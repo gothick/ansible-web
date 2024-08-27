@@ -1,0 +1,14 @@
+---
+- name: Add Vagrant Key
+  ansible.builtin.apt_key:
+    url: https://apt.releases.hashicorp.com/gpg
+
+- name: Add Vagrant Repository
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main
+
+- name: Install Vagrant
+  ansible.builtin.apt:
+    state: present
+    name: vagrant
+    update_cache: true
