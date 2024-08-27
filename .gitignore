@@ -83,7 +83,6 @@ env.bak/
 venv.bak/
 venv
 env
-Vagrantfile
 .vagrant
 # Backwards compatibility with `stable-2.9` and earlier branches.
 # Also used in the `devel` branch during early Ansible 2.10 development.
