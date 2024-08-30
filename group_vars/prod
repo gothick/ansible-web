@@ -1,2 +1,4 @@
 ---
 use_letsencrypt: true
+instance_name: ansible-test-prod
+instance_eip: ~

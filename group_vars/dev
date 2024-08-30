@@ -1,2 +1,4 @@
 ---
 use_letsencrypt: false
+instance_name: ansible-test-dev
+instance_eip: 34.206.218.126
