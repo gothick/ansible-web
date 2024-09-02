@@ -21,9 +21,10 @@
       connection: local
       amazon.aws.ec2_instance:
         name: "{{ instance_name }}"
+        state: running
         instance_type: t2.medium
         image_id: ami-0fc5d935ebf8bc3bc
-        key_name: standard
+        key_name: ansible # We've uploaded this public key to Amazon already
         volumes:
           - device_name: /dev/sda1
             ebs:
@@ -48,3 +49,24 @@
       amazon.aws.ec2_eip:
         device_id: "{{ newinstance.instances[0].instance_id }}"
         ip: "{{ instance_eip }}"
+
+- name: Inspect instances
+  hosts: dev
+  gather_facts: false
+
+  tasks:
+
+    - name: Wait for hosts to become available
+      ansible.builtin.wait_for_connection:
+
+    # Because we night not be in a connectable state when we start, we delay
+    # gathering facts.
+    - name: Gather facts
+      ansible.builtin.setup:
+
+    - name: Get uptime
+      ansible.builtin.shell: uptime
+      register: uptime
+
+    - name: Show uptime
+      ansible.builtin.debug: var=uptime
