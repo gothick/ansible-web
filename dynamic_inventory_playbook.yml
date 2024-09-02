@@ -1,0 +1,11 @@
+---
+
+- name: Test Dynamic Inventory
+  hosts: all
+  vars:
+  pre_tasks:
+  roles:
+
+  tasks:
+    - name: Ping
+      ansible.builtin.ping:
