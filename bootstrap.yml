@@ -53,11 +53,25 @@
 - name: Inspect instances
   hosts: dev
   gather_facts: false
+  become: true
 
   tasks:
 
     - name: Wait for hosts to become available
       ansible.builtin.wait_for_connection:
+
+    - name: Install basic tools for info gathering, etc.
+      ansible.builtin.apt:
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+        name:
+          - aptitude # Always handy for Ansible
+          - facter
+          - ohai
+          # boto required for aws/ec2 ansible plugins and ec2_instance_info
+          - python3-boto3
+          - python3-botocore # Required for aws/ec2 ansible plugins
 
     # Because we night not be in a connectable state when we start, we delay
     # gathering facts.
