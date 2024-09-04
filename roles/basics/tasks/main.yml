@@ -4,3 +4,13 @@
     upgrade: true
     update_cache: true
     cache_valid_time: 3600
+
+- name: Install basic tools for better Ansible info gathering, etc.
+  ansible.builtin.apt:
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+    name:
+      - aptitude # Always handy for Ansible
+      - facter
+      - ohai

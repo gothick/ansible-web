@@ -69,6 +69,8 @@
           - aptitude # Always handy for Ansible
           - facter
           - ohai
+          # TODO: NOT SURE YOU NEED THESE *on the web box*; these are
+          # better for your *client*
           # boto required for aws/ec2 ansible plugins and ec2_instance_info
           - python3-boto3
           - python3-botocore # Required for aws/ec2 ansible plugins
