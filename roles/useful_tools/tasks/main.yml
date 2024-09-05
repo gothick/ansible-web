@@ -1,5 +1,5 @@
 ---
-- name: Install basic tools
+- name: Install tools we find generally useful, e.g. emacs, unzip
   ansible.builtin.apt:
     state: present
     update_cache: true
