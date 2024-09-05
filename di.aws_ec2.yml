@@ -6,7 +6,7 @@ hostnames:
 # I set these tags manually for now
 groups:
   dev: "'dev' in tags.env"
-  live: "'production' in tags.env"
+  live: "'prod' in tags.env"
 
 compose:
   # TODO: If this wasn't just a test hanging around in this other playbook, you'd set

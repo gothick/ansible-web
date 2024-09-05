@@ -1,0 +1,104 @@
+---
+# This will eventually become the Ansible equivalent of:
+# knife ec2 server create --policy-group failover --policy-name primary-web-server
+# -I ami-0fc5d935ebf8bc3bc --ssh-key standard -f t2.medium --connection-user ubuntu
+# --ebs-size 32 --sudo --ssh-identity-file ~/.ssh/ec2.pem --security-group-id
+# sg-245c9940 --associate-eip 34.206.218.126 --server-connect-attribute
+# public_ip_address --subnet subnet-71b71628 --ebs-volume-type gp2
+# --node-name cally --ssh-verify-host-key never
+
+- name: Bootstrap AWS Instance
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    instances:
+      - name: ansible-test-dev0
+        group: web
+        env: dev
+        eip: 34.206.218.126
+      - name: ansible-test-dev1
+        group: web
+        env: dev
+
+  pre_tasks:
+  roles:
+
+  tasks:
+    # This will find an existing instance by name, or create it if it
+    # doesn't exist.
+    - name: Start an instance and add EBS.
+      connection: local
+      amazon.aws.ec2_instance:
+        name: "{{ item.name }}"
+        tags:
+          group: "{{ item.group }}"
+          env: "{{ item.env }}"
+        state: running
+        instance_type: t2.medium
+        image_id: ami-0fc5d935ebf8bc3bc
+        key_name: ansible # We've uploaded this public key to Amazon already
+        volumes:
+          - device_name: /dev/sda1
+            ebs:
+              volume_size: 32
+              delete_on_termination: false
+        security_group: sg-245c9940
+        vpc_subnet_id: subnet-71b71628
+      register: newinstances
+      with_items: "{{ instances }}"
+
+    - name: Debug instance data
+      connection: local
+      ansible.builtin.debug:
+        var: results
+
+    - name: Associate an elastic IP with an instance, if desired
+      connection: local
+      amazon.aws.ec2_eip:
+        device_id: "{{ item.instances[0].instance_id }}"
+        ip: "{{ item.item.eip }}"
+      with_items: "{{ newinstances.results }}"
+      when: item.item.eip is defined
+
+
+
+
+
+
+# - name: Inspect instances
+#   hosts: dev
+#   gather_facts: false
+#   become: true
+
+#   tasks:
+
+#     - name: Wait for hosts to become available
+#       ansible.builtin.wait_for_connection:
+
+#     - name: Install basic tools for info gathering, etc.
+#       ansible.builtin.apt:
+#         state: present
+#         update_cache: true
+#         cache_valid_time: 3600
+#         name:
+#           - aptitude # Always handy for Ansible
+#           - facter
+#           - ohai
+#           # TODO: NOT SURE YOU NEED THESE *on the web box*; these are
+#           # better for your *client*
+#           # boto required for aws/ec2 ansible plugins and ec2_instance_info
+#           - python3-boto3
+#           - python3-botocore # Required for aws/ec2 ansible plugins
+
+#     # Because we night not be in a connectable state when we start, we delay
+#     # gathering facts.
+#     - name: Gather facts
+#       ansible.builtin.setup:
+
+#     - name: Get uptime
+#       ansible.builtin.shell: uptime
+#       register: uptime
+
+#     - name: Show uptime
+#       ansible.builtin.debug: var=uptime
