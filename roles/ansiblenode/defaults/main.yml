@@ -1,0 +1,10 @@
+---
+
+# User to create that will be used for developing Ansible stuff on the
+# machine.
+ansiblenode_user: ansible
+
+# Keys to put in the ansible_developer_user's authorized_keys file so
+# we can log in.
+ansiblenode_authorised_keys:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDl3K/tzUEdvB80r2Gppp7ojFcryQaIA6sXNtb+Nv6WH

@@ -1,0 +1,32 @@
+---
+- name: Install basic tools for Ansible
+  ansible.builtin.apt:
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+    name:
+      - python3 # The basic Ansible-controlled node requirement
+      - aptitude # Ansible apparently prefers this to raw apt
+      - facter # Improve fact gathering
+      - ohai # Improve fact gathering
+
+- name: Create Ansible default user
+  ansible.builtin.user:
+    name: "{{ ansiblenode_user }}"
+    state: present
+    groups: sudo
+    append: true
+    create_home: true
+
+- name: Add user to passwordless sudoers
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: "/etc/sudoers.d/{{ ansiblenode_user }}"
+    mode: "0644"
+
+- name: Add authorised keys so our standard Ansible control user can connect
+  ansible.posix.authorized_key:
+    user: "{{ ansiblenode_user }}"
+    state: present
+    key: "{{ item }}"
+  loop: "{{ ansiblenode_authorised_keys }}"
