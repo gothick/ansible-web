@@ -7,6 +7,8 @@
 # public_ip_address --subnet subnet-71b71628 --ebs-volume-type gp2
 # --node-name cally --ssh-verify-host-key never
 
+# Can be used in one fell swoop with our main configuration
+
 - name: Bootstrap AWS Instance
   hosts: localhost
   connection: local
@@ -17,12 +19,8 @@
         group: web
         env: dev
         eip: 34.206.218.126
-      - name: ansible-test-dev1
-        group: web
-        env: dev
 
   pre_tasks:
-  roles:
 
   tasks:
     # This will find an existing instance by name, or create it if it
@@ -51,7 +49,7 @@
     - name: Debug instance data
       connection: local
       ansible.builtin.debug:
-        var: results
+        var: newinstances.results
 
     - name: Associate an elastic IP with an instance, if desired
       connection: local
@@ -61,44 +59,20 @@
       with_items: "{{ newinstances.results }}"
       when: item.item.eip is defined
 
+    - name: Add new hosts to a group for use below
+      ansible.builtin.add_host:
+        name: "{{ item.instances[0].tags.Name }}"
+        groups: "new,{{ item.instances[0].tags.group }}"
+        ansible_user: ubuntu
+        ansible_host: "{{ item.instances[0].public_ip_address }}"
+        ansible_ssh_private_key_file: ~/.ssh/ansible
+      with_items: "{{ newinstances.results }}"
 
+- name: "Hello new hosts!"
+  hosts: new
+  # remote_user: root
+  gather_facts: false
 
-
-
-
-# - name: Inspect instances
-#   hosts: dev
-#   gather_facts: false
-#   become: true
-
-#   tasks:
-
-#     - name: Wait for hosts to become available
-#       ansible.builtin.wait_for_connection:
-
-#     - name: Install basic tools for info gathering, etc.
-#       ansible.builtin.apt:
-#         state: present
-#         update_cache: true
-#         cache_valid_time: 3600
-#         name:
-#           - aptitude # Always handy for Ansible
-#           - facter
-#           - ohai
-#           # TODO: NOT SURE YOU NEED THESE *on the web box*; these are
-#           # better for your *client*
-#           # boto required for aws/ec2 ansible plugins and ec2_instance_info
-#           - python3-boto3
-#           - python3-botocore # Required for aws/ec2 ansible plugins
-
-#     # Because we night not be in a connectable state when we start, we delay
-#     # gathering facts.
-#     - name: Gather facts
-#       ansible.builtin.setup:
-
-#     - name: Get uptime
-#       ansible.builtin.shell: uptime
-#       register: uptime
-
-#     - name: Show uptime
-#       ansible.builtin.debug: var=uptime
+  tasks:
+    - name: Wait for hosts to become reachable.
+      ansible.builtin.wait_for_connection:
