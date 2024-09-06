@@ -1,0 +1,31 @@
+plugin: amazon.aws.aws_ec2
+
+# Yee haw
+regions:
+  - us-east-1
+
+# Make the Inventory hostname the DNS name of the EC2 box. If you want
+# to change the actual Ansible host that it connects to, maybe do
+# something like
+# compose:
+#   # Use the private IP address to connect to the host
+#   # (note: this does not modify inventory_hostname, which is set via I(hostnames))
+#   ansible_host: private_ip_address
+hostnames:
+  - dns-name
+
+# Only count our dev and prod environments; we may have other EC2
+# boxes lying around that we don't want to fiddle with.
+filters:
+  tag:env:
+    - prod
+
+# Create a dynamic group for each of our environments
+keyed_groups:
+  - key: tags.env
+    separator: ''
+
+# groups:
+#   dev: "'dev' in tags.env"
+#   live: "'prod' in tags.env"
+
