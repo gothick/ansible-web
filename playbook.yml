@@ -10,7 +10,8 @@
 
   roles:
     - basics
-    - ansiblenode
+    # - ansiblenode
+    - ansible_tools
     - useful_tools
 
   tasks:

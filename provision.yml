@@ -1,0 +1,6 @@
+---
+- name: Provision EC2 boxen
+  import_playbook: provisioners/ec2.yml
+
+- name: Configure new boxes
+  import_playbook: playbook.yml
