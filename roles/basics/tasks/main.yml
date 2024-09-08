@@ -1,6 +1,11 @@
 ---
-- name: Update apt packages
+- name: Update apt packages, but only once.
+  # We may configure more regular updates, or run them through ansible every
+  # now and again. *This* one-time update happens very early on in our
+  # bootstrapping process to make sure everything's up to date before we
+  # start.
   ansible.builtin.apt:
     upgrade: true
     update_cache: true
     cache_valid_time: 3600
+  run_once: true
