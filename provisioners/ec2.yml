@@ -61,6 +61,35 @@
       with_items: "{{ newinstances.results }}"
       when: item.item.eip is defined
 
+    - name: Add volume for /www
+      amazon.aws.ec2_vol:
+        instance: "{{ item.instances[0].instance_id }}"
+        name: "www-{{ item.item.name }}"
+        device_name: /dev/sdf
+        volume_size: 64
+      register: ec2_vol_www
+      with_items: "{{ newinstances.results }}"
+
+# directory '/var/www' do
+#   action :create
+#   mode '0755'
+#   owner 'root'
+#   group 'root'
+# end
+
+# directory '/var/lib/mysql' do
+#   mode '0755'
+# end
+
+    - name: Add volume for /var/lib/mysql
+      amazon.aws.ec2_vol:
+        instance: "{{ item.instances[0].instance_id }}"
+        name: "db-{{ item.item.name }}"
+        device_name: /dev/sdg
+        volume_size: 8
+      register: ec2_vol_db
+      with_items: "{{ newinstances.results }}"
+
     - name: Add new hosts to inventory for use below
       # For now we'll just set the facts up to connect via the public
       # DNS name, which should be fine for the rest of this playbook.
@@ -79,24 +108,60 @@
         ansible_ssh_private_key_file: ~/.ssh/ansible
       with_items: "{{ newinstances.results }}"
 
-- name: "Hello new hosts!"
+- name: "No on to the hosts!"
   hosts: new
-  # remote_user: root
+  become: true
   gather_facts: false
 
   tasks:
     - name: Wait for hosts to become reachable.
       ansible.builtin.wait_for_connection:
 
-    # Useful for running this playbook with -vv so you can get a dump of all
-    # facts when everything's up and running.
-    - name: Gather facts now we can connect
+    - name: Gather facts afresh now we can connect
       ansible.builtin.setup:
 
     - name: Refresh inventory so we start with a clean slate from our dynamic inventory
       ansible.builtin.meta: refresh_inventory
 
+    - name: Create mount points
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      with_items:
+        - '/var/www'
+        - '/var/lib/mysql'
+
+    - name: Filesystem for www
+      community.general.filesystem:
+        fstype: ext4
+        state: present
+        dev: /dev/xvdf
+
+    - name: Filesystem for db
+      community.general.filesystem:
+        fstype: ext4
+        state: present
+        dev: /dev/xvdg
+
+    - name: Mount www
+      ansible.posix.mount:
+        path: /var/www
+        state: mounted
+        fstype: ext4
+        src: /dev/xvdf
+        opts: noatime,auto,nofail
+
+    - name: Mount db
+      ansible.posix.mount:
+        path: /var/lib/mysql
+        state: mounted
+        fstype: ext4
+        src: /dev/xvdg
+        opts: noatime,auto,nofail
+
 # Okay, now we're ready to get on with things via our dynamic inventory using
 # a more normal playbook. You can run provision.yml in the root of the project
 # to call this script immeidately followed by the standard playbook.
-
