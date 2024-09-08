@@ -18,7 +18,7 @@
       - name: ansible-test-dev0
         group: web
         env: dev
-        eip: 34.206.218.126
+        eip: 34.198.66.246
 
   pre_tasks:
 
@@ -43,6 +43,8 @@
               delete_on_termination: false
         security_group: sg-245c9940
         vpc_subnet_id: subnet-71b71628
+        network:
+          assign_public_ip: true
       register: newinstances
       with_items: "{{ instances }}"
 
@@ -59,12 +61,21 @@
       with_items: "{{ newinstances.results }}"
       when: item.item.eip is defined
 
-    - name: Add new hosts to a group for use below
+    - name: Add new hosts to inventory for use below
+      # For now we'll just set the facts up to connect via the public
+      # DNS name, which should be fine for the rest of this playbook.
+      # Our dymanic inventory can do something different; it doesn't
+      # really matter.
       ansible.builtin.add_host:
         name: "{{ item.instances[0].tags.Name }}"
         groups: "new,{{ item.instances[0].tags.group }}"
         ansible_user: ubuntu
-        ansible_host: "{{ item.instances[0].public_ip_address }}"
+        # We use the EIP for preference, as we want to use the wait_for_connection
+        # below to validate that the EIP is assigned and working before moving on.
+        # If we haven't assigned an EIP, then we just use the public IP. (We can't
+        # *just* use the Public IP as it gets overwritten with the EIP when assigned,
+        # and that might be happening *right now*.)
+        ansible_host: "{{ item.item.eip | default(item.instances[0].public_ip_address) }}"
         ansible_ssh_private_key_file: ~/.ssh/ansible
       with_items: "{{ newinstances.results }}"
 
@@ -76,3 +87,16 @@
   tasks:
     - name: Wait for hosts to become reachable.
       ansible.builtin.wait_for_connection:
+
+    # Useful for running this playbook with -vv so you can get a dump of all
+    # facts when everything's up and running.
+    - name: Gather facts now we can connect
+      ansible.builtin.setup:
+
+    - name: Refresh inventory so we start with a clean slate from our dynamic inventory
+      ansible.builtin.meta: refresh_inventory
+
+# Okay, now we're ready to get on with things via our dynamic inventory using
+# a more normal playbook. You can run provision.yml in the root of the project
+# to call this script immeidately followed by the standard playbook.
+
