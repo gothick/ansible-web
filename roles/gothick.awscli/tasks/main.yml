@@ -1,11 +1,19 @@
 ---
-- name: Install awscli. This installs v1 on jammy, v2 on noble. Fine by me.
+- name: Install awscli via apt
   ansible.builtin.apt:
     state: present
     update_cache: true
     cache_valid_time: 3600
     name:
       - awscli
+  when: ansible_distribution_release in ['jammy']
+
+- name: Install awscli via snap
+  community.general.snap:
+    classic: true
+    name:
+      - aws-cli
+  when: ansible_distribution_release in ['noble']
 
 - name: Get specified user's home directory
   ansible.builtin.user:
