@@ -9,9 +9,10 @@
   pre_tasks:
 
   roles:
-    - basics
-    # - ansiblenode
+    - update_apt_packages
+    - ansible_node
     - ansible_tools
     - useful_tools
+    - gothick.awscli
 
   tasks:

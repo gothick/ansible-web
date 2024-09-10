@@ -1,20 +1,16 @@
 ---
 galaxy_info:
   role_name: awscli
-  namespace: boutetnico
-  author: Nicolas Boutet
-  description: Install and configure awscli.
+  namespace: gothick
+  author: Matt Gibson
+  description: Install and configure awscli in a quick and dirty way on my Ubuntu 24.04 box
   license: MIT
   min_ansible_version: "2.10"
   platforms:
     - name: Ubuntu
       versions:
-        - focal
         - jammy
-    - name: Debian
-      versions:
-        - bookworm
-        - bullseye
+        - noble
   galaxy_tags:
     - amazon
     - aws

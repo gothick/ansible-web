@@ -1,7 +1,11 @@
 ---
 roles:
-  - name: boutetnico.awscli
-    version: 5.0.0
+
+- name: gothick.awscli
+  src: https://github.com/gothick/ansible-awscli.git
+
+#  - name: boutetnico.awscli
+#    version: 5.0.0
 
 #  - name: Oefenweb.postfix
 #    version: v3.6.4

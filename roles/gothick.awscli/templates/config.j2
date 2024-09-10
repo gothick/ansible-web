@@ -1,0 +1,10 @@
+#jinja2:lstrip_blocks: True
+# Configuration for the awscli tool
+{% for key, value in awscli_config_ids.items() %}
+    {% if key == 'default' -%}
+        [{{ key }}]
+    {% else -%}
+        [profile {{ key }}]
+    {% endif -%}
+        region={{ value.region }}
+{% endfor %}
