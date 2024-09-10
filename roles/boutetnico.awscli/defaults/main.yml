@@ -1,0 +1,17 @@
+---
+awscli_users:
+  - name: root
+    group: root
+    home: /root
+    aws_access_key_id: ''
+    aws_secret_access_key: ''
+#   aws_region: us-east-1
+#   s3_configuration:
+#     - "max_concurrent_requests = 10"
+#     - "max_queue_size = 10000"
+#     - "multipart_threshold = 64MB"
+#     - "multipart_chunksize = 16MB"
+#     - "use_accelerate_endpoint = false"
+#     - "addressing_style = path"
+
+awscli_package_state: present
