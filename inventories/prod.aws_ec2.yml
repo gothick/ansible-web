@@ -28,4 +28,4 @@ keyed_groups:
 # We use the public ipv4 IP address to connect via ssh; this is the
 # Elastic IP if the host has one.
 compose:
-  ansible_host: ip-address
+  ansible_host: public_ip_address
