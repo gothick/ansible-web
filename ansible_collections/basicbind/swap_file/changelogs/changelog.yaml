@@ -1,0 +1,77 @@
+ancestor: '1.0.0'
+releases:
+  1.0.1:
+    release_date: '2023-10-28'
+    changes:
+      release_summary: 'swap_file module bug fix'
+      bugfixes:
+        - "swap_file - Fixed bug where swap_file module failed when given
+                      a size that wasn't a multiple of 1MiB. size is now
+                      rounded to nearest MiB"
+  1.1.0:
+    release_date: '2023-10-29'
+    changes:
+      release_summary: 'Added create_cmd option to swap_file module and role'
+      minor_changes:
+        - 'swap_file - Added "create_cmd" option allowing user to choose between
+                      "fallocate" or "dd" to create swap file'
+  1.2.0:
+    release_date: '2023-11-01'
+    changes:
+      release_summary: 'Added check_mode support and Bug Fixes'
+      minor_changes:
+        - 'swap_file - Added check_mode support'
+      bugfixes:
+        - 'swap_file - Fixed bug where a new swap file could replace
+                       an old one and swapon would fail. For instance,
+                       if the user tried fallocate on a filesystem where
+                       the newly created swap file would not be seen as
+                       a useable swap file. swapon is now attempted on
+                       the new swap file before replacing the old one.'
+  1.2.1:
+    release_date: '2023-11-07'
+    changes:
+      release_summary: 'Fixed bug in swap_file module'
+      bugfixes:
+        - 'swap_file - Fixed bug where state==absent failed
+                       when directory of swap file did not
+                       exist'
+  1.2.2:
+    release_date: '2023-11-12'
+    changes:
+      release_summary: 'Bug fix to ensure cleanup of temp files'
+      bugfixes:
+        - 'swap_file - Ensure temp files are removed if the module
+                       is killed/interrupted'
+  2.0.0:
+    release_date: '2023-11-23'
+    changes:
+      release_summary: 'swap file module uses "fallocate" if it determines that it can'
+      major_changes:
+        - 'swap_file module - Now uses fallocate automatically by using
+          the filesystem type the swap file is to be put on, and the
+          kernel version to make a determination'
+        - 'swap_file module - No longer uses the btrfs command to
+          create swap files on btrfs filesystems. "fallocate" is now
+          used by default.'
+  2.0.1:
+    release_date: '2023-11-24'
+    changes:
+      release_summary: 'Bug fix to stop failure if kernel version cannot be determined'
+      bugfixes:
+        - 'swap_file module - Fixed bug where module would fail if
+          kernel version could not be determined'
+  2.0.2:
+    release_date: '2023-11-25'
+    changes:
+      release_summary: 'Ensure btrfs subvolumes not mounted independently are correctly identified'
+      bugfixes:
+        - 'swap_file module - Fixed regression where btrfs subvolumes which
+          were not mounted independently were not being correctly
+          identified.'
+  2.0.3:
+    release_date: '2023-12-13'
+    changes:
+      release_summary: 'Ensure support for older ansible releases'
+      bugfixes:
+        - 'swap_file module - Added _version.py module_utils to ensure module does not fail on older ansible releases which do not have ansible.module_utils.compat.version.LooseVersion'

@@ -1,0 +1,37 @@
+{
+ "collection_info": {
+  "namespace": "basicbind",
+  "name": "swap_file",
+  "version": "2.0.3",
+  "authors": [
+   "D.T <https://github.com/basicbind>"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "swap",
+   "swapfile",
+   "swap_file",
+   "btrfs"
+  ],
+  "description": "Collection for managing swap files",
+  "license": [
+   "GPL-3.0-only"
+  ],
+  "license_file": null,
+  "dependencies": {
+   "ansible.posix": ">=1.0.0"
+  },
+  "repository": "https://github.com/basicbind/ansible-collection-basicbind.swap_file",
+  "documentation": "https://github.com/basicbind/ansible-collection-basicbind.swap_file/tree/main/docs",
+  "homepage": "https://github.com/basicbind/ansible-collection-basicbind.swap_file",
+  "issues": "https://github.com/basicbind/ansible-collection-basicbind.swap_file/issues"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "f16c1fbd95c2cd34c78bcc8a051795fbe38c74a1fe75e4cdff516459209fa9a7",
+  "format": 1
+ },
+ "format": 1
+}

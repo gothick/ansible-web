@@ -1,5 +1,5 @@
 ---
-- name: Test Playbook
+- name: Main Web Playbook
   hosts: all
   become: true
 
@@ -14,5 +14,6 @@
     - ansible_tools
     - useful_tools
     - gothick.awscli
+    - basicbind.swap_file.swap_file
 
   tasks:

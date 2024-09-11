@@ -4,6 +4,10 @@ roles:
 - name: gothick.awscli
   src: https://github.com/gothick/ansible-awscli.git
 
+collections:
+  - name: basicbind.swap_file
+    version: 2.0.3
+    
 #  - name: boutetnico.awscli
 #    version: 5.0.0
 
