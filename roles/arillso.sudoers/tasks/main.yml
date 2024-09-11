@@ -1,0 +1,56 @@
+---
+# tasks file for arillso.sudoers
+
+- name: Add OS specific variables
+  ansible.builtin.include_vars: '{{ loop_vars }}'
+  with_first_found:
+    - files:
+        - '{{ distribution }}-{{ distribution_version }}.yml'
+        - '{{ distribution }}-{{ distribution_major_version }}.yml'
+        - '{{ distribution }}.yml'
+        - '{{ ansible_os_family }}.yml'
+        - '{{ ansible_system }}.yml'
+        - 'defaults.yml'
+      paths:
+        - 'vars'
+  loop_control:
+    loop_var: loop_vars
+  vars:
+    distribution: '{{ ansible_distribution }}'
+    distribution_version: '{{ ansible_distribution_version }}'
+    distribution_major_version: '{{ ansible_distribution_major_version }}'
+  tags:
+    - configuration
+    - packages
+
+- name: Install sudores package
+  become: true
+  ansible.builtin.package:
+    name: '{{ sudoers_package }}'
+  tags:
+    - packages
+
+- name: Configuration specific files
+  become: true
+  ansible.builtin.template:
+    src: etc/sudoers.d/sudoers.j2
+    dest: '/etc/sudoers.d/{{ item.key }}'
+    validate: /usr/sbin/visudo -cf %s
+    owner: root
+    group: root
+    mode: "0440"
+  with_dict: '{{ sudoers_sudoers_d_files }}'
+  tags:
+    - configuration
+
+- name: Configuration global files
+  become: true
+  ansible.builtin.template:
+    src: etc/sudoers.j2
+    dest: '{{ sudoers_sudoers_file }}'
+    validate: /usr/sbin/visudo -cf %s
+    owner: root
+    group: root
+    mode: "0440"
+  tags:
+    - configuration

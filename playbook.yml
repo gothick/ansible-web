@@ -15,5 +15,5 @@
     - useful_tools
     - gothick.awscli
     - basicbind.swap_file.swap_file
-
+    - arillso.sudoers
   tasks:
