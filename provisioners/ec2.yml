@@ -34,8 +34,7 @@
           env: "{{ item.env }}"
         state: running
         instance_type: t2.medium
-        # TODO: Try a later version, eg ami-09a1c459d70c72b96
-        image_id: ami-0fc5d935ebf8bc3bc
+        image_id: ami-09a1c459d70c72b96
         key_name: ansible # We've uploaded this public key to Amazon already
         volumes:
           - device_name: /dev/sda1
