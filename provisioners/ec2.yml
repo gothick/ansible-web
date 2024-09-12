@@ -67,6 +67,7 @@
         name: "www-{{ item.item.name }}"
         device_name: /dev/sdf
         volume_size: 64
+        volume_type: gp2 # ssd
       register: ec2_vol_www
       with_items: "{{ newinstances.results }}"
 
@@ -87,6 +88,7 @@
         name: "db-{{ item.item.name }}"
         device_name: /dev/sdg
         volume_size: 8
+        volume_type: gp2 # ssd
       register: ec2_vol_db
       with_items: "{{ newinstances.results }}"
 
