@@ -15,5 +15,8 @@
     - useful_tools
     - gothick.awscli
     - basicbind.swap_file.swap_file
-    - web_users
+
   tasks:
+
+- name: Web Users
+  import_playbook: playbooks/web_users/main.yml

@@ -5,7 +5,6 @@ strict: True
 regions:
   - us-east-1
 
-
 hostnames:
   # Matches the dynamic inventory from provisioners/ec2.yml, so we don't think
   # that there are multiple copies of the same host floating around.
