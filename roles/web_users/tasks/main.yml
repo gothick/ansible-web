@@ -1,0 +1,79 @@
+---
+
+- name: Install zsh
+  ansible.builtin.apt:
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+    name:
+      - zsh
+
+- name: Add sudoers users
+  ansible.builtin.include_role:
+    name: arillso.sudoers
+  vars:
+    sudoers_sudoers_d_files:
+      gothick:
+        privileges:
+          - name: gothick
+            entry: 'ALL=(ALL) NOPASSWD:ALL'
+
+- name: Get specified user's home directory
+  ansible.builtin.user:
+    name: "{{ item.username }}"
+    state: present
+    shell: "{{ item.shell | default(web_users_default_shell) }}"
+  register: user_info
+  loop: "{{ web_users_users }}"
+
+- name: Print return information from the previous task
+  ansible.builtin.debug:
+    var: user_info
+    # verbosity: 2
+
+- name: Install oh-my-zsh for zsh users
+  # ansible.builtin.shell: |
+  #   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  loop: "{{ user_info.results }}"
+    # Note the unattended flag being passed in here. This stops it asking
+    # dopey questions or trying to run zsh once it's done the install.
+  ansible.builtin.shell: |
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  become: true
+  become_user: "{{ item.item.username }}"
+  when: item.item.shell | default(web_users_default_shell) == '/bin/zsh'
+  args:
+    creates: "{{ item.home }}/.oh-my-zsh"
+    # Ironically, it's better to install with a simple shell that's
+    # not going to do smartarse checking to see if your environment's
+    # set up and sit there asking stupid questions about it.
+    executable: /bin/sh
+
+- name: Install .zshrc for zsh users, based on the standard template for oh-my-zsh
+  ansible.builtin.template:
+    src: zshrc.j2
+    dest: "{{ item.home }}/.zshrc"
+    owner: "{{ item.item.username }}"
+    mode: '0644'
+  loop: "{{ user_info.results }}"
+  when: item.item.shell | default(web_users_default_shell) == '/bin/zsh'
+
+# ---
+# web_users_default_shell: /bin/bash
+# web_users_users:
+#   gothick:
+#     shell: /bin/zsh
+#   wordpress:
+#     shell: /bin/zsh
+#   uniquesentence:
+#     shell: /bin/zsh
+#   mattgibsoncreative:
+#     shell: /bin/zsh
+#   meditationchimer:
+#     shell: /bin/zsh
+#   onthescales:
+#     shell: /bin/zsh
+#   # omm and fresher need bash for some reason; can't remember
+#   # now but I'm betting it's something to do with Deployer.
+#   omm:
+#   fresher:

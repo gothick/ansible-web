@@ -1,7 +1,0 @@
----
-# For arillso.sudoers
-sudoers_sudoers_d_files:
-  gothick:
-    privileges:
-      - name: gothick
-        entry: 'ALL=(ALL) NOPASSWD:ALL'

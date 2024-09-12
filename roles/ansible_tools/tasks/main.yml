@@ -9,3 +9,9 @@
       - aptitude # Ansible apparently prefers this to raw apt
       - facter # Improve fact gathering
       - ohai # Improve fact gathering
+
+      # TODO: Consider this if you can be arsed remounting / with
+      # acl option enabled
+      # Install setfacl, useful when becoming nonprivileged users
+      # https://docs.ansible.com/ansible-core/2.16/playbook_guide/playbooks_privilege_escalation.html#risks-of-becoming-an-unprivileged-user
+      # - acl
