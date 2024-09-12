@@ -1,0 +1,43 @@
+---
+web_users_zsh_theme: fishy
+web_users_default_shell: /bin/bash
+web_users_users:
+  - username: gothick
+    shell: /bin/zsh
+  - username: wordpress
+    shell: /bin/zsh
+  - username: uniquesentence
+    shell: /bin/zsh
+  - username: mattgibsoncreative
+    shell: /bin/zsh
+  - username: meditationchimer
+    shell: /bin/zsh
+  - username: onthescales
+    shell: /bin/zsh
+  # omm and fresher need bash for some reason; can't remember
+  # now but I'm betting it's something to do with Deployer.
+  - username: omm
+  - username: fresher
+
+_web_users_key_main_mac: "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAvtw+vW1Btsof11hYsDuHyVJx8kFk3nFnRG+IoDnKcGd8KvRvr1j1eQiiGBC3qm7jffvy7+VbLWjlBNfWRjLaMlQ2LYhopptmd2reCnVU9i7c8bBr58NSZxQpTYQmTU0GWWhrU8IrkEgQQDOOyLEzbaf735vJX89+7AjUVtf/juMmHIVZ5rAFAErxgASKs+R9GzCVhvKTCWq+ODEC3DlC/i42ngOetKWc/kF5kjlnvjd4zQvsekC2MzkHIoJVmTc8lNdKx8Hw5YaYrwCFOaz3oRQVvcaoUGYmwoEUwc0aSYB2WwVXezHcGz89SvLcp646hFk5hqkPMhGysyaCTz/2fQ== matt@matt-gibsons-computer.local"
+_web_users_key_chromebook: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK/Sog14pNyzWTBXE0sE12Y4PbCtFlTtc+GsjPTxN2eG gothick@chromebook"
+
+web_users_authorised_keys:
+  - username: gothick
+    key: "{{ _web_users_key_main_mac }}"
+  - username: gothick
+    key: "{{ _web_users_key_chromebook }}"
+  - username: onthescales
+    key: "{{ _web_users_key_main_mac }}"
+  - username: meditationchimer
+    key: "{{ _web_users_key_main_mac }}"
+  - username: wordpress
+    key: "{{ _web_users_key_main_mac }}"
+  - username: omm
+    key: "{{ _web_users_key_main_mac }}"
+  - username: omm
+    key: "{{ _web_users_key_chromebook }}"
+  - username: fresher
+    key: "{{ _web_users_key_main_mac }}"
+  - username: fresher
+    key: "{{ _web_users_key_chromebook }}"

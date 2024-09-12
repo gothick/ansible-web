@@ -26,11 +26,6 @@
   register: user_info
   loop: "{{ web_users_users }}"
 
-- name: Print return information from the previous task
-  ansible.builtin.debug:
-    var: user_info
-    # verbosity: 2
-
 - name: Install oh-my-zsh for zsh users
   # ansible.builtin.shell: |
   #   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -58,22 +53,8 @@
   loop: "{{ user_info.results }}"
   when: item.item.shell | default(web_users_default_shell) == '/bin/zsh'
 
-# ---
-# web_users_default_shell: /bin/bash
-# web_users_users:
-#   gothick:
-#     shell: /bin/zsh
-#   wordpress:
-#     shell: /bin/zsh
-#   uniquesentence:
-#     shell: /bin/zsh
-#   mattgibsoncreative:
-#     shell: /bin/zsh
-#   meditationchimer:
-#     shell: /bin/zsh
-#   onthescales:
-#     shell: /bin/zsh
-#   # omm and fresher need bash for some reason; can't remember
-#   # now but I'm betting it's something to do with Deployer.
-#   omm:
-#   fresher:
+- name: Add authorised keys
+  ansible.posix.authorized_key:
+    key: "{{ item.key }}"
+    user: "{{ item.username }}"
+  loop: "{{ web_users_authorised_keys }}"
