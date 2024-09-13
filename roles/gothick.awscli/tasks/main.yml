@@ -22,7 +22,7 @@
   register: user_info
   check_mode: true # Don't create the user if they don't exist
 
-- name: Fail if no user found
+- name: Fail if no user found # noqa no-handler
   ansible.builtin.fail:
     msg: "User doesn't exist. Create user {{ awscli_config_user }} before using this playbook."
   when: user_info.changed
