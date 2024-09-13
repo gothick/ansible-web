@@ -2,10 +2,6 @@
 web_users_zsh_theme: fishy
 web_users_default_shell: /bin/bash
 web_users_users:
-  - username: andyetanothertest
-  - username: anothertest
-  - username: doesitwork
-    shell: /bin/zsh
   - username: gothick
     shell: /bin/zsh
   - username: wordpress
