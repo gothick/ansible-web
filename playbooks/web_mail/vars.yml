@@ -1,0 +1,10 @@
+postfix_hostname: "{{ ansible_hostname }}.gothick.org.uk"
+postfix_mailname: "gothick.org.uk"
+# postfix_aliases: []
+# postfix_virtual_aliases: []
+postfix_relayhost: 'smtp.fastmail.com'
+postfix_relayhost_port: 587
+postfix_relaytls: true
+postfix_sasl_auth_enable: true
+postfix_sasl_user: "{{ vault_postfix_sasl_user }}"
+postfix_sasl_password:  "{{ vault_postfix_sasl_password }}"

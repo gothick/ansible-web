@@ -1,0 +1,24 @@
+---
+- name: Install and configure postfix and mailutils
+  hosts: all
+  become: true
+
+  vars_files:
+    - vault.yml
+    - vars.yml
+
+  roles:
+    - Oefenweb.postfix
+
+  tasks:
+    - name: "Install mailutils"
+      ansible.builtin.apt:
+        name: mailutils
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: "Configure mailutils with matching From domain"
+      ansible.builtin.template:
+        src: mailutils.conf.j2
+        dest: "/etc/mailutils.conf"
+        mode: "0644"

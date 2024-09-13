@@ -7,9 +7,13 @@ roles:
 - name: arillso.sudoers
   version: 2.3.0
 
+- name: Oefenweb.postfix
+  version: v3.6.4
+
 collections:
   - name: basicbind.swap_file
     version: 2.0.3
+
 
 #  - name: boutetnico.awscli
 #    version: 5.0.0

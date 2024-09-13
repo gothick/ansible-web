@@ -20,3 +20,6 @@
 
 - name: Web Users
   import_playbook: playbooks/web_users/main.yml
+
+- name: Configure postfix
+  import_playbook: playbooks/web_mail/main.yml
