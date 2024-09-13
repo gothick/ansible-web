@@ -11,27 +11,6 @@
       - aptitude # Ansible apparently prefers this to raw apt
       - facter # Improve fact gathering
       - ohai # Improve fact gathering
-
-# When you think about it, you have to do this some other way to start
-# with, because you can't do it with Ansible...
-
-# - name: Create Ansible default user
-#   ansible.builtin.user:
-#     name: "{{ ansiblenode_user }}"
-#     state: present
-#     groups: sudo
-#     append: true
-#     create_home: true
-
-# - name: Add user to passwordless sudoers
-#   ansible.builtin.template:
-#     src: sudoers.j2
-#     dest: "/etc/sudoers.d/{{ ansiblenode_user }}"
-#     mode: "0644"
-
-# - name: Add authorised keys so our standard Ansible control user can connect
-#   ansible.posix.authorized_key:
-#     user: "{{ ansiblenode_user }}"
-#     state: present
-#     key: "{{ item }}"
-#   loop: "{{ ansiblenode_authorised_keys }}"
+      - python3-boto3 # Required for aws/ec2 ansible plugins
+      - python3-botocore # Required for aws/ec2 ansible plugins
+      - python3-packaging # Used by amazon.aws.ec2_vol_info

@@ -23,3 +23,6 @@
 
 - name: Configure postfix
   import_playbook: playbooks/web_mail/main.yml
+
+- name: Install backup scripts
+  import_playbook: playbooks/install_back_scripts/main.yml
