@@ -42,3 +42,11 @@
         owner: root
         group: root
         mode: "0744"
+
+    - name: Install S3 backup script
+      ansible.builtin.template:
+        src: s3_backup.sh.j2
+        dest: /usr/local/bin/s3_backup.sh
+        owner: root
+        group: root
+        mode: '0700'
