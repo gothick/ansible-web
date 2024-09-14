@@ -50,3 +50,36 @@
         owner: root
         group: root
         mode: '0700'
+
+    - name: Add job for daily snapshot
+      ansible.builtin.cron:
+        name: daily snapshot
+        minute: "0"
+        hour: "2"
+        user: root
+        job: "/usr/local/bin/snapshot_ebs_volumes.sh > /dev/null"
+        cron_file: daily_snapshot
+
+    - name: Send cron snapshot emails to the right place
+      community.general.cronvar:
+        name: MAILTO
+        value: "{{ admin_email | default('gothick@gothick.org.uk') }}"
+        user: root
+        cron_file: daily_snapshot
+
+    - name: Add job for s3 backups
+      ansible.builtin.cron:
+        name: s3 backups
+        minute: "0"
+        hour: "3"
+        weekday: "0"
+        user: root
+        job: "/usr/local/bin/s3_backup.sh > /dev/null"
+        cron_file: s3_backups
+
+    - name: Send s3 backup emails to the right place
+      community.general.cronvar:
+        name: MAILTO
+        value: "{{ admin_email | default('gothick@gothick.org.uk') }}"
+        user: root
+        cron_file: s3_backups
