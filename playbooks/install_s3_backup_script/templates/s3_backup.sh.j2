@@ -1,4 +1,5 @@
 #!/bin/bash
+{{ ansible_managed | comment }}
 
 {% set destination          = 'backups-from-' ~ inventory_hostname %}
 {% set home_backup_file     = 'home-' ~ inventory_hostname %}

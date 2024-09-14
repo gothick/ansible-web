@@ -1,0 +1,28 @@
+#! /bin/sh
+{{ ansible_managed | comment }}
+
+if [ $# -ne 1 ] ; then
+    echo "Usage: ${0}: <source_server_name>"
+    exit 1
+fi
+
+server=$1
+
+echo "Copying full database backup"
+aws s3 cp "s3://gothick.org.uk-backup/backups-from-$1/all-databases-$1.sql.gz" "{{ recovery_dir }}/all-databases.sql.gz" --sse
+
+echo "Copying individual database backups"
+# https://stackoverflow.com/a/38834779/300836
+aws s3 cp "s3://gothick.org.uk-backup/backups-from-$1/" "{{ recovery_dir }}" --recursive \
+  --exclude "*" --include "db-*.sql.gz" --sse
+
+echo "Copying www backup"
+aws s3 cp "s3://gothick.org.uk-backup/backups-from-$1/www-$1.tgz" "{{ recovery_dir }}/www.tgz" --sse
+
+echo "Copying docker backup"
+aws s3 cp "s3://gothick.org.uk-backup/backups-from-$1/docker-$1.tgz" "{{ recovery_dir }}/docker.tgz" --sse
+
+echo "Copying home backup"
+aws s3 cp "s3://gothick.org.uk-backup/backups-from-$1/home-$1.tgz" "{{ recovery_dir }}/home.tgz" --sse
+
+exit 0

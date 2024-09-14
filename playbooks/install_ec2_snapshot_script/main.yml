@@ -1,5 +1,5 @@
 ---
-- name: Install EC2-appropriate backup scripts
+- name: Install EC2-appropriate snapshot scripts
   hosts: all
   become: true
 
@@ -8,15 +8,10 @@
     # - vars.yml
 
   tasks:
+    # Because snapshotting EC2 volumes makes no sense if we're not in EC2
     - name: Bail if we're not in EC2
       ansible.builtin.meta: end_host
       when: ansible_facts.ohai_cloud.provider | default(omit) != "ec2"
-
-    - name: Install percona-toolkit, used to dump mysql users and privileges separately
-      ansible.builtin.apt:
-        name: percona-toolkit
-        update_cache: true
-        cache_valid_time: 3600
 
     - name: Get www EBS volume info
       amazon.aws.ec2_vol_info:
@@ -43,43 +38,9 @@
         group: root
         mode: "0744"
 
-    - name: Install S3 backup script
-      ansible.builtin.template:
-        src: s3_backup.sh.j2
-        dest: /usr/local/bin/s3_backup.sh
-        owner: root
-        group: root
-        mode: '0700'
-
-    - name: Add job for daily snapshot
-      ansible.builtin.cron:
-        name: daily snapshot
-        minute: "0"
-        hour: "2"
-        user: root
-        job: "/usr/local/bin/snapshot_ebs_volumes.sh > /dev/null"
-        cron_file: daily_snapshot
-
     - name: Send cron snapshot emails to the right place
       community.general.cronvar:
         name: MAILTO
         value: "{{ admin_email | default('gothick@gothick.org.uk') }}"
         user: root
         cron_file: daily_snapshot
-
-    - name: Add job for s3 backups
-      ansible.builtin.cron:
-        name: s3 backups
-        minute: "0"
-        hour: "3"
-        weekday: "0"
-        user: root
-        job: "/usr/local/bin/s3_backup.sh > /dev/null"
-        cron_file: s3_backups
-
-    - name: Send s3 backup emails to the right place
-      community.general.cronvar:
-        name: MAILTO
-        value: "{{ admin_email | default('gothick@gothick.org.uk') }}"
-        user: root
-        cron_file: s3_backups

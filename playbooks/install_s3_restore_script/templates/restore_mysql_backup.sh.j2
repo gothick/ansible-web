@@ -1,0 +1,22 @@
+#! /bin/sh
+
+{{ ansible_managed | comment }}
+
+while true; do
+    read -p "Are you sure you want to restore recovery mysql backup and flush privileges? " yn
+    case $yn in
+        [Yy]* )
+            # I *think* this should just work, passwordless, these days, as I think
+            # I now have passwordless MySQL root login set up from the get-go.
+	          # TODO: We may need to restore a standard Debian maintenance user, too.
+            gunzip -c {{ recovery_dir }}/all-databases.sql.gz | mysql
+            break
+            ;;
+        [Nn]* )
+            exit
+            ;;
+        * )
+            echo "Please answer yes or no."
+            ;;
+    esac
+done
