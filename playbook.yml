@@ -25,4 +25,4 @@
   import_playbook: playbooks/web_mail/main.yml
 
 - name: Install backup scripts
-  import_playbook: playbooks/install_back_scripts/main.yml
+  import_playbook: playbooks/install_backup_scripts/main.yml
