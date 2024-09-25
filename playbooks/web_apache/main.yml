@@ -1,0 +1,11 @@
+---
+- name: Install and configure Apache (but not PHP)
+  hosts: all
+  become: true
+
+  vars_files:
+  #   - vault.yml
+    - vars.yml
+
+  roles:
+    - geerlingguy.apache

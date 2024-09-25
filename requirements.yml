@@ -10,6 +10,9 @@ roles:
 - name: Oefenweb.postfix
   version: v3.6.4
 
+- name: geerlingguy.apache
+  version: 4.0.0
+
 collections:
   - name: basicbind.swap_file
     version: 2.0.3

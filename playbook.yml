@@ -33,3 +33,5 @@
 - name: Install S3 restore script
   import_playbook: playbooks/install_s3_restore_script/main.yml
 
+- name: Install and configure basic Apache
+  import_playbook: playbooks/web_apache/main.yml
