@@ -1,0 +1,3 @@
+# Because it can be handy in dev
+apache_remove_default_vhost: false
+apache_add_test_php_file: true

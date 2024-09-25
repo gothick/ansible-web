@@ -7,12 +7,13 @@ apache_create_vhosts: false
 
 # TODO: Turn this back off, but for now it might be useful to have
 # a default site to try to connect to.
-apache_remove_default_vhost: false
+apache_remove_default_vhost: true
 
-# apache_mods_enabled:
-#   - rewrite
-#   - ssl
+apache_add_test_php_file: false
+
+apache_mods_enabled:
+  - rewrite
+  - ssl
+  - headers
 
 # apache_mods_disabled: []
-
-
