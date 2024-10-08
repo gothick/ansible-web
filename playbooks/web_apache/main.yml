@@ -6,7 +6,6 @@
   roles:
     - geerlingguy.apache
 
-  # TODO: Remove this once PHP is up and running
   tasks:
     - name: Install PHP test script
       ansible.builtin.template:

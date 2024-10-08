@@ -35,3 +35,6 @@
 
 - name: Install and configure basic Apache
   import_playbook: playbooks/web_apache/main.yml
+
+- name: Install and configure PHP-FPM
+  import_playbook: playbooks/web_php/main.yml
