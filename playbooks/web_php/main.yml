@@ -6,7 +6,7 @@
   vars_files:
     - vars.yml
 
-  tasks:
+  pre_tasks:
     - name: Install various PHP dependencies
       ansible.builtin.apt:
         state: present

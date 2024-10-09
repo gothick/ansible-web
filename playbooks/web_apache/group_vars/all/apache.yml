@@ -13,5 +13,7 @@ apache_mods_enabled:
   - rewrite
   - ssl
   - headers
+  - proxy
+  - proxy_fcgi
 
 # apache_mods_disabled: []
