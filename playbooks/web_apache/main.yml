@@ -5,13 +5,3 @@
 
   roles:
     - geerlingguy.apache
-
-  tasks:
-    - name: Install PHP test script
-      ansible.builtin.template:
-        src: phpinfo.php.j2
-        dest: /var/www/html/phpinfo.php
-        owner: root
-        group: root
-        mode: '0744'
-      when: apache_add_test_php_file is defined and apache_add_test_php_file | bool

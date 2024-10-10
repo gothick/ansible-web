@@ -21,3 +21,57 @@
 
   roles:
     - geerlingguy.php
+
+  tasks:
+    - name: Create test PHP site folder
+      ansible.builtin.file:
+        path: "{{ php_phptest_dir }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      tags:
+        - phptest
+
+    - name: Install PHP test script
+      ansible.builtin.template:
+        src: phpinfo.php.j2
+        dest: "{{ php_phptest_dir }}/phpinfo.php"
+        owner: root
+        group: root
+        mode: '0644'
+      tags:
+        - phptest
+
+    - name: Install PHP test site configuration
+      ansible.builtin.template:
+        src: testsite.conf.j2
+        # TODO: Can we use this? Or do we have to include (but not run)
+        # the Apache role to get hold of apache_server_root?
+        dest: "{{ php_apache_server_root }}/sites-available/{{ php_phptest_conf_name }}"
+        owner: root
+        group: root
+        mode: '0644'
+      tags:
+        - phptest
+
+    - name: Enable PHP test site
+      ansible.builtin.command: a2ensite {{ php_phptest_conf_name }}
+      register: site_result
+      notify: Reload apache
+      when: web_php_create_test_site is defined and web_php_create_test_site | bool
+      changed_when: "'Enabling site' in site_result.stdout"
+      tags:
+        - phptest
+
+    - name: Debug a2ensite
+      ansible.builtin.debug:
+        var: site_result
+      tags:
+        - phptest
+
+  handlers:
+    - name: Reload apache
+      ansible.builtin.service:
+        name: apache2
+        state: reloaded
