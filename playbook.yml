@@ -5,6 +5,7 @@
 
   vars:
     vagrant_version: "2.4.1"
+    is_vagrant: false # Overriden to true in Vagrantfile
 
   pre_tasks:
 
@@ -17,6 +18,10 @@
     - basicbind.swap_file.swap_file
 
   tasks:
+
+- name: Create Ansible user
+  import_playbook: playbooks/create_ansible_user/main.yml
+  when: is_vagrant == true
 
 - name: Web Users
   import_playbook: playbooks/web_users/main.yml

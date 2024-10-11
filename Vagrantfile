@@ -26,6 +26,7 @@ Vagrant.configure("2") do |config|
         ansible.limit = "all"
         ansible.extra_vars = {
           ansible_user: 'vagrant',
+          is_vagrant: true,
           ansible_ssh_private_key_file: "~/.vagrant.d/insecure_private_key"
         }
       end

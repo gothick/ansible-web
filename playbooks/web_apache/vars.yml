@@ -1,14 +1,10 @@
 ---
-
 # geerlingguy.apache will create a big-ass vhosts file if you
 # let it; this lets us manually create our own individual vhosts
 # files to keep things simpler and more flexible.
 apache_create_vhosts: false
 
-apache_remove_default_vhost: true
-
-apache_add_test_php_file: false
-
+# Should be everything we need to plug PHP in later, etc.
 apache_mods_enabled:
   - rewrite
   - ssl
