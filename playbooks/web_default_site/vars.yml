@@ -1,0 +1,2 @@
+---
+site_type: "{{ 'dev' if 'dev' in group_names else 'prod' }}"
