@@ -41,5 +41,8 @@
 - name: Install and configure basic Apache
   import_playbook: playbooks/web_apache/main.yml
 
+- name: Add a default Apache site
+  import_playbook: playbooks/web_default_site/main.yml
+
 - name: Install and configure PHP-FPM
   import_playbook: playbooks/web_php/main.yml

@@ -1,2 +1,5 @@
 ---
-site_type: "{{ 'dev' if 'dev' in group_names else 'prod' }}"
+default_site_path: /var/www/sites/default
+php_apache_server_root: /etc/apache2
+default_conf_name: "000-default.conf"
+default_conf_ssl_name: "default-ssl.conf"

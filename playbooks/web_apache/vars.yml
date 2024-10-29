@@ -4,6 +4,9 @@
 # files to keep things simpler and more flexible.
 apache_create_vhosts: false
 
+# We'll add our own default vhost if necessary
+apache_remove_default_vhost: true
+
 # Should be everything we need to plug PHP in later, etc.
 apache_mods_enabled:
   - rewrite
