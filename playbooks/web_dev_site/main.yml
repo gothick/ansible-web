@@ -1,0 +1,90 @@
+---
+- name: Install a simple dev/test site on our dev servers only
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create default site folder
+      ansible.builtin.file:
+        path: "{{ dev_site_path }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      tags:
+        - phptest
+
+    - name: Install default site index
+      ansible.builtin.template:
+        src: index.html.j2
+        dest: "{{ dev_site_path }}/index.html"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Install default site http configuration
+      ansible.builtin.template:
+        src: "dev.conf.j2"
+        dest: "{{ php_apache_server_root }}/sites-available/{{ dev_conf_name }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Install default site http configuration
+      ansible.builtin.template:
+        src: "dev-ssl.conf.j2"
+        dest: "{{ php_apache_server_root }}/sites-available/{{ dev_conf_ssl_name }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    # TODO: Disable dev site if not in production
+
+    - name: Enable default site
+      ansible.builtin.command: a2ensite {{ dev_conf_name }}
+      register: site_result
+      notify: Reload apache
+      changed_when: "'Enabling site' in site_result.stdout"
+
+    # BEFORE we enable the ssl site we've got to provide a self-signed certificate
+    # if no SSL certificate is present yet. Later if necessary we can regenerate
+    # the certificate with a real one from Let's Encrypt.
+
+    - name: Create private key for a self-signed certificate (RSA, 4096 bits)
+      community.crypto.openssl_privatekey:
+        path: /etc/ssl/private/ssl-cert-dev.key
+        # Because we don't want to overwite a valid Let's Encrypt certificate
+        # so we only create the key if there's nothing there at all yet.
+        regenerate: never
+        type: RSA
+
+    # community.crypto.x509_certificate will overwrite a certificate if it
+    # was generated with different options. For this initial self-signed
+    # certificate we'll only create it if there's no certificate of any
+    # kind yet.
+    - name: Check if certificate exists
+      ansible.builtin.stat:
+        path: /etc/ssl/certs/ssl-cert-dev.pem
+      register: cert_path
+
+    - name: Create simple self-signed certificate
+      community.crypto.x509_certificate:
+        path: /etc/ssl/certs/ssl-cert-dev.pem
+        privatekey_path: /etc/ssl/private/ssl-cert-dev.key
+        provider: selfsigned
+      when: "not cert_path.stat.exists"
+
+    - name: Enable default-ssl site
+      ansible.builtin.command: a2ensite {{ dev_conf_ssl_name }}
+      register: site_result
+      notify: Reload apache
+      changed_when: "'Enabling site' in site_result.stdout"
+
+  handlers:
+    - name: Reload apache
+      ansible.builtin.service:
+        name: apache2
+        state: reloaded

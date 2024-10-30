@@ -1,0 +1,6 @@
+---
+dev_site_path: /var/www/sites/dev
+dev_server_name: dev.gothick.org.uk
+php_apache_server_root: /etc/apache2
+dev_conf_name: "dev.conf"
+dev_conf_ssl_name: "dev-ssl.conf"
