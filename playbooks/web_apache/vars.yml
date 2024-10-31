@@ -14,5 +14,6 @@ apache_mods_enabled:
   - headers
   - proxy
   - proxy_fcgi
+  - alias
 
 # apache_mods_disabled: []

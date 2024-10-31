@@ -14,8 +14,22 @@
         mode: '0755'
         owner: root
         group: root
-      tags:
-        - phptest
+
+    - name: Create corresponding well-known directory with acme-challenge subdirectory
+      ansible.builtin.file:
+        path: "{{ well_known_dir }}/acme-challenge"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Template standard security.txt to well-known directory
+      ansible.builtin.template:
+        src: security.txt.j2
+        dest: "{{ well_known_dir }}/security.txt"
+        owner: root
+        group: root
+        mode: '0644'
 
     - name: Install default site index
       ansible.builtin.template:
@@ -32,6 +46,7 @@
         owner: root
         group: root
         mode: '0644'
+      notify: Reload apache
 
     - name: Install default site http configuration
       ansible.builtin.template:
@@ -40,10 +55,12 @@
         owner: root
         group: root
         mode: '0644'
+      notify: Reload apache
 
-    # TODO: Disable dev site if not in production
+    # TODO: Disable dev site (http and https) if not in production
 
-    - name: Enable default site
+    # We'll need the http site up and running before we can pass an ACME challenge.
+    - name: Enable default non-https site
       ansible.builtin.command: a2ensite {{ dev_conf_name }}
       register: site_result
       notify: Reload apache

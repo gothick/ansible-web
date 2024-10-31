@@ -10,7 +10,24 @@
 	ServerName {{ dev_server_name }}
 
 	ServerAdmin {{ admin_email }}
+
+	# We manage our well_known directories somewhat globally. It's useful if
+	# they're stored outside the main document root. For example, if I want
+	# to generate an acme challenge file, I can do so without worrying about
+	# whether a file lying around created by root or some other privileged
+	# user will prevent e.g. a capistrano-style deployment by the web app
+	# owner from working, as it won't be sitting under the main document
+	# root.
+	Alias "/.well-known" "{{ well_known_dir }}"
+
+	<Directory "{{ well_known_dir }}">
+		Options -Indexes +FollowSymLinks +MultiViews
+		AllowOverride All
+		Require all granted
+	</Directory>
+
 	DocumentRoot {{ dev_site_path }}
+
 
 	# Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
 	# error, crit, alert, emerg.
