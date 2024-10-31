@@ -53,29 +53,31 @@
     # if no SSL certificate is present yet. Later if necessary we can regenerate
     # the certificate with a real one from Let's Encrypt.
 
-    - name: Create private key for a self-signed certificate (RSA, 4096 bits)
-      community.crypto.openssl_privatekey:
-        path: /etc/ssl/private/ssl-cert-dev.key
-        # Because we don't want to overwite a valid Let's Encrypt certificate
-        # so we only create the key if there's nothing there at all yet.
-        regenerate: never
-        type: RSA
-
     # community.crypto.x509_certificate will overwrite a certificate if it
     # was generated with different options. For this initial self-signed
     # certificate we'll only create it if there's no certificate of any
     # kind yet.
-    - name: Check if certificate exists
+    - name: Check if any kind of certificate exists
       ansible.builtin.stat:
         path: /etc/ssl/certs/ssl-cert-dev.pem
       register: cert_path
 
-    - name: Create simple self-signed certificate
-      community.crypto.x509_certificate:
-        path: /etc/ssl/certs/ssl-cert-dev.pem
-        privatekey_path: /etc/ssl/private/ssl-cert-dev.key
-        provider: selfsigned
+    - name: Create self-signed cert only if we don't already have a cert of any kind
       when: "not cert_path.stat.exists"
+      block:
+        - name: Create private key for a self-signed certificate (RSA, 4096 bits)
+          community.crypto.openssl_privatekey:
+            path: /etc/ssl/private/ssl-cert-dev.key
+            # Because we don't want to overwite a valid Let's Encrypt certificate
+            # so we only create the key if there's nothing there at all yet.
+            regenerate: never
+            type: RSA
+        - name: Create simple self-signed certificate
+          community.crypto.x509_certificate:
+            path: /etc/ssl/certs/ssl-cert-dev.pem
+            privatekey_path: /etc/ssl/private/ssl-cert-dev.key
+            provider: selfsigned
+          when: "not cert_path.stat.exists"
 
     - name: Enable default-ssl site
       ansible.builtin.command: a2ensite {{ dev_conf_ssl_name }}
