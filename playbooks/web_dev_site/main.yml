@@ -70,9 +70,7 @@
     # if no SSL certificate is present yet. Later if necessary we can regenerate
     # the certificate with a real one from Let's Encrypt.
 
-    # community.crypto.x509_certificate will overwrite a certificate if it
-    # was generated with different options. For this initial self-signed
-    # certificate we'll only create it if there's no certificate of any
+    # For this initial key we'll only create it if there's no key certificate of any
     # kind yet.
     - name: Check if any kind of certificate exists
       ansible.builtin.stat:
@@ -89,12 +87,13 @@
             # so we only create the key if there's nothing there at all yet.
             regenerate: never
             type: RSA
+          notify: Reload apache
         - name: Create simple self-signed certificate
           community.crypto.x509_certificate:
             path: "{{ dev_cert_path }}"
             privatekey_path: "{{ dev_key_path }}"
             provider: selfsigned
-          when: "not cert_path.stat.exists"
+          notify: Reload apache
 
     - name: Enable default-ssl site
       ansible.builtin.command: "a2ensite {{ dev_conf_ssl_name }}"
@@ -102,7 +101,93 @@
       notify: Reload apache
       changed_when: "'Enabling site' in site_result.stdout"
 
+    # At this point we should be able to get our site up and running enough to
+    # pass an ACME challenge, so run handlers to reload apache and get the site
+    # up and running.
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    # Okay, so now we've got both http and https sites up and running. Now let's get ourselves
+    # a real certificate from Let's Encrypt.
+
+    - name: "Create required directories"
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: u=rwx,g=x,o=x
+      with_items:
+        - "{{ letsencrypt_account_dir }}"
+        # - certs
+        # - csrs
+        # - keys
+
+    # TODO This generates the key every time. We should only do this if the key file doesn't exist at all
+    - name: Generate a Letsencrypt Account Key (RSA, 4096 bits is the default)
+      community.crypto.openssl_privatekey:
+        path: "{{ letsencrypt_account_key_file }}"
+        regenerate: never
+
+    - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
+      community.crypto.openssl_privatekey:
+        path: "{{ dev_key_path }}"
+
+    - name: Generate an OpenSSL Certificate Signing Request
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "{{ dev_key_path }}"
+        common_name: "{{ dev_server_name }}"
+        # TODO:
+        # subject_alt_name
+      register: csr
+
+    - name: Print CSR
+      ansible.builtin.debug:
+        var: csr.csr
+
+    - name: Create an ACME challenge for sample.com using a account key file.
+      community.crypto.acme_certificate:
+        # Staging enviroment for testing
+        acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
+        # Live enviroment
+        # acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+        acme_version: 2
+        account_key_src: "{{ letsencrypt_account_key_file }}"
+        csr_content: "{{ csr.csr }}"
+        fullchain_dest: "{{ dev_cert_path }}"
+      register: dev_server_challenge
+
+    - name: Debug challenge data
+      ansible.builtin.debug:
+        var: dev_server_challenge
+
+    - name: Copy http-01 challenge for dev server (if we've actually been challenged)
+      ansible.builtin.copy:
+        # /var/www/html/{{ sample_com_challenge['challenge_data']['sample.com']['http-01']['resource'] }}
+        dest: "{{ well_known_dir || (dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource'] | basename) }}"
+        content: "{{ sample_com_challenge['challenge_data']['sample.com']['http-01']['resource_value'] }}"
+        owner: root
+        group: root
+        mode: '0644'
+      when: dev_server_challenge is changed and dev_server_name in sample_com_challenge['challenge_data']
+
+    - name: Let the challenge be validated and retrieve the cert and intermediate certificate
+      community.crypto.acme_certificate:
+        # Staging enviroment for testing
+        acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
+        # Live enviroment
+        # acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+        acme_version: 2
+        account_key_src: "{{ letsencrypt_account_key_file }}"
+        csr_content: "{{ csr.csr }}"
+        fullchain_dest: "{{ dev_cert_path }}"
+        data: "{{ dev_server_challenge }}"
+
+    # Now we need to pass the challenge
+    # Resource: /.well-known/acme-challenge/{{ token }}
+
   handlers:
+
     - name: Reload apache
       ansible.builtin.service:
         name: apache2
