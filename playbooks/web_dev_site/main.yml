@@ -147,9 +147,9 @@
 
     - name: Create an ACME challenge for sample.com using a account key file.
       community.crypto.acme_certificate:
-        # Staging enviroment for testing
+        # Staging environment for testing
         acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
-        # Live enviroment
+        # Live environment
         # acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
         acme_version: 2
         account_key_src: "{{ letsencrypt_account_key_file }}"
@@ -173,9 +173,9 @@
 
     - name: Let the challenge be validated and retrieve the cert and intermediate certificate
       community.crypto.acme_certificate:
-        # Staging enviroment for testing
+        # Staging environment for testing
         acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
-        # Live enviroment
+        # Live environment
         # acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
         acme_version: 2
         account_key_src: "{{ letsencrypt_account_key_file }}"
