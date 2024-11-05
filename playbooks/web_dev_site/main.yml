@@ -88,11 +88,24 @@
             regenerate: never
             type: RSA
           notify: Reload apache
+        - name: Create CSR for simple self-signed certificate
+          community.crypto.openssl_csr_pipe:
+            privatekey_path: "{{ dev_key_path }}"
+            common_name: "{{ dev_server_name }}"
+            authority_cert_issuer:
+              - "{{ self_signed_ca_DNS }}"
+            authority_cert_serial_number: 123
+          register: result
+        - name: Print CSR
+          ansible.builtin.debug:
+            var: result.csr
         - name: Create simple self-signed certificate
           community.crypto.x509_certificate:
             path: "{{ dev_cert_path }}"
+            csr_content: "{{ result.csr }}"
             privatekey_path: "{{ dev_key_path }}"
             provider: selfsigned
+
           notify: Reload apache
 
     - name: Enable default-ssl site
@@ -145,6 +158,19 @@
       ansible.builtin.debug:
         var: csr.csr
 
+    - name: Get certificate information
+      community.crypto.x509_certificate_info:
+        path: "{{ dev_cert_path }}"
+      register: cert_info
+
+    - name: Print existing certificate information
+      ansible.builtin.debug:
+        var: cert_info
+
+    - name: Print existing certificate information
+      ansible.builtin.debug:
+        var: cert_info['authority_cert_issuer']
+
     - name: Create an ACME challenge for sample.com using a account key file.
       community.crypto.acme_certificate:
         # Staging environment for testing
@@ -152,6 +178,8 @@
         # Live environment
         # acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
         acme_version: 2
+        # Force an ACME certificate if it was we who self-signed the existing certificate
+        force: "{{ self_signed_ca_DNS in cert_info['authority_cert_issuer'] }}"
         account_key_src: "{{ letsencrypt_account_key_file }}"
         csr_content: "{{ csr.csr }}"
         fullchain_dest: "{{ dev_cert_path }}"

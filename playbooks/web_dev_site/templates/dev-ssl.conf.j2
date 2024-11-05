@@ -1,6 +1,10 @@
 {{ ansible_managed | comment }}
 <IfModule mod_ssl.c>
 	<VirtualHost _default_:443>
+
+		ServerName {{ dev_server_name }}
+		# TODO ServerAliases www.gothick.org.uk mattgibsoncreative.co.uk etc. etc.
+
 		ServerAdmin {{ admin_email }}
 
 		DocumentRoot {{ dev_site_path }}
