@@ -152,6 +152,11 @@
         common_name: "{{ dev_server_name }}"
         # TODO:
         # subject_alt_name
+        # O and OU fields
+        #     country_name: FR
+        #     subject_alt_name: 'DNS:www.ansible.com,DNS:m.ansible.com'
+        # organization_name: Ansible
+        # email_address: jdoe@ansible.com
       register: csr
 
     - name: Print CSR
@@ -174,9 +179,9 @@
     - name: Create an ACME challenge for sample.com using a account key file.
       community.crypto.acme_certificate:
         # Staging environment for testing
-        acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
+        # acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
         # Live environment
-        # acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+        acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
         acme_version: 2
         # Force an ACME certificate if it was we who self-signed the existing certificate
         terms_agreed: true
@@ -204,15 +209,16 @@
       community.crypto.acme_certificate:
         # Staging environment for testing
         terms_agreed: true
-        acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
+        # acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
         # Live environment
-        # acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
+        acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
         acme_version: 2
         force: "{{ self_signed_ca_DNS in cert_info['authority_cert_issuer'] }}"
         account_key_src: "{{ letsencrypt_account_key_file }}"
         csr_content: "{{ csr.csr }}"
         fullchain_dest: "{{ dev_cert_path }}"
         data: "{{ dev_server_challenge }}"
+      notify: Reload apache
 
     # Now we need to pass the challenge
     # Resource: /.well-known/acme-challenge/{{ token }}
