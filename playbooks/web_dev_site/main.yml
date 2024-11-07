@@ -17,7 +17,7 @@
 
     - name: Create corresponding well-known directory with acme-challenge subdirectory
       ansible.builtin.file:
-        path: "{{ well_known_dir }}/acme-challenge"
+        path: "{{ acme_challenge_dir }}"
         state: directory
         mode: '0755'
         owner: root
@@ -179,6 +179,7 @@
         # acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
         acme_version: 2
         # Force an ACME certificate if it was we who self-signed the existing certificate
+        terms_agreed: true
         force: "{{ self_signed_ca_DNS in cert_info['authority_cert_issuer'] }}"
         account_key_src: "{{ letsencrypt_account_key_file }}"
         csr_content: "{{ csr.csr }}"
@@ -192,20 +193,22 @@
     - name: Copy http-01 challenge for dev server (if we've actually been challenged)
       ansible.builtin.copy:
         # /var/www/html/{{ sample_com_challenge['challenge_data']['sample.com']['http-01']['resource'] }}
-        dest: "{{ well_known_dir || (dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource'] | basename) }}"
-        content: "{{ sample_com_challenge['challenge_data']['sample.com']['http-01']['resource_value'] }}"
+        dest: "{{ acme_challenge_dir }}/{{ (dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource'] | basename) }}"
+        content: "{{ dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource_value'] }}"
         owner: root
         group: root
         mode: '0644'
-      when: dev_server_challenge is changed and dev_server_name in sample_com_challenge['challenge_data']
+      when: dev_server_challenge is changed and dev_server_name in dev_server_challenge['challenge_data']
 
     - name: Let the challenge be validated and retrieve the cert and intermediate certificate
       community.crypto.acme_certificate:
         # Staging environment for testing
+        terms_agreed: true
         acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
         # Live environment
         # acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
         acme_version: 2
+        force: "{{ self_signed_ca_DNS in cert_info['authority_cert_issuer'] }}"
         account_key_src: "{{ letsencrypt_account_key_file }}"
         csr_content: "{{ csr.csr }}"
         fullchain_dest: "{{ dev_cert_path }}"
