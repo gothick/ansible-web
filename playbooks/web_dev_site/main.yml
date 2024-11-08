@@ -77,6 +77,16 @@
         path: "{{ dev_cert_path }}"
       register: cert_path
 
+    # - name: Get certificate information
+    #   when: cert_path.stat.exists
+    #   community.crypto.x509_certificate_info:
+    #     path: "{{ dev_cert_path }}"
+    #   register: cert_info
+
+    # - name: Print existing certificate information
+    #   ansible.builtin.debug:
+    #     var: cert_info
+
     - name: Create self-signed cert only if we don't already have a cert of any kind
       when: "not cert_path.stat.exists"
       block:
@@ -105,7 +115,6 @@
             csr_content: "{{ result.csr }}"
             privatekey_path: "{{ dev_key_path }}"
             provider: selfsigned
-
           notify: Reload apache
 
     - name: Enable default-ssl site
