@@ -121,107 +121,108 @@
       ansible.builtin.meta: flush_handlers
 
     # Okay, so now we've got both http and https sites up and running. Now let's get ourselves
-    # a real certificate from Let's Encrypt.
+    # a real certificate from Let's Encrypt, assuming we're not on the Vagrant box, where it's
+    # impossible to pass the acme challenge as that's inside our firewall and DNS won't be
+    # pointing to it anyway.
+    - name: "Install Letsencrypt certificate"
+      when: use_letsencrypt
+      block:
+        - name: "Create required directories"
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: directory
+            owner: root
+            group: root
+            mode: u=rwx,g=x,o=x
+          with_items:
+            - "{{ letsencrypt_account_dir }}"
+            # - certs
+            # - csrs
+            # - keys
 
-    - name: "Create required directories"
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: directory
-        owner: root
-        group: root
-        mode: u=rwx,g=x,o=x
-      with_items:
-        - "{{ letsencrypt_account_dir }}"
-        # - certs
-        # - csrs
-        # - keys
+        # TODO This generates the key every time. We should only do this if the key file doesn't exist at all
+        - name: Generate a Letsencrypt Account Key (RSA, 4096 bits is the default)
+          community.crypto.openssl_privatekey:
+            path: "{{ letsencrypt_account_key_file }}"
+            regenerate: never
 
-    # TODO This generates the key every time. We should only do this if the key file doesn't exist at all
-    - name: Generate a Letsencrypt Account Key (RSA, 4096 bits is the default)
-      community.crypto.openssl_privatekey:
-        path: "{{ letsencrypt_account_key_file }}"
-        regenerate: never
+        - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
+          community.crypto.openssl_privatekey:
+            path: "{{ dev_key_path }}"
 
-    - name: Generate an OpenSSL private key with the default values (4096 bits, RSA)
-      community.crypto.openssl_privatekey:
-        path: "{{ dev_key_path }}"
+        - name: Generate an OpenSSL Certificate Signing Request
+          community.crypto.openssl_csr_pipe:
+            privatekey_path: "{{ dev_key_path }}"
+            common_name: "{{ dev_server_name }}"
+            email_address: "{{ letsencrypt_email }}"
+            organization_name: "{{ letsencrypt_organisation }}"
+            country_name: GB
+            # TODO:
+            # subject_alt_name
+            # O and OU fields
+            #     country_name: FR
+            #     subject_alt_name: 'DNS:www.ansible.com,DNS:m.ansible.com'
+            # organization_name: Ansible
+          register: csr
 
-    - name: Generate an OpenSSL Certificate Signing Request
-      community.crypto.openssl_csr_pipe:
-        privatekey_path: "{{ dev_key_path }}"
-        common_name: "{{ dev_server_name }}"
-        # TODO:
-        # subject_alt_name
-        # O and OU fields
-        #     country_name: FR
-        #     subject_alt_name: 'DNS:www.ansible.com,DNS:m.ansible.com'
-        # organization_name: Ansible
-        # email_address: jdoe@ansible.com
-      register: csr
+        - name: Print CSR
+          ansible.builtin.debug:
+            var: csr.csr
 
-    - name: Print CSR
-      ansible.builtin.debug:
-        var: csr.csr
+        - name: Get certificate information
+          community.crypto.x509_certificate_info:
+            path: "{{ dev_cert_path }}"
+          register: cert_info
 
-    - name: Get certificate information
-      community.crypto.x509_certificate_info:
-        path: "{{ dev_cert_path }}"
-      register: cert_info
+        - name: Print existing certificate information
+          ansible.builtin.debug:
+            var: cert_info
 
-    - name: Print existing certificate information
-      ansible.builtin.debug:
-        var: cert_info
+        - name: Print existing certificate information
+          ansible.builtin.debug:
+            var: cert_info['authority_cert_issuer']
 
-    - name: Print existing certificate information
-      ansible.builtin.debug:
-        var: cert_info['authority_cert_issuer']
+        - name: Create an ACME challenge for sample.com using a account key file.
+          community.crypto.acme_certificate:
+            acme_directory: "{{ acme_directory }}"
+            acme_version: 2
+            terms_agreed: true
+            # This won't deliver a new certificate if there's already a self-signed one
+            # in place unless we detect that and force it.
+            force: "{{ self_signed_ca_DNS in cert_info['authority_cert_issuer'] }}"
+            account_key_src: "{{ letsencrypt_account_key_file }}"
+            csr_content: "{{ csr.csr }}"
+            fullchain_dest: "{{ dev_cert_path }}"
+          register: dev_server_challenge
 
-    - name: Create an ACME challenge for sample.com using a account key file.
-      community.crypto.acme_certificate:
-        # Staging environment for testing
-        # acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
-        # Live environment
-        acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
-        acme_version: 2
-        # Force an ACME certificate if it was we who self-signed the existing certificate
-        terms_agreed: true
-        force: "{{ self_signed_ca_DNS in cert_info['authority_cert_issuer'] }}"
-        account_key_src: "{{ letsencrypt_account_key_file }}"
-        csr_content: "{{ csr.csr }}"
-        fullchain_dest: "{{ dev_cert_path }}"
-      register: dev_server_challenge
+        - name: Debug challenge data
+          ansible.builtin.debug:
+            var: dev_server_challenge
 
-    - name: Debug challenge data
-      ansible.builtin.debug:
-        var: dev_server_challenge
+        - name: Copy http-01 challenge for dev server (if we've actually been challenged)
+          ansible.builtin.copy:
+            # /var/www/html/{{ sample_com_challenge['challenge_data']['sample.com']['http-01']['resource'] }}
+            dest: "{{ acme_challenge_dir }}/{{ (dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource'] | basename) }}"
+            content: "{{ dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource_value'] }}"
+            owner: root
+            group: root
+            mode: '0644'
+          when: dev_server_challenge is changed and dev_server_name in dev_server_challenge['challenge_data']
 
-    - name: Copy http-01 challenge for dev server (if we've actually been challenged)
-      ansible.builtin.copy:
-        # /var/www/html/{{ sample_com_challenge['challenge_data']['sample.com']['http-01']['resource'] }}
-        dest: "{{ acme_challenge_dir }}/{{ (dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource'] | basename) }}"
-        content: "{{ dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource_value'] }}"
-        owner: root
-        group: root
-        mode: '0644'
-      when: dev_server_challenge is changed and dev_server_name in dev_server_challenge['challenge_data']
+        - name: Let the challenge be validated and retrieve the cert and intermediate certificate
+          community.crypto.acme_certificate:
+            terms_agreed: true
+            acme_directory: "{{ acme_directory }}"
+            acme_version: 2
+            # This won't deliver a new certificate if there's already a self-signed one
+            # in place unless we detect that and force it.
+            force: "{{ self_signed_ca_DNS in cert_info['authority_cert_issuer'] }}"
+            account_key_src: "{{ letsencrypt_account_key_file }}"
+            csr_content: "{{ csr.csr }}"
+            fullchain_dest: "{{ dev_cert_path }}"
+            data: "{{ dev_server_challenge }}"
+          notify: Reload apache
 
-    - name: Let the challenge be validated and retrieve the cert and intermediate certificate
-      community.crypto.acme_certificate:
-        # Staging environment for testing
-        terms_agreed: true
-        # acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
-        # Live environment
-        acme_directory: "https://acme-v02.api.letsencrypt.org/directory"
-        acme_version: 2
-        force: "{{ self_signed_ca_DNS in cert_info['authority_cert_issuer'] }}"
-        account_key_src: "{{ letsencrypt_account_key_file }}"
-        csr_content: "{{ csr.csr }}"
-        fullchain_dest: "{{ dev_cert_path }}"
-        data: "{{ dev_server_challenge }}"
-      notify: Reload apache
-
-    # Now we need to pass the challenge
-    # Resource: /.well-known/acme-challenge/{{ token }}
 
   handlers:
 

@@ -11,3 +11,5 @@ dev_key_path: /etc/ssl/private/ssl-cert-dev.pem
 dev_cert_path: /etc/ssl/certs/ssl-cert-dev.pem
 letsencrypt_account_dir: /etc/letsencrypt/account
 letsencrypt_account_key_file: "{{ letsencrypt_account_dir }}/account.key"
+letsencrypt_email: gothick@gothick.org.uk
+letsencrypt_organisation: "Gothick"

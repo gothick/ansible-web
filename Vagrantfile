@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
       machine.vm.network :private_network, ip: "192.168.56.2"
       machine.vm.provision "ansible" do |ansible|
         ansible.playbook = "playbook.yml"
-        ansible.inventory_path = "inventories/vagrant.ini"
+        ansible.inventory_path = "inventories/vagrant.yml"
         ansible.limit = "all"
         ansible.extra_vars = {
           ansible_user: 'vagrant',
