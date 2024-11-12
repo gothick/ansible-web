@@ -17,7 +17,7 @@
 
     - name: Create corresponding well-known directory with acme-challenge subdirectory
       ansible.builtin.file:
-        path: "{{ acme_challenge_dir }}"
+        path: "{{ well_known_dir }}/{{ dev_server_name }}/acme-challenge"
         state: directory
         mode: '0755'
         owner: root
@@ -26,7 +26,7 @@
     - name: Template standard security.txt to well-known directory
       ansible.builtin.template:
         src: security.txt.j2
-        dest: "{{ well_known_dir }}/security.txt"
+        dest: "{{ well_known_dir }}/{{ dev_server_name }}/security.txt"
         owner: root
         group: root
         mode: '0644'

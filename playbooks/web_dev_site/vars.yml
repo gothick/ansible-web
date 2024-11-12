@@ -1,8 +1,11 @@
 ---
 dev_site_path: /var/www/sites/dev
-well_known_dir: /var/www/well-known/dev
-acme_challenge_dir: /var/www/well-known/dev/acme-challenge
+well_known_dir: /var/www/well-known #/dev
+# acme_challenge_dir: /var/www/well-known/dev/acme-challenge
 dev_server_name: dev.gothick.org.uk
+dev_server_aliases:
+  - devtest1.gothick.org.uk
+  - devtest2.gothick.org.uk
 self_signed_ca_DNS: DNS:ca.gothick.org.uk
 php_apache_server_root: /etc/apache2
 dev_conf_name: "dev.conf"

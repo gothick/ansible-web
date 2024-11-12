@@ -26,6 +26,7 @@ php_apache_server_root: "/etc/apache2"
 
 # Create just the dev pool for now. Individual websites
 # might create others for themselves in different
+# playbooks
 php_fpm_pools:
   - pool_name: www
     pool_template: www.conf.j2

@@ -33,6 +33,8 @@
       tags:
         - phptest
 
+    # TODO: Move these somewhere else.
+
     - name: Install PHP test script
       ansible.builtin.template:
         src: phpinfo.php.j2

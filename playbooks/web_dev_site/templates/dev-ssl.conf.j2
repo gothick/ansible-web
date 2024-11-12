@@ -3,7 +3,10 @@
 	<VirtualHost _default_:443>
 
 		ServerName {{ dev_server_name }}
-		# TODO ServerAliases www.gothick.org.uk mattgibsoncreative.co.uk etc. etc.
+
+		{% if dev_server_aliases is defined %}
+		ServerAlias {{ dev_server_aliases | join(' ') }}
+		{% endif %}
 
 		ServerAdmin {{ admin_email }}
 

@@ -33,30 +33,25 @@
     email_address: "{{ letsencrypt_email }}"
     organization_name: "{{ letsencrypt_organisation }}"
     country_name: GB
-    # TODO:
-    # subject_alt_name
-    # O and OU fields
-    #     country_name: FR
-    #     subject_alt_name: 'DNS:www.ansible.com,DNS:m.ansible.com'
-    # organization_name: Ansible
+    subject_alt_name: "{{ ([dev_server_name] + (dev_server_aliases | default([]))) | map('regex_replace', '^', 'DNS:') | list }}"
   register: csr
 
-- name: Print CSR
-  ansible.builtin.debug:
-    var: csr.csr
+# - name: Print CSR
+#   ansible.builtin.debug:
+#     var: csr.csr
 
 - name: Get certificate information
   community.crypto.x509_certificate_info:
     path: "{{ dev_cert_path }}"
   register: cert_info
 
-- name: Print existing certificate information
-  ansible.builtin.debug:
-    var: cert_info
+# - name: Print existing certificate information
+#   ansible.builtin.debug:
+#     var: cert_info
 
-- name: Print existing certificate information
-  ansible.builtin.debug:
-    var: cert_info['authority_cert_issuer']
+# - name: Print existing certificate information
+#   ansible.builtin.debug:
+#     var: cert_info['authority_cert_issuer']
 
 - name: Create an ACME challenge for sample.com using a account key file.
   community.crypto.acme_certificate:
@@ -78,12 +73,14 @@
 - name: Copy http-01 challenge for dev server (if we've actually been challenged)
   ansible.builtin.copy:
     # /var/www/html/{{ sample_com_challenge['challenge_data']['sample.com']['http-01']['resource'] }}
-    dest: "{{ acme_challenge_dir }}/{{ (dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource'] | basename) }}"
-    content: "{{ dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource_value'] }}"
+    # dest: "{{ acme_challenge_dir }}/{{ (dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource'] | basename) }}"
+    dest: "{{ well_known_dir }}/{{ dev_server_name }}/acme-challenge/{{ (item.value['http-01']['resource'] | basename) }}"
+    content: "{{ item.value['http-01']['resource_value'] }}"
     owner: root
     group: root
     mode: '0644'
-  when: dev_server_challenge is changed and dev_server_name in dev_server_challenge['challenge_data']
+  when: dev_server_challenge is changed # and dev_server_name in dev_server_challenge['challenge_data']
+  loop: "{{ dev_server_challenge['challenge_data'] | dict2items }}"
 
 - name: Let the challenge be validated and retrieve the cert and intermediate certificate
   community.crypto.acme_certificate:

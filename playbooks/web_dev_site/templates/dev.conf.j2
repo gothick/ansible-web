@@ -9,6 +9,10 @@
 	# However, you must set it for any further virtual host explicitly.
 	ServerName {{ dev_server_name }}
 
+	{% if dev_server_aliases is defined %}
+	ServerAlias {{ dev_server_aliases | join(' ') }}
+	{% endif %}
+
 	ServerAdmin {{ admin_email }}
 
 	# We manage our well_known directories somewhat globally. It's useful if
@@ -18,7 +22,7 @@
 	# user will prevent e.g. a capistrano-style deployment by the web app
 	# owner from working, as it won't be sitting under the main document
 	# root.
-	Alias "/.well-known" "{{ well_known_dir }}"
+	Alias "/.well-known" "{{ well_known_dir }}/{{ dev_server_name }}"
 
 	<Directory "{{ well_known_dir }}">
 		Options -Indexes +FollowSymLinks +MultiViews
