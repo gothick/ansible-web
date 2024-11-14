@@ -2,24 +2,43 @@
 <IfModule mod_ssl.c>
 	<VirtualHost _default_:443>
 
-		ServerName {{ dev_server_name }}
-
-		{% if dev_server_aliases is defined %}
-		ServerAlias {{ dev_server_aliases | join(' ') }}
+		ServerName {{ site.server_name }}
+		{% if site.aliases is defined %}
+		ServerAlias {{ site.aliases | join(' ') }}
 		{% endif %}
 
 		ServerAdmin {{ admin_email }}
 
-		DocumentRoot {{ dev_site_path }}
+		# Protect against iframe clickjacking
+		# Older, for backward compatibility
+		Header set X-Frame-Options "SAMEORIGIN"
+		# Newer, for modern browsers
+		Header set Content-Security-Policy "frame-ancestors 'self';"
+
+		# We manage our well_known directories somewhat globally. It's useful if
+		# they're stored outside the main document root. For example, if I want
+		# to generate an acme challenge file, I can do so without worrying about
+		# whether a file lying around created by root or some other privileged
+		# user will prevent e.g. a capistrano-style deployment by the web app
+		# owner from working, as it won't be sitting under the main document
+		# root.
+		Alias "/.well-known" "{{ acme_well_known_dir }}/{{ site.server_name}}"
+
+		<Directory "{{ acme_well_known_dir }}/{{ site.server_name}}">
+			Options -Indexes +FollowSymLinks +MultiViews
+			AllowOverride All
+			Require all granted
+		</Directory>
+
+		DocumentRoot {{ site.docroot }}
 
 		# Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
 		# error, crit, alert, emerg.
 		# It is also possible to configure the loglevel for particular
 		# modules, e.g.
-		#LogLevel info ssl:warn
-
-		ErrorLog ${APACHE_LOG_DIR}/dev-ssl-error.log
-		CustomLog ${APACHE_LOG_DIR}/dev-ssl-access.log combined
+		LogLevel info ssl:warn
+  		ErrorLog {{ apache_log_dir }}/{{ site.server_name }}-https-error.log
+  		CustomLog {{ apache_log_dir }}/{{ site.server_name }}-https-access.log combined
 
 		# For most configuration files from conf-available/, which are
 		# enabled or disabled at a global level, it is possible to
@@ -37,8 +56,8 @@
 		#   /usr/share/doc/apache2/README.Debian.gz for more info.
 		#   If both key and certificate are stored in the same file, only the
 		#   SSLCertificateFile directive is needed.
-		SSLCertificateFile	{{ dev_cert_path }}
-		SSLCertificateKeyFile {{ dev_key_path }}
+		SSLCertificateFile	{{ acme_certs_dir }}/{{ site.server_name }}.crt
+		SSLCertificateKeyFile {{ acme_keys_dir }}/{{ site.server_name }}.key
 
 		#   Server Certificate Chain:
 		#   Point SSLCertificateChainFile at a file containing the
@@ -135,6 +154,48 @@
 		# BrowserMatch "MSIE [2-6]" \
 		#		nokeepalive ssl-unclean-shutdown \
 		#		downgrade-1.0 force-response-1.0
+
+		# Redirect e.g. http://www.meditationchimer.com (an alias) to https://meditationchimer.com
+		# TODO: We might want to protect this from open redirect by using the
+		# same approach of checking the host header as we do in the HTTP version
+		# of the site.
+		{% if site.canonical_rewrite %}
+  		RewriteEngine On
+  		# Canonical host, {{ site.server_name }}
+  		RewriteCond %{HTTP_HOST}   !^{{ site.server_name }} [NC]
+  		RewriteCond %{HTTP_HOST}   !^$
+  		RewriteRule ^/(.*)$        https://{{ site.server_name }}/$1 [L,R=301]
+  		{% endif %}
+
+		# Generally useful
+  		RewriteCond {{ site.docroot }}/system/maintenance.html -f
+  		RewriteCond %{SCRIPT_FILENAME} !maintenance.html
+  		RewriteRule ^.*$ /system/maintenance.html [L,R=503]
+
+		{% if site.enable_pagespeed | default(false) %}
+		<IfModule pagespeed_module>
+			ModPagespeedEnableFilters prioritize_critical_css
+			# TODO If we enable this, our basic gothick.org.uk page dies with a JavaScript error
+			# ModPagespeedEnableFilters defer_javascript
+			ModPagespeedEnableFilters sprite_images
+			ModPagespeedEnableFilters rewrite_images
+			ModPagespeedEnableFilters recompress_png
+			ModPagespeedEnableFilters convert_png_to_jpeg,convert_jpeg_to_webp
+			ModPagespeedEnableFilters collapse_whitespace,remove_comments
+
+			<Location /mod_pagespeed_statistics>
+				<IfModule mod_rewrite.c>
+					RewriteEngine Off
+				</IfModule>
+				Require host gothick.plus.com
+				SetHandler mod_pagespeed_statistics
+      		</Location>
+    	</IfModule>
+  		{% else %}
+    	<IfModule pagespeed_module>
+      		ModPagespeed off
+    	</IfModule>
+		{% endif %}
 
 	</VirtualHost>
 </IfModule>

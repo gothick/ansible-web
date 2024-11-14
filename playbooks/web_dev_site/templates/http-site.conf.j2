@@ -1,0 +1,47 @@
+{{ ansible_managed | comment }}
+<VirtualHost *:80>
+	ServerName {{ site.server_name }}
+
+	{% if site.aliases is defined %}
+	ServerAlias {{ site.aliases | join(' ') }}
+	{% endif %}
+
+	ServerAdmin {{ admin_email }}
+
+	# We manage our well_known directories somewhat globally. It's useful if
+	# they're stored outside the main document root. For example, if I want
+	# to generate an acme challenge file, I can do so without worrying about
+	# whether a file lying around created by root or some other privileged
+	# user will prevent e.g. a capistrano-style deployment by the web app
+	# owner from working, as it won't be sitting under the main document
+	# root.
+	Alias "/.well-known" "{{ acme_well_known_dir }}/{{ site.server_name}}"
+
+	<Directory "{{ acme_well_known_dir }}/{{ site.server_name}}">
+		Options -Indexes +FollowSymLinks +MultiViews
+		AllowOverride All
+		Require all granted
+	</Directory>
+
+	# This is the insecure version of a site we're serving securely. Rewrite everything
+  	# to the secure version instead.
+	# When HTTP_HOST is definitely one of ours, redirect to HTTPS
+	RewriteEngine On
+	{% set safenames = [ site.server_name ] + (site.aliases | default([])) %}
+	{% for safename in safenames %}
+	RewriteCond "%{HTTP_HOST}" "={{ safename }}" {% if loop.last %} [NC] {% else %} [NC,OR] {% endif %}
+	{% endfor %}
+	RewriteCond %{HTTPS} !=on
+	RewriteRule ^/?(.*) https://%{HTTP_HOST}/$1 [R,L]
+
+	# Otherwise, I don't know what's going on, but we can't trust
+	# the HTTP_HOST header, so just redirect to the server_name. If
+	# this happens then they'll probably end up on the default site,
+	# as their Host header won't match any of our sites. In fact,
+	# if they've spoofed the HOST header then we're probably already
+	# on the default site. TODO: I'll have to have a think about
+	# this.
+	RewriteEngine On
+	RewriteCond %{HTTPS} !=on
+	RewriteRule ^/?(.*) https://{{ site.server_name }} [R,L]
+</VirtualHost>

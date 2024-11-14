@@ -1,0 +1,15 @@
+---
+- name: Test playbook
+  hosts: all
+  become: true
+
+  pre_tasks:
+
+  tasks:
+
+- name: Configure php
+  import_playbook: playbooks/web_php/main.yml
+
+- name: Dump facts
+  import_playbook: playbooks/dump_facts/main.yml
+

@@ -1,18 +1,102 @@
 ---
-dev_site_path: /var/www/sites/dev
-well_known_dir: /var/www/well-known #/dev
-# acme_challenge_dir: /var/www/well-known/dev/acme-challenge
-dev_server_name: dev.gothick.org.uk
-dev_server_aliases:
-  - devtest1.gothick.org.uk
-  - devtest2.gothick.org.uk
+apache_server_root: /etc/apache2
+apache_log_dir: /var/log/apache2
+
+default_docroot_owner: www-data
+default_docroot_group: www-data
+
 self_signed_ca_DNS: DNS:ca.gothick.org.uk
-php_apache_server_root: /etc/apache2
-dev_conf_name: "dev.conf"
-dev_conf_ssl_name: "dev-ssl.conf"
-dev_key_path: /etc/ssl/private/ssl-cert-dev.pem
-dev_cert_path: /etc/ssl/certs/ssl-cert-dev.pem
-letsencrypt_account_dir: /etc/letsencrypt/account
-letsencrypt_account_key_file: "{{ letsencrypt_account_dir }}/account.key"
-letsencrypt_email: gothick@gothick.org.uk
-letsencrypt_organisation: "Gothick"
+
+acme_well_known_dir: /var/www/well-known
+acme_keys_dir: /etc/ssl/private
+acme_certs_dir: /etc/ssl/certs
+acme_account_dir: /etc/letsencrypt/account
+acme_account_key_file: "{{ acme_account_dir }}/account.key"
+acme_email: gothick@gothick.org.uk
+acme_organisation: "Gothick"
+
+# All possible configuration options that are in my Chef
+# setup at the moment:
+# server_name
+# server_aliases (array)
+# siteroot # Directory of the site code overall
+# siteroot_group
+# siteroot_owner
+# docroot # Docroot directory for Apache to point at, may be below siteroot
+# docroot_group
+# docroot_owner
+# php_fpm_pool
+# allow_override
+
+# compress_types (array)
+# directory_options
+# enable_pagespeed
+
+# Probably don't need no_well_known any more, as it was a workaround for when we had well-known
+# stored inside the siteroot and it sometimes interfered with Capistrano-style deployments as
+# some of the files would be owned by root so couldn't be deleted when deleting the older versions
+# of the site.
+# no_well_known
+
+# I don't think I need canonical_rewrite any more, either.
+# canonical_rewrite
+
+sites_dir: /var/www/sites
+
+# A few different sites to test with, quite varied:
+websites:
+  - server_name: "gothick.org.uk"
+    aliases:
+      - "www.gothick.org.uk"
+      - "mattgibsoncreative.co.uk"
+      - "www.mattgibsoncreative.co.uk"
+      - "mattgibsoncreative.gothick.org.uk"
+      - "mattgibsoncreative.com"
+      - "www.mattgibsoncreative.com"
+      - "mattgetsrunning.com"
+      - "www.mattgetsrunning.com"
+      - "mattgetsrunning.gothick.org.uk"
+    docroot: "{{ sites_dir }}/wordpress/html"
+    docroot_owner: wordpress
+    docroot_group: users
+    allow_override: all
+    directory_options: FollowSymLinks
+    canonical_rewrite: false
+    php_fpm_pool: /run/php/chef-managed-fpm-wordpress.sock
+    enable_pagespeed: true
+
+  - server_name: "omm.gothick.org.uk"
+    siteroot: "{{ sites_dir }}/gothick.org.uk/omm.gothick.org.uk"
+    compresstypes:
+      - text/html
+      - text/plain
+      - text/xml
+      - text/css
+      - application/x-javascript
+      - application/javascript
+      - application/ecmascript
+      - application/rss+xml
+      - application/xml
+      - application/json
+      - application/ld+json
+    siteroot_owner: omm
+    siteroot_group: users
+    docroot: "{{ sites_dir }}/gothick.org.uk/omm.gothick.org.uk/current/public"
+    docroot_owner: omm
+    docroot_group: users
+    allow_override: all
+    directory_options: Indexes FollowSymLinks
+    canonical_rewrite: true
+    no_well_known: true
+    php_fpm_pool: /run/php/chef-managed-fpm-omm.sock
+    enable_pagespeed: false, # Seemed to be causing minor issues, while not speeding much up.
+
+  - server_name: "dev.gothick.org.uk"
+    docroot: "{{ sites_dir }}/gothick.org.uk/dev.gothick.org.uk"
+    docroot_owner: root
+    docroot_group: root
+    allow_override: all
+    directory_options: FollowSymLinks
+    canonical_rewrite: false
+    php_fpm_pool: /run/php/chef-managed-fpm-wordpress.sock
+    enable_pagespeed: true
