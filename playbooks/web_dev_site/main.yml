@@ -134,7 +134,7 @@
       community.crypto.openssl_csr_pipe:
         privatekey_path: "{{ acme_keys_dir }}/{{ item.item.server_name }}.key"
         common_name: "{{ item.item.server_name }}"
-        subject_alt_name: "{{ ([item.item.server_name] + (item.item.server_aliases | default([]))) | map('regex_replace', '^', 'DNS:') | list }}"
+        subject_alt_name: "{{ ([item.item.server_name] + (item.item.aliases | default([]))) | map('regex_replace', '^', 'DNS:') | list }}"
         authority_cert_issuer:
           - "{{ self_signed_ca_DNS }}"
         authority_cert_serial_number: 123
@@ -144,26 +144,28 @@
       ansible.builtin.debug:
         var: csrs.results
 
+    - name: Create simple self-signed certificates
+      loop: "{{ csrs.results }}"
+      community.crypto.x509_certificate:
+        path: "{{ acme_certs_dir }}/{{ item.item.item.server_name }}.crt"
+        csr_content: "{{ item.csr }}"
+        privatekey_path: "{{ acme_keys_dir }}/{{ item.item.item.server_name }}.key"
+        provider: selfsigned
+      when: item.csr is defined
+      notify: Reload apache
 
-    #     - name: Create simple self-signed certificate
-    #       community.crypto.x509_certificate:
-    #         path: "{{ dev_cert_path }}"
-    #         csr_content: "{{ result.csr }}"
-    #         privatekey_path: "{{ dev_key_path }}"
-    #         provider: selfsigned
-    #       notify: Reload apache
+    - name: Enable default-ssl site
+      loop: "{{ websites }}"
+      ansible.builtin.command: "a2ensite {{ item.server_name }}-ssl"
+      register: site_result
+      notify: Reload apache
+      changed_when: "'Enabling site' in site_result.stdout"
 
-    # - name: Enable default-ssl site
-    #   ansible.builtin.command: "a2ensite {{ dev_conf_ssl_name }}"
-    #   register: site_result
-    #   notify: Reload apache
-    #   changed_when: "'Enabling site' in site_result.stdout"
-
-    # # At this point we should be able to get our site up and running enough to
-    # # pass an ACME challenge, so run handlers to reload apache and get the site
-    # # up and running.
-    # - name: Flush handlers
-    #   ansible.builtin.meta: flush_handlers
+    # At this point we should be able to get our site up and running enough to
+    # pass an ACME challenge, so run handlers to reload apache and get the site
+    # up and running.
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
 
     # - name: Install Letsencrypt certificate
     #   ansible.builtin.import_tasks: acme.yml

@@ -1,6 +1,7 @@
 ---
 apache_server_root: /etc/apache2
 apache_log_dir: /var/log/apache2
+safe_admin_host: gothick.plus.com
 
 default_docroot_owner: www-data
 default_docroot_group: www-data

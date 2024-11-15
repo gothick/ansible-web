@@ -30,7 +30,65 @@
 			Require all granted
 		</Directory>
 
+		<Location "/status">
+			SetHandler server-status
+			Require local
+			{# TODO Don't hardcode this #}
+			Require host gothick.plus.com
+		</Location>
+
 		DocumentRoot {{ site.docroot }}
+
+		<Directory {{ site.docroot }}>
+			Options {{ site.directory_options | default('FollowSymLinks') }}
+			AllowOverride {{ site.allow_override | default('None') }}
+			Require all granted
+
+			# CORS, mostly for CDN on gothick.org.uk
+			<IfModule mod_headers.c>
+			SetEnvIf Origin "^https?://{{ site.server_name }}$" ORIGIN=$0
+			{% if site.server_aliases is defined %}
+			SetEnvIf Origin "^https?://{{ site.aliases | join('|') }})$" ORIGIN=$0
+			{% endif %}
+			Header set Access-Control-Allow-Origin %{ORIGIN}e env=ORIGIN
+			Header merge Vary Origin
+			</IfModule>
+
+			{% if site.php_fpm_pool is defined %}
+			<IfModule proxy_module>
+				<FilesMatch "\.php$">
+					SetHandler "proxy:unix:{{ site.php_fpm_pool }}|fcgi://127.0.0.1:9000"
+				</FilesMatch>
+			</IfModule>
+			{% endif %}
+
+			{% if site.compresstypes is defined %}
+			<IfModule mod_deflate.c>
+				<IfModule mod_filter.c>
+					{% for compresstype in site.compresstypes %}
+						AddOutputFilterByType DEFLATE {{ compresstype }}
+					{% endfor %}
+				</IfModule>
+			</IfModule>
+			{% endif %}
+
+		</Directory>
+
+		<Directory />
+    		Options FollowSymLinks
+    		AllowOverride None
+  		</Directory>
+
+		{% if site.php_fpm_pool is defined %}
+		<IfModule proxy_module>
+			{# TODO: Test this. May need setting up in pool https://www.php.net/manual/en/install.fpm.configuration.php#pm.status-path #}
+			<LocationMatch "/fpm-status">
+				Require local
+				Require host {{ safe_admin_host }}
+				ProxyPass "unix:{{ site.php_fpm_pool }}|fcgi://localhost/fpm-status"
+			</LocationMatch>
+		</IfModule>
+		{% endif %}
 
 		# Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
 		# error, crit, alert, emerg.
@@ -156,21 +214,22 @@
 		#		downgrade-1.0 force-response-1.0
 
 		# Redirect e.g. http://www.meditationchimer.com (an alias) to https://meditationchimer.com
-		# TODO: We might want to protect this from open redirect by using the
-		# same approach of checking the host header as we do in the HTTP version
-		# of the site.
+		{# TODO: We might want to protect this from open redirect by using the
+		   same approach of checking the host header as we do in the HTTP version
+		   of the site. #}
 		{% if site.canonical_rewrite %}
-  		RewriteEngine On
-  		# Canonical host, {{ site.server_name }}
-  		RewriteCond %{HTTP_HOST}   !^{{ site.server_name }} [NC]
-  		RewriteCond %{HTTP_HOST}   !^$
-  		RewriteRule ^/(.*)$        https://{{ site.server_name }}/$1 [L,R=301]
-  		{% endif %}
+		RewriteEngine On
+		# Canonical host, {{ site.server_name }}
+		RewriteCond %{HTTP_HOST}   !^{{ site.server_name }} [NC]
+		RewriteCond %{HTTP_HOST}   !^$
+		RewriteRule ^/(.*)$        https://{{ site.server_name }}/$1 [L,R=301]
+		{% endif %}
 
 		# Generally useful
-  		RewriteCond {{ site.docroot }}/system/maintenance.html -f
-  		RewriteCond %{SCRIPT_FILENAME} !maintenance.html
-  		RewriteRule ^.*$ /system/maintenance.html [L,R=503]
+		RewriteEngine On
+		RewriteCond {{ site.docroot }}/system/maintenance.html -f
+		RewriteCond %{SCRIPT_FILENAME} !maintenance.html
+		RewriteRule ^.*$ /system/maintenance.html [L,R=503]
 
 		{% if site.enable_pagespeed | default(false) %}
 		<IfModule pagespeed_module>
@@ -187,14 +246,14 @@
 				<IfModule mod_rewrite.c>
 					RewriteEngine Off
 				</IfModule>
-				Require host gothick.plus.com
+				Require host {{ safe_admin_host }}
 				SetHandler mod_pagespeed_statistics
-      		</Location>
-    	</IfModule>
-  		{% else %}
-    	<IfModule pagespeed_module>
-      		ModPagespeed off
-    	</IfModule>
+			</Location>
+		</IfModule>
+		{% else %}
+		<IfModule pagespeed_module>
+			ModPagespeed off
+		</IfModule>
 		{% endif %}
 
 	</VirtualHost>
