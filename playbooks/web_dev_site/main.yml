@@ -8,6 +8,16 @@
 
   # TODO: Pre-tasks to create directories for letsencrypt, etc. and set permissions
 
+  pre_tasks:
+
+    - name: Create necessary acme directories
+      ansible.builtin.file:
+        path: "{{ acme_csr_dir }}"
+        state: directory
+        mode: '0755' # CSRs only contain public keys, so no need to be more restrictive
+        owner: root
+        group: root
+
   tasks:
 
     - name: Create siteroot folders
@@ -117,43 +127,67 @@
     #     path: "{{ dev_cert_path }}"
     #   register: cert_info
 
-    - name: Print existing certificate information
-      ansible.builtin.debug:
-        var: cert_paths.results
+    # - name: Print existing certificate information
+    #   ansible.builtin.debug:
+    #     var: cert_paths.results
 
-    - name: Create private key for a self-signed certificate (RSA, 4096 bits)
-      loop: "{{ cert_paths.results }}"
-      when: "not item.stat.exists"
+    # - name: Arbitrary debugging 3
+    #   ansible.builtin.debug:
+    #     msg: >-
+    #      {{ (cert_paths.results | map(attribute='item.server_name')) |
+    #         zip(cert_paths.results | map(attribute='stat.exists'))
+    #      }}
+
+    # Filter our websites to only those that don't have a certificate yet
+    - name: Find sites with no certificates at all at the moment
+      ansible.builtin.set_fact:
+        self_signed_certs_needed: >-
+         {{ cert_paths.results |
+            selectattr('stat.exists', 'equalto', false) |
+            map(attribute='item') }}
+
+    - name: Debug sites with no certificates
+      ansible.builtin.debug:
+        msg: >-
+         {{ self_signed_certs_needed | map(attribute='server_name') }}
+
+    - name: Create private keys for self-signed certificates (RSA, 4096 bits)
+      loop: "{{ self_signed_certs_needed }}"
+      loop_control:
+        loop_var: site
       notify: Reload apache
       community.crypto.openssl_privatekey:
-        path: "{{ acme_keys_dir }}/{{ item.item.server_name }}.key"
+        path: "{{ acme_keys_dir }}/{{ site.server_name }}.key"
         regenerate: never
         type: RSA
 
-    - name: Create CSR for simple self-signed certificate
-      loop: "{{ cert_paths.results }}"
-      when: "not item.stat.exists"
-      community.crypto.openssl_csr_pipe:
-        privatekey_path: "{{ acme_keys_dir }}/{{ item.item.server_name }}.key"
-        common_name: "{{ item.item.server_name }}"
-        subject_alt_name: "{{ ([item.item.server_name] + (item.item.aliases | default([]))) | map('regex_replace', '^', 'DNS:') | list }}"
+    - name: Create CSRs for simple self-signed certificate
+      loop: "{{ self_signed_certs_needed }}"
+      loop_control:
+        loop_var: site
+      community.crypto.openssl_csr:
+        path: "{{ acme_csr_dir }}/{{ site.server_name }}.csr"
+        privatekey_path: "{{ acme_keys_dir }}/{{ site.server_name }}.key"
+        common_name: "{{ site.server_name }}"
+        subject_alt_name: "{{ ([site.server_name] + (site.aliases | default([]))) | map('regex_replace', '^', 'DNS:') | list }}"
         authority_cert_issuer:
           - "{{ self_signed_ca_DNS }}"
         authority_cert_serial_number: 123
       register: csrs
 
-    - name: Print CSRs
-      ansible.builtin.debug:
-        var: csrs.results
+    # - name: Print CSRs
+    #   ansible.builtin.debug:
+    #     var: csrs.results
 
     - name: Create simple self-signed certificates
-      loop: "{{ csrs.results }}"
+      loop: "{{ self_signed_certs_needed }}"
+      loop_control:
+        loop_var: site
       community.crypto.x509_certificate:
-        path: "{{ acme_certs_dir }}/{{ item.item.item.server_name }}.crt"
-        csr_content: "{{ item.csr }}"
-        privatekey_path: "{{ acme_keys_dir }}/{{ item.item.item.server_name }}.key"
+        path: "{{ acme_certs_dir }}/{{ site.server_name }}.crt"
+        csr_path: "{{ acme_csr_dir }}/{{ site.server_name }}.csr"
+        privatekey_path: "{{ acme_keys_dir }}/{{ site.server_name }}.key"
         provider: selfsigned
-      when: item.csr is defined
       notify: Reload apache
 
     - name: Enable default-ssl site

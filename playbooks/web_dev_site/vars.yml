@@ -11,6 +11,7 @@ self_signed_ca_DNS: DNS:ca.gothick.org.uk
 acme_well_known_dir: /var/www/well-known
 acme_keys_dir: /etc/ssl/private
 acme_certs_dir: /etc/ssl/certs
+acme_csr_dir: /etc/ssl/csr
 acme_account_dir: /etc/letsencrypt/account
 acme_account_key_file: "{{ acme_account_dir }}/account.key"
 acme_email: gothick@gothick.org.uk
