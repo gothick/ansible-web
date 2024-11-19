@@ -47,51 +47,51 @@ sites_dir: /var/www/sites
 
 # A few different sites to test with, quite varied:
 websites:
-  - server_name: "gothick.org.uk"
-    aliases:
-      - "www.gothick.org.uk"
-      - "mattgibsoncreative.co.uk"
-      - "www.mattgibsoncreative.co.uk"
-      - "mattgibsoncreative.gothick.org.uk"
-      - "mattgibsoncreative.com"
-      - "www.mattgibsoncreative.com"
-      - "mattgetsrunning.com"
-      - "www.mattgetsrunning.com"
-      - "mattgetsrunning.gothick.org.uk"
-    docroot: "{{ sites_dir }}/wordpress/html"
-    docroot_owner: wordpress
-    docroot_group: users
-    allow_override: all
-    directory_options: FollowSymLinks
-    canonical_rewrite: false
-    php_fpm_pool: /run/php/chef-managed-fpm-wordpress.sock
-    enable_pagespeed: true
+  # - server_name: "gothick.org.uk"
+  #   aliases:
+  #     - "www.gothick.org.uk"
+  #     - "mattgibsoncreative.co.uk"
+  #     - "www.mattgibsoncreative.co.uk"
+  #     - "mattgibsoncreative.gothick.org.uk"
+  #     - "mattgibsoncreative.com"
+  #     - "www.mattgibsoncreative.com"
+  #     - "mattgetsrunning.com"
+  #     - "www.mattgetsrunning.com"
+  #     - "mattgetsrunning.gothick.org.uk"
+  #   docroot: "{{ sites_dir }}/wordpress/html"
+  #   docroot_owner: wordpress
+  #   docroot_group: users
+  #   allow_override: all
+  #   directory_options: FollowSymLinks
+  #   canonical_rewrite: false
+  #   php_fpm_pool: /run/php/chef-managed-fpm-wordpress.sock
+  #   enable_pagespeed: true
 
-  - server_name: "omm.gothick.org.uk"
-    siteroot: "{{ sites_dir }}/gothick.org.uk/omm.gothick.org.uk"
-    compresstypes:
-      - text/html
-      - text/plain
-      - text/xml
-      - text/css
-      - application/x-javascript
-      - application/javascript
-      - application/ecmascript
-      - application/rss+xml
-      - application/xml
-      - application/json
-      - application/ld+json
-    siteroot_owner: omm
-    siteroot_group: users
-    docroot: "{{ sites_dir }}/gothick.org.uk/omm.gothick.org.uk/current/public"
-    docroot_owner: omm
-    docroot_group: users
-    allow_override: all
-    directory_options: Indexes FollowSymLinks
-    canonical_rewrite: true
-    no_well_known: true
-    php_fpm_pool: /run/php/chef-managed-fpm-omm.sock
-    enable_pagespeed: false, # Seemed to be causing minor issues, while not speeding much up.
+  # - server_name: "omm.gothick.org.uk"
+  #   siteroot: "{{ sites_dir }}/gothick.org.uk/omm.gothick.org.uk"
+  #   compresstypes:
+  #     - text/html
+  #     - text/plain
+  #     - text/xml
+  #     - text/css
+  #     - application/x-javascript
+  #     - application/javascript
+  #     - application/ecmascript
+  #     - application/rss+xml
+  #     - application/xml
+  #     - application/json
+  #     - application/ld+json
+  #   siteroot_owner: omm
+  #   siteroot_group: users
+  #   docroot: "{{ sites_dir }}/gothick.org.uk/omm.gothick.org.uk/current/public"
+  #   docroot_owner: omm
+  #   docroot_group: users
+  #   allow_override: all
+  #   directory_options: Indexes FollowSymLinks
+  #   canonical_rewrite: true
+  #   no_well_known: true
+  #   php_fpm_pool: /run/php/chef-managed-fpm-omm.sock
+  #   enable_pagespeed: false, # Seemed to be causing minor issues, while not speeding much up.
 
   - server_name: "dev.gothick.org.uk"
     docroot: "{{ sites_dir }}/gothick.org.uk/dev.gothick.org.uk"
@@ -100,5 +100,5 @@ websites:
     allow_override: all
     directory_options: FollowSymLinks
     canonical_rewrite: false
-    php_fpm_pool: /run/php/chef-managed-fpm-wordpress.sock
+    php_fpm_pool: /run/php/chef-managed-fpm-gothick.sock
     enable_pagespeed: true

@@ -9,17 +9,24 @@
   # TODO: Pre-tasks to create directories for letsencrypt, etc. and set permissions
 
   pre_tasks:
-
-    - name: Create necessary acme directories
+    - name: Create necessary directories.
+      # The ssl and key directories seem to be there already in Ubuntu, so I'm
+      # just matching their existing permissions/ownership.
       ansible.builtin.file:
-        path: "{{ acme_csr_dir }}"
+        path: "{{ item.dir }}"
         state: directory
-        mode: '0755' # CSRs only contain public keys, so no need to be more restrictive
-        owner: root
-        group: root
+        mode: "{{ item.mode | default('0755') }}"
+        owner: "{{ item.owner | default('root') }}"
+        group: "{{ item.group | default('root') }}"
+      with_items:
+        - dir: "{{ acme_keys_dir }}"
+          mode: 'u=rwx,g=x,o=x'
+          group: ssl-cert
+        - dir: "{{ acme_certs_dir }}"
+        - dir: "{{ acme_csr_dir }}"
+        - dir: "{{ acme_account_dir }}"
 
   tasks:
-
     - name: Create siteroot folders
       ansible.builtin.file:
         path: "{{ item.siteroot }}"
@@ -102,7 +109,7 @@
     # TODO: Disable dev site (http and https) if not in production
 
     # We'll need the http site up and running before we can pass an ACME challenge.
-    - name: Enable http sites
+    - name: Enable all http sites
       ansible.builtin.command: a2ensite {{ item.server_name }}
       loop: "{{ websites }}"
       notify: Reload apache
@@ -190,22 +197,22 @@
         provider: selfsigned
       notify: Reload apache
 
-    - name: Enable default-ssl site
+    - name: Enable all https sites
       loop: "{{ websites }}"
       ansible.builtin.command: "a2ensite {{ item.server_name }}-ssl"
       register: site_result
       notify: Reload apache
       changed_when: "'Enabling site' in site_result.stdout"
 
-    # At this point we should be able to get our site up and running enough to
+    # At this point we should be able to get our sites up and running enough to
     # pass an ACME challenge, so run handlers to reload apache and get the site
     # up and running.
     - name: Flush handlers
       ansible.builtin.meta: flush_handlers
 
-    # - name: Install Letsencrypt certificate
-    #   ansible.builtin.import_tasks: acme.yml
-    #   when: use_letsencrypt
+    - name: Install Letsencrypt certificates
+      ansible.builtin.import_tasks: acme.yml
+      when: use_letsencrypt
 
   handlers:
 
