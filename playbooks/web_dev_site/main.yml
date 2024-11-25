@@ -213,6 +213,7 @@
     - name: Install Letsencrypt certificates
       ansible.builtin.import_tasks: acme.yml
       when: use_letsencrypt
+      tags: acme
 
   handlers:
 

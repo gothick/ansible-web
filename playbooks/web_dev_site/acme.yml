@@ -26,66 +26,96 @@
   ansible.builtin.debug:
     var: existing_cert_info.results
 
-- name: Record current certificate issuer for each site so we can tell if it's self-signed later
+- name: Record current certificate issuers for each site so we can tell if it's self-signed later
   ansible.builtin.set_fact:
+    # Dictionary of server name to list of issuers
     cert_issuers: >-
       {{ dict(existing_cert_info.results | map(attribute='site.server_name') |
-          zip(existing_cert_info.results | map(attribute='authority_cert_issuer') | map('first')))
+          zip(existing_cert_info.results | map(attribute='authority_cert_issuer') ))
       }}
 
-# - name: Generate OpenSSL private keys with the default values for all sites (4096 bits, RSA)
-#   community.crypto.openssl_privatekey:
-#     path: "{{ acme_keys_dir }}/{{ site.server_name }}.key"
-#   with_items: "{{ websites }}"
-#   loop_control:
-#     loop_var: site
+- name: Print issuer details
+  ansible.builtin.debug:
+    var: cert_issuers
 
-# - name: Generate OpenSSL Certificate Signing Requests for all sites
-#   community.crypto.openssl_csr:
-#     path: "{{ acme_csr_dir }}/{{ site.server_name }}.csr"
-#     privatekey_path: "{{ acme_keys_dir }}/{{ site.server_name }}.key"
-#     common_name: "{{ site.server_name }}"
-#     email_address: "{{ acme_email }}"
-#     organization_name: "{{ acme_organisation }}"
-#     country_name: GB
-#     subject_alt_name: "{{ ([site.server_name] + (site.aliases | default([]))) | map('regex_replace', '^', 'DNS:') | list }}"
-#   register: csr
-#   with_items: "{{ websites }}"
-#   loop_control:
-#     loop_var: site
+- name: Generate OpenSSL private keys with the default values for all sites (4096 bits, RSA)
+  # This should leave any existing keys alone if they don't need to be regenerated.
+  community.crypto.openssl_privatekey:
+    path: "{{ acme_keys_dir }}/{{ site.server_name }}.key"
+  with_items: "{{ websites }}"
+  loop_control:
+    loop_var: site
 
-# - name: Print CSR
-#   ansible.builtin.debug:
-#     var: csr
+- name: Generate OpenSSL Certificate Signing Requests for all sites
+  community.crypto.openssl_csr:
+    path: "{{ acme_csr_dir }}/{{ site.server_name }}.csr"
+    privatekey_path: "{{ acme_keys_dir }}/{{ site.server_name }}.key"
+    common_name: "{{ site.server_name }}"
+    email_address: "{{ acme_email }}"
+    organization_name: "{{ acme_organisation }}"
+    country_name: GB
+    subject_alt_name: "{{ ([site.server_name] + (site.aliases | default([]))) | map('regex_replace', '^', 'DNS:') | list }}"
+  register: requests
+  with_items: "{{ websites }}"
+  loop_control:
+    loop_var: site
 
-# - name: Create ACME challenges for all sites as necessary
-#   community.crypto.acme_certificate:
-#     acme_directory: "{{ acme_directory }}"
-#     acme_version: 2
-#     terms_agreed: true
-#     # This won't deliver a new certificate if there's already a self-signed one
-#     # in place unless we detect that and force it.
-#     force: "{{ self_signed_ca_DNS in cert_info['authority_cert_issuer'] }}"
-#     account_key_src: "{{ letsencrypt_account_key_file }}"
-#     csr_content: "{{ csr.csr }}"
-#     fullchain_dest: "{{ dev_cert_path }}"
-#   register: dev_server_challenge
+- name: Print CSR details
+  ansible.builtin.debug:
+    var: requests.results
 
-# - name: Debug challenge data
-#   ansible.builtin.debug:
-#     var: dev_server_challenge
+- name: Create ACME challenges for all sites as necessary
+  community.crypto.acme_certificate:
+    acme_directory: "{{ acme_directory }}"
+    acme_version: 2
+    terms_agreed: true
+    # This won't deliver a new certificate if there's already a self-signed one
+    # in place unless we detect that and force it.
+    force: "{{ self_signed_ca_DNS in cert_issuers[csr.site.server_name] }}"
+    account_key_src: "{{ acme_account_key_file }}"
+    csr: "{{ acme_csr_dir }}/{{ csr.site.server_name }}.csr"
+    fullchain_dest: "{{ acme_certs_dir }}/{{ csr.site.server_name }}.crt"
+  register: challenges
+  with_items: "{{ requests.results }}"
+  loop_control:
+    loop_var: csr
 
-# - name: Copy http-01 challenge for dev server (if we've actually been challenged)
+- name: Debug challenge data
+  ansible.builtin.debug:
+    var: challenges.results
+
+- name: Debug some things
+  ansible.builtin.debug:
+    # msg: "{{ [item.csr.site.server_name] | product(item.challenge_data.values() | map(attribute='http-01')) }}"
+    # msg: "{{ { 'server_name': item.csr.site.server_name, 'challenges': item.challenge_data.values() | map(attribute='http-01') } }}"
+    # msg: "{{ item.challenge_data.values() | map(attribute='http-01') | map('combine', { 'server_name': item.csr.site.server_name }) }}-ssl"
+    # msg: "{{ challenges.results | map(attribute='csr.site.server_name') | map('community.general.dict_kv', 'server_name') }}"
+    msg: "{{ challenges.results | map(attribute='challenge_data') | map('community.general.dict_kv', 'challenge_data') }}"
+    # msg: "{{ challenges.results | community.general.groupby_as_dict('csr.site.server_name') }}"
+    # when: item is changed
+  # with_items: "{{ challenges.results }}"
+
+# - name: Make a fact of the challenge data per site.
+#   # There may be multiple per challenges -- one per alias -- for any site, but the server name
+#   # is the same for all if them as all aliases share the same well-known directory.
+#   ansible.builtin.set_fact:
+#     acme_challenges: "{{ item.challenge_data.values() | map(attribute='http-01') | map('combine', { 'server_name': item.csr.site.server_name }) }}"
+#   when: item is changed
+#   with_items: "{{ challenges.results }}"
+
+# - name: Copy http-01 challenges for all servers into the right places (if we've actually been challenged)
 #   ansible.builtin.copy:
 #     # /var/www/html/{{ sample_com_challenge['challenge_data']['sample.com']['http-01']['resource'] }}
 #     # dest: "{{ acme_challenge_dir }}/{{ (dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource'] | basename) }}"
-#     dest: "{{ well_known_dir }}/{{ dev_server_name }}/acme-challenge/{{ (item.value['http-01']['resource'] | basename) }}"
-#     content: "{{ item.value['http-01']['resource_value'] }}"
+#     dest: "{{ acme_well_known_dir }}/{{ site.server_name }}/acme-challenge/{{ (site.resource | basename) }}"
+#     content: "{{ site.resource_value }}"
 #     owner: root
 #     group: root
 #     mode: '0644'
-#   when: dev_server_challenge is changed # and dev_server_name in dev_server_challenge['challenge_data']
-#   loop: "{{ dev_server_challenge['challenge_data'] | dict2items }}"
+#   # when: item is changed # and dev_server_name in dev_server_challenge['challenge_data']
+#   loop: "{{ acme_challenges }}"
+#   loop_control:
+#     loop_var: site
 
 # - name: Let the challenge be validated and retrieve the cert and intermediate certificate
 #   community.crypto.acme_certificate:
