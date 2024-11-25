@@ -75,47 +75,42 @@
     account_key_src: "{{ acme_account_key_file }}"
     csr: "{{ acme_csr_dir }}/{{ csr.site.server_name }}.csr"
     fullchain_dest: "{{ acme_certs_dir }}/{{ csr.site.server_name }}.crt"
-  register: challenges
+  register: acme_results
   with_items: "{{ requests.results }}"
   loop_control:
     loop_var: csr
 
-- name: Debug challenge data
+# - name: Debug challenge data
+#   ansible.builtin.debug:
+#     var: acme_results
+
+- name: test fact
+  ansible.builtin.set_fact:
+    challenges: >-
+      {{
+        challenges | default([]) +
+        [ item.challenge_data.values() | map('combine', { 'server_name': item.csr.site.server_name }) ]
+      }}
+  when: item is changed and item.challenge_data is defined
+  with_items: "{{ acme_results.results }}"
+
+- name: Print test fact
   ansible.builtin.debug:
-    var: challenges.results
+    # var: ch
+    msg: "{{ challenges | flatten }}"
 
-- name: Debug some things
-  ansible.builtin.debug:
-    # msg: "{{ [item.csr.site.server_name] | product(item.challenge_data.values() | map(attribute='http-01')) }}"
-    # msg: "{{ { 'server_name': item.csr.site.server_name, 'challenges': item.challenge_data.values() | map(attribute='http-01') } }}"
-    # msg: "{{ item.challenge_data.values() | map(attribute='http-01') | map('combine', { 'server_name': item.csr.site.server_name }) }}-ssl"
-    # msg: "{{ challenges.results | map(attribute='csr.site.server_name') | map('community.general.dict_kv', 'server_name') }}"
-    msg: "{{ challenges.results | map(attribute='challenge_data') | map('community.general.dict_kv', 'challenge_data') }}"
-    # msg: "{{ challenges.results | community.general.groupby_as_dict('csr.site.server_name') }}"
-    # when: item is changed
-  # with_items: "{{ challenges.results }}"
-
-# - name: Make a fact of the challenge data per site.
-#   # There may be multiple per challenges -- one per alias -- for any site, but the server name
-#   # is the same for all if them as all aliases share the same well-known directory.
-#   ansible.builtin.set_fact:
-#     acme_challenges: "{{ item.challenge_data.values() | map(attribute='http-01') | map('combine', { 'server_name': item.csr.site.server_name }) }}"
-#   when: item is changed
-#   with_items: "{{ challenges.results }}"
-
-# - name: Copy http-01 challenges for all servers into the right places (if we've actually been challenged)
-#   ansible.builtin.copy:
-#     # /var/www/html/{{ sample_com_challenge['challenge_data']['sample.com']['http-01']['resource'] }}
-#     # dest: "{{ acme_challenge_dir }}/{{ (dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource'] | basename) }}"
-#     dest: "{{ acme_well_known_dir }}/{{ site.server_name }}/acme-challenge/{{ (site.resource | basename) }}"
-#     content: "{{ site.resource_value }}"
-#     owner: root
-#     group: root
-#     mode: '0644'
-#   # when: item is changed # and dev_server_name in dev_server_challenge['challenge_data']
-#   loop: "{{ acme_challenges }}"
-#   loop_control:
-#     loop_var: site
+- name: Copy http-01 challenges for all servers into the right places (if we've actually been challenged)
+  ansible.builtin.copy:
+    # /var/www/html/{{ sample_com_challenge['challenge_data']['sample.com']['http-01']['resource'] }}
+    # dest: "{{ acme_challenge_dir }}/{{ (dev_server_challenge['challenge_data'][dev_server_name]['http-01']['resource'] | basename) }}"
+    dest: "{{ acme_well_known_dir }}/{{ site.server_name }}/acme-challenge/{{ (site['http-01']['resource'] | basename) }}"
+    content: "{{ site['http-01']['resource_value'] }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ challenges | flatten }}"
+  loop_control:
+    loop_var: site
 
 # - name: Let the challenge be validated and retrieve the cert and intermediate certificate
 #   community.crypto.acme_certificate:
