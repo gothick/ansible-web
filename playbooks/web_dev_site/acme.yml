@@ -12,6 +12,7 @@
     path: "{{ acme_account_key_file }}"
     regenerate: never
 
+# TODO: I think we should do this for all sites *and* all aliases, not just the main site.
 - name: Inspect existing certificate information for all sites
   # A certificate should always exist, but it might be self-signed. We only
   # want to generate a new one if it's self-signed.
@@ -80,9 +81,9 @@
   loop_control:
     loop_var: csr
 
-# - name: Debug challenge data
-#   ansible.builtin.debug:
-#     var: acme_results
+- name: Debug challenge data
+  ansible.builtin.debug:
+    var: acme_results
 
 - name: test fact
   ansible.builtin.set_fact:
@@ -125,3 +126,22 @@
 #     fullchain_dest: "{{ dev_cert_path }}"
 #     data: "{{ dev_server_challenge }}"
 #   notify: Reload apache
+
+- name: debug
+  ansible.builtin.debug:
+    msg: "{{ item.csr.site.server_name }}"
+  with_items: "{{ acme_results.results }}"
+
+- name: Let the challenge be validated and retrieve the cert and intermediate certificate
+  community.crypto.acme_certificate:
+    acme_directory: "{{ acme_directory }}"
+    acme_version: 2
+    terms_agreed: true
+    # This won't deliver a new certificate if there's already a self-signed one
+    # in place unless we detect that and force it.
+    force: "{{ self_signed_ca_DNS in cert_issuers[item.csr.site.server_name] }}"
+    account_key_src: "{{ acme_account_key_file }}"
+    csr: "{{ acme_csr_dir }}/{{ item.csr.site.server_name }}.csr"
+    fullchain_dest: "{{ acme_certs_dir }}/{{ item.csr.site.server_name }}.crt"
+  with_items: "{{ acme_results.results }}"
+  when: item is changed

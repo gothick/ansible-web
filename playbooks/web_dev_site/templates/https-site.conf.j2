@@ -22,7 +22,7 @@
 		# user will prevent e.g. a capistrano-style deployment by the web app
 		# owner from working, as it won't be sitting under the main document
 		# root.
-		Alias "/.well-known" "{{ acme_well_known_dir }}/{{ site.server_name}}"
+		Alias "/.well-known" "{{ acme_well_known_dir }}/{{ site.server_name}}/.well-known"
 
 		<Directory "{{ acme_well_known_dir }}/{{ site.server_name}}">
 			Options -Indexes +FollowSymLinks +MultiViews
