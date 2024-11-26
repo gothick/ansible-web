@@ -17,6 +17,11 @@ acme_account_key_file: "{{ acme_account_dir }}/account.key"
 acme_email: gothick@gothick.org.uk
 acme_organisation: "Gothick"
 
+# Probably don't need these now we're relying on the certbot
+# role to do the heavy lifting.
+acme_directory_live: "https://acme-v02.api.letsencrypt.org/directory"
+acme_directory_staging: "https://acme-staging-v02.api.letsencrypt.org/directory"
+
 # All possible configuration options that are in my Chef
 # setup at the moment:
 # server_name

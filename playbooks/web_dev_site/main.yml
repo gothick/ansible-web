@@ -240,12 +240,11 @@
         certbot_create_method: webroot
         certbot_create_if_missing: true
         certbot_agree_tos: true
-        certbot_testmode: true
+        # certbot_testmode enables --test-cert, which uses the staging server.
+        certbot_testmode: "{{ acme_use_staging_server }}"
         certbot_email: "{{ acme_email }}"
-        # Use staging if we're only in the dev environment
-        certbot_create_extra_args: "--server {{ acme_directory }}"
         # TODO: Can/should we do this as some other user? Not sure. What permissions would it need?
-        certbot_renew_cron_user: root
+        certbot_auto_renew_user: root
       when: use_letsencrypt
       tags: acme
 
