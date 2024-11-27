@@ -114,8 +114,21 @@
 		#   /usr/share/doc/apache2/README.Debian.gz for more info.
 		#   If both key and certificate are stored in the same file, only the
 		#   SSLCertificateFile directive is needed.
-		SSLCertificateFile	{{ acme_certs_dir }}/{{ site.server_name }}.crt
-		SSLCertificateKeyFile {{ acme_keys_dir }}/{{ site.server_name }}.key
+
+		# We use a letsencrypt certificate if it's there, otherwise we fall back
+		# to a simple snakeoil certificate. The snakeoil certificate will only be
+		# used to bootstrap the letsencrypt certificate the very first time we
+		# fire up a site.
+		<IfFile {{ acme_sites_dir }}/{{ site.server_name }}/fullchain.pem >
+			SSLCertificateFile	{{ acme_sites_dir }}/{{ site.server_name }}/fullchain.pem
+			SSLCertificateKeyFile {{ acme_sites_dir }}/{{ site.server_name }}/privkey.pem
+		</IfFile>
+
+		# Using a separate IfFile with ! here as IfFile doesn't seem to have an Else, weirdly.
+		<IfFile !{{ acme_sites_dir }}/{{ site.server_name }}/fullchain.pem >
+			SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+			SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+		</IfFile>
 
 		#   Server Certificate Chain:
 		#   Point SSLCertificateChainFile at a file containing the

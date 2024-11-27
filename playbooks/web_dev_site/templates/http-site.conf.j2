@@ -8,21 +8,6 @@
 
 	ServerAdmin {{ admin_email }}
 
-	# We manage our well_known directories somewhat globally. It's useful if
-	# they're stored outside the main document root. For example, if I want
-	# to generate an acme challenge file, I can do so without worrying about
-	# whether a file lying around created by root or some other privileged
-	# user will prevent e.g. a capistrano-style deployment by the web app
-	# owner from working, as it won't be sitting under the main document
-	# root.
-	Alias "/.well-known" "{{ acme_well_known_dir }}/{{ site.server_name}}/.well-known"
-
-	<Directory "{{ acme_well_known_dir }}/{{ site.server_name}}">
-		Options -Indexes +FollowSymLinks +MultiViews
-		AllowOverride All
-		Require all granted
-	</Directory>
-
 	# This is the insecure version of a site we're serving securely. Rewrite everything
   	# to the secure version instead.
 	# When HTTP_HOST is definitely one of ours, redirect to HTTPS
@@ -40,7 +25,8 @@
 	# as their Host header won't match any of our sites. In fact,
 	# if they've spoofed the HOST header then we're probably already
 	# on the default site. TODO: I'll have to have a think about
-	# this.
+	# this. But it's safe enough for now as we're never redirecting
+	# anyone to a site that isn't ours.
 	RewriteEngine On
 	RewriteCond %{HTTPS} !=on
 	RewriteRule ^/?(.*) https://{{ site.server_name }} [R,L]

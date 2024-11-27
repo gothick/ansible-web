@@ -240,12 +240,18 @@
         certbot_create_method: webroot
         certbot_create_if_missing: true
         certbot_agree_tos: true
+        certbot_auto_renew_hour: "2"
+        certbot_auto_renew_minute: "18" # Random.org
+        # NB: certbot_create_extra_args can't be empty with our current role version;
+        # see https://github.com/geerlingguy/ansible-role-certbot/issues/225
+        certbot_create_extra_args: ''
         # certbot_testmode enables --test-cert, which uses the staging server.
         certbot_testmode: "{{ acme_use_staging_server }}"
         certbot_email: "{{ acme_email }}"
         # TODO: Can/should we do this as some other user? Not sure. What permissions would it need?
         certbot_auto_renew_user: root
       when: use_letsencrypt
+      notify: Reload apache
       tags: acme
 
     # - name: Install Letsencrypt certificates
