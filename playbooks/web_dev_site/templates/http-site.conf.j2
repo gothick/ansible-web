@@ -19,14 +19,9 @@
 	RewriteCond %{HTTPS} !=on
 	RewriteRule ^/?(.*) https://%{HTTP_HOST}/$1 [R,L]
 
-	# Otherwise, I don't know what's going on, but we can't trust
-	# the HTTP_HOST header, so just redirect to the server_name. If
-	# this happens then they'll probably end up on the default site,
-	# as their Host header won't match any of our sites. In fact,
-	# if they've spoofed the HOST header then we're probably already
-	# on the default site. TODO: I'll have to have a think about
-	# this. But it's safe enough for now as we're never redirecting
-	# anyone to a site that isn't ours.
+	# If HTTP_HOST *isn't* one of ours, then (a) this must be the default site, as the
+	# others wouldn't have matched, and (b) we should redirect to the https version of
+	# the default site as a sane default.
 	RewriteEngine On
 	RewriteCond %{HTTPS} !=on
 	RewriteRule ^/?(.*) https://{{ site.server_name }} [R,L]
