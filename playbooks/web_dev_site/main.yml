@@ -6,25 +6,7 @@
   vars_files:
     - vars.yml
 
-  # TODO: Pre-tasks to create directories for letsencrypt, etc. and set permissions
-
   pre_tasks:
-    - name: Create necessary directories.
-      # The ssl and key directories seem to be there already in Ubuntu, so I'm
-      # just matching their existing permissions/ownership.
-      ansible.builtin.file:
-        path: "{{ item.dir }}"
-        state: directory
-        mode: "{{ item.mode | default('0755') }}"
-        owner: "{{ item.owner | default('root') }}"
-        group: "{{ item.group | default('root') }}"
-      with_items:
-        - dir: "{{ acme_keys_dir }}"
-          mode: 'u=rwx,g=x,o=x'
-          group: ssl-cert
-        - dir: "{{ acme_certs_dir }}"
-        - dir: "{{ acme_csr_dir }}"
-        - dir: "{{ acme_account_dir }}"
 
   tasks:
     - name: Create siteroot folders
@@ -60,7 +42,7 @@
     - name: Template standard security.txt to well-known directory
       ansible.builtin.template:
         src: security.txt.j2
-        dest: "{{ acme_well_known_dir }}/{{ item.server_name }}/security.txt"
+        dest: "{{ acme_well_known_dir }}/{{ item.server_name }}/.well-known/security.txt"
         owner: root
         group: root
         mode: '0644'
@@ -110,7 +92,7 @@
 
     # TODO: Disable dev site (http and https) if not in production
 
-    # We'll need the http site up and running before we can pass an ACME challenge.
+    # The http versions of the sites don't do anything special; they just redirect to https
     - name: Enable all http sites
       ansible.builtin.command: a2ensite {{ item.server_name }}
       loop: "{{ websites }}"
@@ -118,87 +100,12 @@
       register: site_result
       changed_when: "'Enabling site' in site_result.stdout"
 
-    # BEFORE we enable the ssl site we've got to provide a self-signed certificate
-    # if no SSL certificate is present yet. Later if necessary we can regenerate
-    # the certificate with a real one from Let's Encrypt.
-
-    # For this initial key we'll only create it if there's no key certificate of any
-    # kind yet.
-    - name: Check if any kind of certificate exists
-      ansible.builtin.stat:
-        path: "{{ acme_certs_dir }}/{{ item.server_name }}.crt"
-      register: cert_paths
-      loop: "{{ websites }}"
-
-    # - name: Get certificate information
-    #   when: cert_path.stat.exists
-    #   community.crypto.x509_certificate_info:
-    #     path: "{{ dev_cert_path }}"
-    #   register: cert_info
-
-    # - name: Print existing certificate information
-    #   ansible.builtin.debug:
-    #     var: cert_paths.results
-
-    # - name: Arbitrary debugging 3
-    #   ansible.builtin.debug:
-    #     msg: >-
-    #      {{ (cert_paths.results | map(attribute='item.server_name')) |
-    #         zip(cert_paths.results | map(attribute='stat.exists'))
-    #      }}
-
-    # Filter our websites to only those that don't have a certificate yet
-    - name: Find sites with no certificates at all at the moment
-      ansible.builtin.set_fact:
-        self_signed_certs_needed: >-
-         {{ cert_paths.results |
-            selectattr('stat.exists', 'equalto', false) |
-            map(attribute='item') }}
-
-    - name: Debug sites with no certificates
-      ansible.builtin.debug:
-        msg: >-
-         {{ self_signed_certs_needed | map(attribute='server_name') }}
-
-    - name: Create private keys for self-signed certificates (RSA, 4096 bits)
-      loop: "{{ self_signed_certs_needed }}"
-      loop_control:
-        loop_var: site
-      notify: Reload apache
-      community.crypto.openssl_privatekey:
-        path: "{{ acme_keys_dir }}/{{ site.server_name }}.key"
-        regenerate: never
-        type: RSA
-
-    - name: Create CSRs for simple self-signed certificate
-      loop: "{{ self_signed_certs_needed }}"
-      loop_control:
-        loop_var: site
-      community.crypto.openssl_csr:
-        path: "{{ acme_csr_dir }}/{{ site.server_name }}.csr"
-        privatekey_path: "{{ acme_keys_dir }}/{{ site.server_name }}.key"
-        common_name: "{{ site.server_name }}"
-        subject_alt_name: "{{ ([site.server_name] + (site.aliases | default([]))) | map('regex_replace', '^', 'DNS:') | list }}"
-        authority_cert_issuer:
-          - "{{ self_signed_ca_DNS }}"
-        authority_cert_serial_number: 123
-      register: csrs
-
-    # - name: Print CSRs
-    #   ansible.builtin.debug:
-    #     var: csrs.results
-
-    - name: Create simple self-signed certificates
-      loop: "{{ self_signed_certs_needed }}"
-      loop_control:
-        loop_var: site
-      community.crypto.x509_certificate:
-        path: "{{ acme_certs_dir }}/{{ site.server_name }}.crt"
-        csr_path: "{{ acme_csr_dir }}/{{ site.server_name }}.csr"
-        privatekey_path: "{{ acme_keys_dir }}/{{ site.server_name }}.key"
-        provider: selfsigned
-      notify: Reload apache
-
+    # The https versions of the sites will use a letsencrypt certificate if it's
+    # available, otherwise they'll all use the same snakeoil self-signed cert that's
+    # generated by ssl-cert. This means it's safe to enable them immediately, and
+    # if they've not a letsencrypt certificate, they'll run well enough to use
+    # cerbot's http validation to *get* the letsencrypt certificate, at which point
+    # we reload apache and they'll start using the new certificate.
     - name: Enable all https sites
       loop: "{{ websites }}"
       ansible.builtin.command: "a2ensite {{ item.server_name }}-ssl"
@@ -207,7 +114,7 @@
       changed_when: "'Enabling site' in site_result.stdout"
 
     # At this point we should be able to get our sites up and running enough to
-    # pass an ACME challenge, so run handlers to reload apache and get the site
+    # pass an ACME challenge, so run handlers to reload apache and get the sites
     # up and running.
     - name: Flush handlers
       ansible.builtin.meta: flush_handlers
@@ -226,12 +133,7 @@
       with_items: "{{ websites }}"
       tags: acme
 
-    - name: Debug certbot_certs
-      ansible.builtin.debug:
-        var: certs
-      tags: acme
-
-    - name: Set up Certbot with the certificates set up as above for our websites
+    - name: Set up Certbot with the certificates set up as above for all websites
       ansible.builtin.import_role:
         name: geerlingguy.certbot
       vars:
@@ -250,14 +152,13 @@
         certbot_email: "{{ acme_email }}"
         # TODO: Can/should we do this as some other user? Not sure. What permissions would it need?
         certbot_auto_renew_user: root
+      # Because there's no point in doing this for e.g. vagrant, where letsencrypt won't
+      # be able to see our sites anyway, so we need a mechanism for not bothering.
       when: use_letsencrypt
+      # Make sure we reload the config, as the switch from snakeoil to letsencrypt is done
+      # by IfFile checks in the apache config, so we need to reload to pick up the change.
       notify: Reload apache
       tags: acme
-
-    # - name: Install Letsencrypt certificates
-    #   ansible.builtin.import_tasks: acme.yml
-    #   when: use_letsencrypt
-    #   tags: acme
 
   handlers:
 

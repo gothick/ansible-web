@@ -53,9 +53,11 @@ acme_directory_staging: "https://acme-staging-v02.api.letsencrypt.org/directory"
 
 sites_dir: /var/www/sites
 
+# TODO: Remove the enable_pagespeed options, as we're not using pagespeed!
+
 # A few different sites to test with, quite varied:
 websites:
-  # - server_name: "gothick.org.uk"
+  # - server_name: "gothick.org.uk{{ hostname_suffix | default('') }}"
   #   aliases:
   #     - "www.gothick.org.uk"
   #     - "mattgibsoncreative.co.uk"
@@ -75,7 +77,7 @@ websites:
   #   php_fpm_pool: /run/php/chef-managed-fpm-wordpress.sock
   #   enable_pagespeed: true
 
-  # - server_name: "omm.gothick.org.uk"
+  # - server_name: "omm.gothick.org.uk{{ hostname_suffix | default('') }}"
   #   siteroot: "{{ sites_dir }}/gothick.org.uk/omm.gothick.org.uk"
   #   compresstypes:
   #     - text/html
@@ -101,10 +103,10 @@ websites:
   #   php_fpm_pool: /run/php/chef-managed-fpm-omm.sock
   #   enable_pagespeed: false, # Seemed to be causing minor issues, while not speeding much up.
 
-  - server_name: "dev.gothick.org.uk"
+  - server_name: "dev.gothick.org.uk{{ hostname_suffix | default('') }}"
     aliases:
-      - "devtest1.gothick.org.uk"
-      - "devtest2.gothick.org.uk"
+      - "devtest1.gothick.org.uk{{ hostname_suffix | default('') }}"
+      - "devtest2.gothick.org.uk{{ hostname_suffix | default('') }}"
     docroot: "{{ sites_dir }}/gothick.org.uk/dev.gothick.org.uk"
     docroot_owner: root
     docroot_group: root
