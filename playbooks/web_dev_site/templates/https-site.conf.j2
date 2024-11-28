@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks:True
 {{ ansible_managed | comment }}
 <IfModule mod_ssl.c>
 	<VirtualHost _default_:443>
@@ -14,6 +15,14 @@
 		Header set X-Frame-Options "SAMEORIGIN"
 		# Newer, for modern browsers
 		Header set Content-Security-Policy "frame-ancestors 'self';"
+
+		# TODO:
+		# Strict-Transport-Security
+		# X-Content-Type-Options
+		# Referrer-Policy
+		# Permissions-Policy
+		# Steps to reproduce:
+		# Simply go to https://securityheaders.com/?q=https%3A%2F%2Fgothick.org.uk%2F
 
 		# We manage our well_known directories somewhat globally. It's useful if
 		# they're stored outside the main document root. For example, if I want
@@ -33,8 +42,9 @@
 		<Location "/status">
 			SetHandler server-status
 			Require local
-			{# TODO Don't hardcode this #}
-			Require host gothick.plus.com
+			{% if safe_admin_hosts is defined and safe_admin_hosts %}
+			Require host {{ safe_admin_hosts | join(' ') }}
+			{% endif %}
 		</Location>
 
 		DocumentRoot {{ site.docroot }}
@@ -74,7 +84,7 @@
 
 		</Directory>
 
-		<Directory />
+		<Directory "/">
     		Options FollowSymLinks
     		AllowOverride None
   		</Directory>
@@ -84,7 +94,9 @@
 			{# TODO: Test this. May need setting up in pool https://www.php.net/manual/en/install.fpm.configuration.php#pm.status-path #}
 			<LocationMatch "/fpm-status">
 				Require local
-				Require host {{ safe_admin_host }}
+				{% if safe_admin_hosts is defined and safe_admin_hosts %}
+				Require host {{ safe_admin_hosts | join(' ') }}
+				{% endif %}
 				ProxyPass "unix:{{ site.php_fpm_pool }}|fcgi://localhost/fpm-status"
 			</LocationMatch>
 		</IfModule>
@@ -244,30 +256,37 @@
 		RewriteCond %{SCRIPT_FILENAME} !maintenance.html
 		RewriteRule ^.*$ /system/maintenance.html [L,R=503]
 
-		{% if site.enable_pagespeed | default(false) %}
-		<IfModule pagespeed_module>
-			ModPagespeedEnableFilters prioritize_critical_css
-			# TODO If we enable this, our basic gothick.org.uk page dies with a JavaScript error
-			# ModPagespeedEnableFilters defer_javascript
-			ModPagespeedEnableFilters sprite_images
-			ModPagespeedEnableFilters rewrite_images
-			ModPagespeedEnableFilters recompress_png
-			ModPagespeedEnableFilters convert_png_to_jpeg,convert_jpeg_to_webp
-			ModPagespeedEnableFilters collapse_whitespace,remove_comments
+		{# Turns out mod_pagespeed wasn't even enabled on the server with
+		   our chef setup. I think I probably just gave up on it as not
+		   worthwhile at some point. #}
+		{#
+			{% if site.enable_pagespeed | default(false) %}
+			<IfModule pagespeed_module>
+				ModPagespeedEnableFilters prioritize_critical_css
+				# TODO If we enable this, our basic gothick.org.uk page dies with a JavaScript error
+				# ModPagespeedEnableFilters defer_javascript
+				ModPagespeedEnableFilters sprite_images
+				ModPagespeedEnableFilters rewrite_images
+				ModPagespeedEnableFilters recompress_png
+				ModPagespeedEnableFilters convert_png_to_jpeg,convert_jpeg_to_webp
+				ModPagespeedEnableFilters collapse_whitespace,remove_comments
 
-			<Location /mod_pagespeed_statistics>
-				<IfModule mod_rewrite.c>
-					RewriteEngine Off
-				</IfModule>
-				Require host {{ safe_admin_host }}
-				SetHandler mod_pagespeed_statistics
-			</Location>
-		</IfModule>
-		{% else %}
-		<IfModule pagespeed_module>
-			ModPagespeed off
-		</IfModule>
-		{% endif %}
+				<Location /mod_pagespeed_statistics>
+					<IfModule mod_rewrite.c>
+						RewriteEngine Off
+					</IfModule>
+					{% if safe_admin_hosts is defined and safe_admin_hosts %}
+					Require host {{ safe_admin_hosts | join(' ') }}
+					{% endif %}
+					SetHandler mod_pagespeed_statistics
+				</Location>
+			</IfModule>
+			{% else %}
+			<IfModule pagespeed_module>
+				ModPagespeed off
+			</IfModule>
+			{% endif %}
+		#}
 
 	</VirtualHost>
 </IfModule>
