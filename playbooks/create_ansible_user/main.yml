@@ -18,9 +18,10 @@
         name: arillso.sudoers
       vars:
         sudoers_sudoers_d_files:
-          - name: ansible
-            entry: |
-              ansible ALL=(ALL) NOPASSWD: ALL
+          ansible:
+            privileges:
+              - name: ansible
+                entry: "ALL=(ALL) NOPASSWD: ALL"
 
     - name: Add authorised keys
       ansible.posix.authorized_key:
