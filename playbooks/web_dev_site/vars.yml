@@ -5,113 +5,149 @@ safe_admin_hosts:
   - gothick.plus.com
   - example.com
 
+apache_sites_dir: /var/www/sites
+
 default_docroot_owner: www-data
 default_docroot_group: www-data
 
-self_signed_ca_DNS: DNS:ca.gothick.org.uk
-
 acme_well_known_dir: /var/www/well-known
 acme_sites_dir: /etc/letsencrypt/live
-acme_keys_dir: /etc/ssl/private
-acme_certs_dir: /etc/ssl/certs
-acme_csr_dir: /etc/ssl/csr
-acme_account_dir: /etc/letsencrypt/account
-acme_account_key_file: "{{ acme_account_dir }}/account.key"
 acme_email: gothick@gothick.org.uk
-acme_organisation: "Gothick"
 
-# Probably don't need these now we're relying on the certbot
-# role to do the heavy lifting.
-acme_directory_live: "https://acme-v02.api.letsencrypt.org/directory"
-acme_directory_staging: "https://acme-staging-v02.api.letsencrypt.org/directory"
-
-# All possible configuration options that are in my Chef
-# setup at the moment:
-# server_name
-# server_aliases (array)
-# siteroot # Directory of the site code overall
-# siteroot_group
-# siteroot_owner
-# docroot # Docroot directory for Apache to point at, may be below siteroot
-# docroot_group
-# docroot_owner
-# php_fpm_pool
-# allow_override
-
-# compress_types (array)
-# directory_options
-# enable_pagespeed
-
-# Probably don't need no_well_known any more, as it was a workaround for when we had well-known
-# stored inside the siteroot and it sometimes interfered with Capistrano-style deployments as
-# some of the files would be owned by root so couldn't be deleted when deleting the older versions
-# of the site.
-# no_well_known
-
-# I don't think I need canonical_rewrite any more, either.
-# canonical_rewrite
-
-sites_dir: /var/www/sites
-
-# TODO: Remove the enable_pagespeed options, as we're not using pagespeed!
-
-# A few different sites to test with, quite varied:
 websites:
-  # - server_name: "gothick.org.uk{{ hostname_suffix | default('') }}"
-  #   aliases:
-  #     - "www.gothick.org.uk"
-  #     - "mattgibsoncreative.co.uk"
-  #     - "www.mattgibsoncreative.co.uk"
-  #     - "mattgibsoncreative.gothick.org.uk"
-  #     - "mattgibsoncreative.com"
-  #     - "www.mattgibsoncreative.com"
-  #     - "mattgetsrunning.com"
-  #     - "www.mattgetsrunning.com"
-  #     - "mattgetsrunning.gothick.org.uk"
-  #   docroot: "{{ sites_dir }}/wordpress/html"
-  #   docroot_owner: wordpress
-  #   docroot_group: users
-  #   allow_override: all
-  #   directory_options: FollowSymLinks
-  #   canonical_rewrite: false
-  #   php_fpm_pool: /run/php/chef-managed-fpm-wordpress.sock
-  #   enable_pagespeed: true
+  - server_name: "brianthedebugger.gothick.org.uk{{ hostname_suffix | default('') }}"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/brianthedebugger.gothick.org.uk/"
+    allow_override: "all"
+    directory_options: "Indexes FollowSymLinks Multiviews"
+    canonical_rewrite: true
 
-  # - server_name: "omm.gothick.org.uk{{ hostname_suffix | default('') }}"
-  #   siteroot: "{{ sites_dir }}/gothick.org.uk/omm.gothick.org.uk"
-  #   compresstypes:
-  #     - text/html
-  #     - text/plain
-  #     - text/xml
-  #     - text/css
-  #     - application/x-javascript
-  #     - application/javascript
-  #     - application/ecmascript
-  #     - application/rss+xml
-  #     - application/xml
-  #     - application/json
-  #     - application/ld+json
-  #   siteroot_owner: omm
-  #   siteroot_group: users
-  #   docroot: "{{ sites_dir }}/gothick.org.uk/omm.gothick.org.uk/current/public"
-  #   docroot_owner: omm
-  #   docroot_group: users
-  #   allow_override: all
-  #   directory_options: Indexes FollowSymLinks
-  #   canonical_rewrite: true
-  #   no_well_known: true
-  #   php_fpm_pool: /run/php/chef-managed-fpm-omm.sock
-  #   enable_pagespeed: false, # Seemed to be causing minor issues, while not speeding much up.
+  - server_name: "bookpedia.gothick.org.uk{{ hostname_suffix | default('') }}"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/bookpedia.gothick.org.uk/"
+    allow_override: "all"
+    docroot_owner: "gothick"
+    docroot_group: "gothick"
+    directory_options: "FollowSymLinks Multiviews"
+    canonical_rewrite: true
 
-  - server_name: "dev.gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "exhibition.gothick.org.uk{{ hostname_suffix | default('') }}"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/exhibition.gothick.org.uk/current/"
+    allow_override: "all"
+    docroot_owner: "gothick"
+    docroot_group: "gothick"
+    directory_options: "FollowSymLinks Multiviews"
+    canonical_rewrite: true
+
+  - server_name: "meditationchimer.com{{ hostname_suffix | default('') }}"
     aliases:
-      - "devtest1.gothick.org.uk{{ hostname_suffix | default('') }}"
-      - "devtest2.gothick.org.uk{{ hostname_suffix | default('') }}"
-    docroot: "{{ sites_dir }}/gothick.org.uk/dev.gothick.org.uk"
-    docroot_owner: root
-    docroot_group: root
-    allow_override: all
-    directory_options: FollowSymLinks
+      - "www.meditationchimer.com{{ hostname_suffix | default('') }}"
+    docroot: "{{ apache_sites_dir }}/meditationchimer.com/html"
+    docroot_owner: "meditationchimer"
+    docroot_group: "meditationchimer"
+    allow_override: "all"
+    directory_options: "Indexes FollowSymLinks Multiviews"
+    canonical_rewrite: true
+
+  - server_name: "xslorenz.gothick.org.uk{{ hostname_suffix | default('') }}"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/xslorenz.gothick.org.uk/html"
+    allow_override: "all"
+    directory_options: "Indexes FollowSymLinks Multiviews"
+    canonical_rewrite: true
+
+  - server_name: "onthescales.com{{ hostname_suffix | default('') }}"
+    aliases:
+      - "www.onthescales.com{{ hostname_suffix | default('') }}"
+    docroot: "{{ apache_sites_dir }}/onthescales.com/html"
+    docroot_owner: "onthescales"
+    docroot_group: "onthescales"
+    allow_override: "all"
+    directory_options: "Indexes FollowSymLinks Multiviews"
+    canonical_rewrite: true
+
+  - server_name: "tweetnest.gothick.org.uk{{ hostname_suffix | default('') }}"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/tweetnest.gothick.org.uk/html"
+    allow_override: "all"
+    directory_options: "Indexes FollowSymLinks"
+    canonical_rewrite: true
+    php_fpm_pool: "/run/php/chef-managed-fpm-gothick.sock"
+
+  - server_name: "oldtweets.gothick.org.uk{{ hostname_suffix | default('') }}"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/oldtweets.gothick.org.uk/html"
+    allow_override: "all"
+    directory_options: "Indexes FollowSymLinks"
+    canonical_rewrite: true
+    php_fpm_pool: "/run/php/chef-managed-fpm-gothick.sock"
+
+  - server_name: "omm.gothick.org.uk{{ hostname_suffix | default('') }}"
+    siteroot: "{{ apache_sites_dir }}/gothick.org.uk/omm.gothick.org.uk"
+    compresstypes:
+      - "text/html"
+      - "text/plain"
+      - "text/xml"
+      - "text/css"
+      - "application/x-javascript"
+      - "application/javascript"
+      - "application/ecmascript"
+      - "application/rss+xml"
+      - "application/xml"
+      - "application/json"
+      - "application/ld+json"
+    siteroot_owner: "omm"
+    siteroot_group: "users"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/omm.gothick.org.uk/current/public"
+    docroot_owner: "omm"
+    docroot_group: "users"
+    allow_override: "all"
+    directory_options: "Indexes FollowSymLinks"
+    canonical_rewrite: true
+    no_well_known: true
+    php_fpm_pool: "/run/php/chef-managed-fpm-omm.sock"
+
+  - server_name: "fresher.gothick.org.uk{{ hostname_suffix | default('') }}"
+    siteroot: "{{ apache_sites_dir }}/fresher.gothick.org.uk"
+    compresstypes:
+      - "text/html"
+      - "text/plain"
+      - "text/xml"
+      - "text/css"
+      - "application/x-javascript"
+      - "application/javascript"
+      - "application/ecmascript"
+      - "application/rss+xml"
+      - "application/xml"
+      - "application/json"
+      - "application/ld+json"
+    siteroot_owner: "fresher"
+    siteroot_group: "users"
+    docroot: "{{ apache_sites_dir }}/fresher.gothick.org.uk/current/public"
+    docroot_owner: "fresher"
+    docroot_group: "users"
+    allow_override: "all"
+    directory_options: "Indexes FollowSymLinks"
+    canonical_rewrite: true
+    no_well_known: true
+    php_fpm_pool: "/run/php/chef-managed-fpm-fresher.sock"
+
+  - server_name: "gothick.org.uk{{ hostname_suffix | default('') }}"
+    aliases:
+      - "www.gothick.org.uk{{ hostname_suffix | default('') }}"
+      - "mattgibsoncreative.co.uk{{ hostname_suffix | default('') }}"
+      - "www.mattgibsoncreative.co.uk{{ hostname_suffix | default('') }}"
+      - "mattgibsoncreative.gothick.org.uk{{ hostname_suffix | default('') }}"
+      - "mattgibsoncreative.com{{ hostname_suffix | default('') }}"
+      - "www.mattgibsoncreative.com{{ hostname_suffix | default('') }}"
+      - "mattgetsrunning.com{{ hostname_suffix | default('') }}"
+      - "www.mattgetsrunning.com{{ hostname_suffix | default('') }}"
+      - "mattgetsrunning.gothick.org.uk{{ hostname_suffix | default('') }}"
+    docroot: "{{ apache_sites_dir }}/wordpress/html"
+    docroot_owner: "wordpress"
+    docroot_group: "users"
+    allow_override: "all"
+    directory_options: "FollowSymLinks"
     canonical_rewrite: false
-    php_fpm_pool: /run/php/chef-managed-fpm-gothick.sock
-    enable_pagespeed: true
+    php_fpm_pool: "/run/php/chef-managed-fpm-wordpress.sock"
+
+  - server_name: "threesixfive.gothick.org.uk{{ hostname_suffix | default('') }}"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/threesixfive.gothick.org.uk/"
+    allow_override: "all"
+    directory_options: "Indexes FollowSymLinks Multiviews"
+    canonical_rewrite: true
