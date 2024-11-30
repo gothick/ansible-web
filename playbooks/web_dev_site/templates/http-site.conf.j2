@@ -22,7 +22,7 @@
 
 	# If HTTP_HOST *isn't* one of ours, then (a) this must be the default site, as the
 	# others wouldn't have matched, and (b) we should redirect to the https version of
-	# the default site as a sane default.
+	# the main page default site as a sane default, removing (QSD) any query string.
 	RewriteEngine On
 	RewriteCond %{HTTPS} !=on
 	RewriteRule ^/?(.*) https://{{ site.server_name }} [R,L,QSD]
