@@ -52,12 +52,10 @@
         mode: '0644'
       loop: "{{ websites }}"
 
-    # TODO: Add a default site
-
     - name: Install straight http configurations for all sites
       ansible.builtin.template:
         src: http-site.conf.j2
-        dest: "{{ apache_server_root }}/sites-available/{{ site.server_name }}.conf"
+        dest: "{{ apache_server_root }}/sites-available/{{ site.apache_config_name | default(site.server_name) }}.conf"
         owner: root
         group: root
         mode: '0644'
@@ -69,7 +67,7 @@
     - name: Install https configurations for all sites
       ansible.builtin.template:
         src: "https-site.conf.j2"
-        dest: "{{ apache_server_root }}/sites-available/{{ site.server_name }}-ssl.conf"
+        dest: "{{ apache_server_root }}/sites-available/{{ site.apache_config_name | default(site.server_name) }}-ssl.conf"
         owner: root
         group: root
         mode: '0644'
@@ -78,12 +76,21 @@
         loop_var: site
       notify: Reload apache
 
-    # TODO: Disable dev site (http and https) if not in production
+    - name: Install default site's index
+      ansible.builtin.template:
+        src: default.html.j2
+        dest: "{{ default_site_docroot }}/index.html"
+        owner: "{{ default_apache_user }}"
+        group: "{{ default_apache_group }}"
+        mode: '0644'
+      notify: Reload apache
 
     # The http versions of the sites don't do anything special; they just redirect to https
     - name: Enable all http sites
-      ansible.builtin.command: a2ensite {{ item.server_name }}
+      ansible.builtin.command: a2ensite {{ site.apache_config_name | default(site.server_name) }}
       loop: "{{ websites }}"
+      loop_control:
+        loop_var: site
       notify: Reload apache
       register: site_result
       changed_when: "'Enabling site' in site_result.stdout"
@@ -96,7 +103,9 @@
     # we reload apache and they'll start using the new certificate.
     - name: Enable all https sites
       loop: "{{ websites }}"
-      ansible.builtin.command: "a2ensite {{ item.server_name }}-ssl"
+      loop_control:
+        loop_var: site
+      ansible.builtin.command: "a2ensite {{ site.apache_config_name | default(site.server_name) }}-ssl"
       register: site_result
       notify: Reload apache
       changed_when: "'Enabling site' in site_result.stdout"

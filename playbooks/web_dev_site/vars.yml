@@ -14,7 +14,19 @@ acme_well_known_dir: /var/www/well-known
 acme_sites_dir: /etc/letsencrypt/live
 acme_email: gothick@gothick.org.uk
 
+default_site_docroot: "{{ apache_sites_dir }}/default.gothick.org.uk/"
+
 websites:
+  # One special site: the default site. We use 000-default.conf for the Apache config name
+  # so it always gets loaded first, and we also set the docroot to a special directory so
+  # we can put a "this is the default site, why the fuck you here, dude?" page there.
+  - server_name: "default.gothick.org.uk{{ hostname_suffix | default('') }}"
+    docroot: "{{ default_site_docroot }}"
+    allow_override: "all"
+    directory_options: "Indexes FollowSymLinks Multiviews"
+    canonical_rewrite: true
+    apache_config_name: 000-default # Because the first VirtulHost Apache sees becomes the default
+
   - server_name: "brianthedebugger.gothick.org.uk{{ hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/brianthedebugger.gothick.org.uk/"
     allow_override: "all"

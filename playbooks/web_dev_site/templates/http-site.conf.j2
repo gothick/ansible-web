@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks:True
 {{ ansible_managed | comment }}
 <VirtualHost *:80>
 	ServerName {{ site.server_name }}
@@ -24,5 +25,7 @@
 	# the default site as a sane default.
 	RewriteEngine On
 	RewriteCond %{HTTPS} !=on
-	RewriteRule ^/?(.*) https://{{ site.server_name }} [R,L]
+	RewriteRule ^/?(.*) https://{{ site.server_name }} [R,L,QSD]
 </VirtualHost>
+
+
