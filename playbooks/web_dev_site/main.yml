@@ -14,8 +14,8 @@
         path: "{{ item.siteroot }}"
         state: directory
         mode: '0755'
-        owner: "{{ item.siteroot_owner }}"
-        group: "{{ item.siteroot_group }}"
+        owner: "{{ item.siteroot_owner | default(default_apache_user) }}"
+        group: "{{ item.siteroot_group | default(default_apache_group) }}"
       loop: "{{ websites }}"
       when: item.siteroot is defined
 
@@ -24,9 +24,13 @@
         path: "{{ item.docroot }}"
         state: directory
         mode: '0755'
-        owner: "{{ item.docroot_owner | default(default_docroot_owner) }}"
-        group: "{{ item.siteroot_group | default(default_docroot_group) }}"
+        owner: "{{ item.docroot_owner | default(default_apache_user) }}"
+        group: "{{ item.docroot_group | default(default_apache_group) }}"
       loop: "{{ websites }}"
+      # Some websites will have the docroot as a symlink to a current directory, so
+      # we don't want to create it as a directory. Apache won't die if it doesn't
+      # exist.
+      when: item.create_docroot | default(true)
 
     - name: Create corresponding well-known directory with acme-challenge subdirectory
       ansible.builtin.file:
@@ -48,23 +52,7 @@
         mode: '0644'
       loop: "{{ websites }}"
 
-# TODO: Add a default site
-    # - name: Install default site index
-    #   ansible.builtin.template:
-    #     src: index.html.j2
-    #     dest: "{{ dev_site_path }}/index.html"
-    #     owner: root
-    #     group: root
-    #     mode: '0644'
-
-    # - name: Install default site http configuration
-    #   ansible.builtin.template:
-    #     src: "dev.conf.j2"
-    #     dest: "{{ apache_server_root }}/sites-available/{{ dev_conf_name }}"
-    #     owner: root
-    #     group: root
-    #     mode: '0644'
-    #   notify: Reload apache
+    # TODO: Add a default site
 
     - name: Install straight http configurations for all sites
       ansible.builtin.template:

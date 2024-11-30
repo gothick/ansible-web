@@ -7,8 +7,8 @@ safe_admin_hosts:
 
 apache_sites_dir: /var/www/sites
 
-default_docroot_owner: www-data
-default_docroot_group: www-data
+default_apache_user: www-data
+default_apache_group: www-data
 
 acme_well_known_dir: /var/www/well-known
 acme_sites_dir: /etc/letsencrypt/live
@@ -17,6 +17,12 @@ acme_email: gothick@gothick.org.uk
 websites:
   - server_name: "brianthedebugger.gothick.org.uk{{ hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/brianthedebugger.gothick.org.uk/"
+    allow_override: "all"
+    directory_options: "Indexes FollowSymLinks Multiviews"
+    canonical_rewrite: true
+
+  - server_name: "dev.gothick.org.uk{{ hostname_suffix | default('') }}"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/dev.gothick.org.uk/"
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks Multiviews"
     canonical_rewrite: true
@@ -96,6 +102,7 @@ websites:
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/omm.gothick.org.uk/current/public"
     docroot_owner: "omm"
     docroot_group: "users"
+    create_docroot: false # Because this will be a symlink created by Deployer
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks"
     canonical_rewrite: true
@@ -121,6 +128,7 @@ websites:
     docroot: "{{ apache_sites_dir }}/fresher.gothick.org.uk/current/public"
     docroot_owner: "fresher"
     docroot_group: "users"
+    create_docroot: false # Because this will be a symlink created by Deployer
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks"
     canonical_rewrite: true
