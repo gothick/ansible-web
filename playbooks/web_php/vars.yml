@@ -28,14 +28,78 @@ php_apache_server_root: "/etc/apache2"
 # might create others for themselves in different
 # playbooks
 php_fpm_pools:
-  - pool_name: www
-    pool_template: www.conf.j2
-    pool_listen: "{{ php_www_pool_listen }}"
-    pool_listen_allowed_clients: "127.0.0.1"
+  # Not a default pool, but a pool for our default.gothick.org.uk site
+  - pool_name: default
+    pool_user: www-data
+    pool_group: www-data
+    pool_template: custom.conf.j2
+    pool_listen: '/run/php/ansible-managed-fpm-default.sock'
+    php_admin_values:
+      open_basedir: "{{ apache_sites_dir }}/default.gothick.org.uk/:/tmp"
+    pool_pm: dynamic
+    pool_pm_status_path: /fpm-status
+
+  - pool_name: gothick
+    pool_user: www-data
+    pool_group: www-data
+    pool_template: custom.conf.j2
+    pool_listen: '/run/php/ansible-managed-fpm-gothick.sock'
+    php_admin_values:
+      open_basedir: "{{ apache_sites_dir }}/gothick.org.uk/:/tmp"
     pool_pm: dynamic
     pool_pm_max_children: 5
     pool_pm_start_servers: 2
     pool_pm_min_spare_servers: 1
     pool_pm_max_spare_servers: 3
     pool_pm_max_requests: 500
-    pool_pm_status_path: /status
+    pool_pm_status_path: /fpm-status
+
+  - pool_name: omm
+    pool_user: omm
+    pool_group: users
+    pool_template: custom.conf.j2
+    pool_listen: '/run/php/ansible-managed-fpm-omm.sock'
+    # So that Apache can talk to it
+    pool_listen_owner: 'www-data'
+    # So that the omm user can reset the opcache using cachetool
+    pool_listen_group: 'omm'
+    php_admin_values:
+      open_basedir: "{{ apache_sites_dir }}/gothick.org.uk/omm.gothick.org.uk:/tmp"
+      opcache.memory_consumption: 256
+      opcache.max_accelerated_files: 20000
+    pool_pm: dynamic
+    pool_pm_max_children: 5
+    pool_pm_start_servers: 2
+    pool_pm_min_spare_servers: 1
+    pool_pm_max_spare_servers: 3
+    pool_pm_max_requests: 500
+    pool_pm_status_path: /fpm-status
+
+  - pool_name: fresher
+    pool_user: fresher
+    pool_group: users
+    pool_template: custom.conf.j2
+    pool_listen: '/run/php/ansible-managed-fpm-fresher.sock'
+    # So that Apache can talk to it
+    pool_listen_owner: 'www-data'
+    # So that the omm user can reset the opcache using cachetool
+    pool_listen_group: 'fresher'
+    php_admin_values:
+      open_basedir: "{{ apache_sites_dir }}/fresher.gothick.org.uk:/tmp"
+      opcache.memory_consumption: 256
+      opcache.max_accelerated_files: 20000
+    pool_pm: dynamic
+    pool_pm_status_path: /fpm-status
+
+  - pool_name: wordpress
+    pool_user: wordpress
+    pool_group: users
+    pool_template: custom.conf.j2
+    pool_listen: '/run/php/ansible-managed-fpm-wordpress.sock'
+    pool_pm_max_children: 10
+    php_admin_values:
+      open_basedir: "{{ apache_sites_dir }}/wordpress:/tmp"
+      post_max_size: '12M'
+      upload_max_filesize: '12M'
+    pool_pm: dynamic
+    pool_pm_status_path: /fpm-status

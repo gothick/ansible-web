@@ -40,8 +40,8 @@
 - name: Install and configure basic Apache
   import_playbook: playbooks/web_apache/main.yml
 
-- name: Add a default dev site (possibly with https) for testing/dev info, only in dev environment
-  import_playbook: playbooks/web_dev_site/main.yml
-
 - name: Install and configure PHP-FPM
   import_playbook: playbooks/web_php/main.yml
+
+- name: Add a default dev site (possibly with https) for testing/dev info, only in dev environment
+  import_playbook: playbooks/web_dev_site/main.yml

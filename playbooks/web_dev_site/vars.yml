@@ -5,8 +5,6 @@ safe_admin_hosts:
   - gothick.plus.com
   - example.com
 
-apache_sites_dir: /var/www/sites
-
 default_apache_user: www-data
 default_apache_group: www-data
 
