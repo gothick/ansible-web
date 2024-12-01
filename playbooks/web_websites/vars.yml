@@ -3,7 +3,12 @@ apache_server_root: /etc/apache2
 apache_log_dir: /var/log/apache2
 safe_admin_hosts:
   - gothick.plus.com
-  - example.com
+  - klegg
+
+safe_admin_ips:
+  - "81.174.144.111"
+  - "192.168.1.103" # home Mac :)
+  - "10.0.2.2"
 
 default_apache_user: www-data
 default_apache_group: www-data
@@ -12,7 +17,7 @@ acme_well_known_dir: /var/www/well-known
 acme_sites_dir: /etc/letsencrypt/live
 acme_email: gothick@gothick.org.uk
 
-default_site_docroot: "{{ apache_sites_dir }}/default.gothick.org.uk/"
+default_site_docroot: "{{ apache_sites_dir }}/default.gothick.org.uk"
 
 websites:
   # One special site: the default site. We use 000-default.conf for the Apache config name
@@ -25,21 +30,23 @@ websites:
     canonical_rewrite: true
     apache_config_name: 000-default # Because the first VirtulHost Apache sees becomes the default
     php_fpm_pool: "/run/php/ansible-managed-fpm-default.sock"
+    enable_server_status: true
+    secure_private_directory: true
 
   - server_name: "brianthedebugger.gothick.org.uk{{ hostname_suffix | default('') }}"
-    docroot: "{{ apache_sites_dir }}/gothick.org.uk/brianthedebugger.gothick.org.uk/"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/brianthedebugger.gothick.org.uk"
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks Multiviews"
     canonical_rewrite: true
 
   - server_name: "dev.gothick.org.uk{{ hostname_suffix | default('') }}"
-    docroot: "{{ apache_sites_dir }}/gothick.org.uk/dev.gothick.org.uk/"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/dev.gothick.org.uk"
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks Multiviews"
     canonical_rewrite: true
 
   - server_name: "bookpedia.gothick.org.uk{{ hostname_suffix | default('') }}"
-    docroot: "{{ apache_sites_dir }}/gothick.org.uk/bookpedia.gothick.org.uk/"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/bookpedia.gothick.org.uk"
     allow_override: "all"
     docroot_owner: "gothick"
     docroot_group: "gothick"
@@ -47,7 +54,7 @@ websites:
     canonical_rewrite: true
 
   - server_name: "exhibition.gothick.org.uk{{ hostname_suffix | default('') }}"
-    docroot: "{{ apache_sites_dir }}/gothick.org.uk/exhibition.gothick.org.uk/current/"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/exhibition.gothick.org.uk/current"
     allow_override: "all"
     docroot_owner: "gothick"
     docroot_group: "gothick"
@@ -167,7 +174,7 @@ websites:
 
   # This one only has a .htaccess file that redirects things to WordPress
   - server_name: "threesixfive.gothick.org.uk{{ hostname_suffix | default('') }}"
-    docroot: "{{ apache_sites_dir }}/gothick.org.uk/threesixfive.gothick.org.uk/"
+    docroot: "{{ apache_sites_dir }}/gothick.org.uk/threesixfive.gothick.org.uk"
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks Multiviews"
     canonical_rewrite: true

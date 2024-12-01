@@ -1,3 +1,4 @@
+---
 # Dev environment
 use_letsencrypt: "{{ not (is_vagrant | default(false)) }}"
 acme_use_staging_server: true

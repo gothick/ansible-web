@@ -1,0 +1,27 @@
+---
+- name: Install default site's index
+  ansible.builtin.template:
+    src: default.html.j2
+    dest: "{{ default_site_docroot }}/index.html"
+    owner: "{{ default_apache_user }}"
+    group: "{{ default_apache_group }}"
+    mode: '0644'
+  notify: Reload apache
+
+- name: Create default site private area
+  ansible.builtin.file:
+    path: "{{ default_site_docroot }}/private"
+    recurse: true
+    state: directory
+    owner: "{{ default_apache_user }}"
+    group: "{{ default_apache_group }}"
+    mode: '0755'
+
+- name: Install default site helper/status page
+  ansible.builtin.template:
+    src: private-index.php.j2
+    dest: "{{ default_site_docroot }}/private/index.php"
+    owner: "{{ default_apache_user }}"
+    group: "{{ default_apache_group }}"
+    mode: '0644'
+  notify: Reload apache

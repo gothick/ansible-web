@@ -76,23 +76,9 @@
         loop_var: site
       notify: Reload apache
 
-    - name: Install default site's index
-      ansible.builtin.template:
-        src: default.html.j2
-        dest: "{{ default_site_docroot }}/index.html"
-        owner: "{{ default_apache_user }}"
-        group: "{{ default_apache_group }}"
-        mode: '0644'
-      notify: Reload apache
-
-    - name: Install default site's index
-      ansible.builtin.template:
-        src: default.html.j2
-        dest: "{{ default_site_docroot }}/index.html"
-        owner: "{{ default_apache_user }}"
-        group: "{{ default_apache_group }}"
-        mode: '0644'
-      notify: Reload apache
+    - name: Set up default site
+      ansible.builtin.import_tasks:
+        file: default-site.yml
 
     # The http versions of the sites don't do anything special; they just redirect to https
     - name: Enable all http sites

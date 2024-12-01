@@ -39,13 +39,18 @@
 			Require all granted
 		</Directory>
 
-		<Location "/status">
+		{% if site.enable_server_status | default(false) %}
+		<Location "/server-status">
 			SetHandler server-status
 			Require local
 			{% if safe_admin_hosts is defined and safe_admin_hosts %}
 			Require host {{ safe_admin_hosts | join(' ') }}
 			{% endif %}
+			{% if safe_admin_ips is defined and safe_admin_ips %}
+			Require ip {{ safe_admin_ips | join(' ') }}
+			{% endif %}
 		</Location>
+		{% endif %}
 
 		DocumentRoot {{ site.docroot }}
 
@@ -88,6 +93,18 @@
     		Options FollowSymLinks
     		AllowOverride None
   		</Directory>
+
+		{% if site.secure_private_directory | default(false) %}
+		<Directory "{{ site.docroot }}/private">
+			Require local
+			{% if safe_admin_hosts is defined and safe_admin_hosts %}
+			Require host {{ safe_admin_hosts | join(' ') }}
+			{% endif %}
+			{% if safe_admin_ips is defined and safe_admin_ips %}
+			Require ip {{ safe_admin_ips | join(' ') }}
+			{% endif %}
+		</Directory>
+		{% endif %}
 
 		{% if site.php_fpm_pool is defined %}
 		<IfModule proxy_module>
@@ -287,6 +304,5 @@
 			</IfModule>
 			{% endif %}
 		#}
-
 	</VirtualHost>
 </IfModule>
