@@ -85,6 +85,15 @@
         mode: '0644'
       notify: Reload apache
 
+    - name: Install default site's index
+      ansible.builtin.template:
+        src: default.html.j2
+        dest: "{{ default_site_docroot }}/index.html"
+        owner: "{{ default_apache_user }}"
+        group: "{{ default_apache_group }}"
+        mode: '0644'
+      notify: Reload apache
+
     # The http versions of the sites don't do anything special; they just redirect to https
     - name: Enable all http sites
       ansible.builtin.command: a2ensite {{ site.apache_config_name | default(site.server_name) }}

@@ -24,6 +24,7 @@ websites:
     directory_options: "Indexes FollowSymLinks Multiviews"
     canonical_rewrite: true
     apache_config_name: 000-default # Because the first VirtulHost Apache sees becomes the default
+    php_fpm_pool: "/run/php/ansible-managed-fpm-default.sock"
 
   - server_name: "brianthedebugger.gothick.org.uk{{ hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/brianthedebugger.gothick.org.uk/"
