@@ -84,14 +84,14 @@ websites:
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks"
     canonical_rewrite: true
-    php_fpm_pool: "/run/php/chef-managed-fpm-gothick.sock"
+    php_fpm_pool: "/run/php/ansible-managed-fpm-gothick.sock"
 
   - server_name: "oldtweets.gothick.org.uk{{ hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/oldtweets.gothick.org.uk/html"
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks"
     canonical_rewrite: true
-    php_fpm_pool: "/run/php/chef-managed-fpm-gothick.sock"
+    php_fpm_pool: "/run/php/ansible-managed-fpm-gothick.sock"
 
   - server_name: "omm.gothick.org.uk{{ hostname_suffix | default('') }}"
     siteroot: "{{ apache_sites_dir }}/gothick.org.uk/omm.gothick.org.uk"
@@ -117,7 +117,7 @@ websites:
     directory_options: "Indexes FollowSymLinks"
     canonical_rewrite: true
     no_well_known: true
-    php_fpm_pool: "/run/php/chef-managed-fpm-omm.sock"
+    php_fpm_pool: "/run/php/ansible-managed-fpm-omm.sock"
 
   - server_name: "fresher.gothick.org.uk{{ hostname_suffix | default('') }}"
     siteroot: "{{ apache_sites_dir }}/fresher.gothick.org.uk"
@@ -143,7 +143,7 @@ websites:
     directory_options: "Indexes FollowSymLinks"
     canonical_rewrite: true
     no_well_known: true
-    php_fpm_pool: "/run/php/chef-managed-fpm-fresher.sock"
+    php_fpm_pool: "/run/php/ansible-managed-fpm-fresher.sock"
 
   - server_name: "gothick.org.uk{{ hostname_suffix | default('') }}"
     aliases:
@@ -162,8 +162,9 @@ websites:
     allow_override: "all"
     directory_options: "FollowSymLinks"
     canonical_rewrite: false
-    php_fpm_pool: "/run/php/chef-managed-fpm-wordpress.sock"
+    php_fpm_pool: "/run/php/ansible-managed-fpm-wordpress.sock"
 
+  # This one only has a .htaccess file that redirects things to WordPress
   - server_name: "threesixfive.gothick.org.uk{{ hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/threesixfive.gothick.org.uk/"
     allow_override: "all"
