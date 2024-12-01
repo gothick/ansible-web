@@ -1,0 +1,32 @@
+# vars file
+---
+nodejs_version_map:
+  nodejs-v23x: '23.x'
+  nodejs-v22x: '22.x'
+  nodejs-v21x: '21.x'
+  nodejs-v20x: '20.x'
+  nodejs-v19x: '19.x'
+  nodejs-v18x: '18.x'
+  nodejs-v17x: '17.x'
+  nodejs-v16x: '16.x'
+  nodejs-v15x: '15.x'
+  nodejs-v14x: '14.x'
+  nodejs-v13x: '13.x'
+  nodejs-v12x: '12.x'
+  nodejs-v10x: '10.x'
+  nodejs-v9x: '9.x'
+  nodejs-v8x: '8.x'
+  nodejs-v7x: '7.x'
+  nodejs-v6x: '6.x'
+  nodejs-v5x: '5.x'
+  nodejs-v4x: '4.x'
+  nodejs-v012: '0.12'
+  nodejs-v010: '0.10'
+  iojs-v3x: 'iojs_3.x'
+  iojs-v2x: 'iojs_2.x'
+  iojs-v1x: 'iojs_1.x'
+
+nodejs_dependencies:
+  - software-properties-common
+  - dirmngr
+  - curl

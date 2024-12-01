@@ -1,0 +1,15 @@
+# tasks file
+---
+- name: repository
+  ansible.builtin.import_tasks: repository.yml
+  tags:
+    - configuration
+    - yarn
+    - yarn-repository
+
+- name: install
+  ansible.builtin.import_tasks: install.yml
+  tags:
+    - configuration
+    - yarn
+    - yarn-install

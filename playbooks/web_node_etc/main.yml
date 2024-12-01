@@ -1,0 +1,11 @@
+- name: Install node, etc.
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  roles:
+    - Oefenweb.nodejs
+    - Oefenweb.yarn
+

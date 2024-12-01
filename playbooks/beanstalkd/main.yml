@@ -1,0 +1,18 @@
+---
+# Beanstalkd. Used for Messenger component in OMM Symfony application.
+- name: Install beanstalkd
+  hosts: all
+  become: true
+
+  # vars_files:
+  #   - vars.yml
+
+  pre_tasks:
+
+  tasks:
+
+    - name: Install beanstalkd
+      ansible.builtin.apt:
+        name: beanstalkd
+        state: present
+        update_cache: true

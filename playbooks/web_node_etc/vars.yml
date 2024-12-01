@@ -1,0 +1,6 @@
+---
+# nodejs_npm_global_packages:
+#   - name: jslint
+#   - name: node-sass
+
+nodejs_version: nodejs-v16x

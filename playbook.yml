@@ -45,3 +45,9 @@
 
 - name: Configure all websites
   import_playbook: playbooks/web_websites/main.yml
+
+- name: Install and configure beanstalkd
+  import_playbook: playbooks/beanstalkd/main.yml
+
+- name: Install and configure Node, etc.
+  import_playbook: playbooks/web_node_etc/main.yml

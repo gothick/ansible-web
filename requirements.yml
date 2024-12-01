@@ -1,23 +1,29 @@
 ---
 roles:
 
-- name: gothick.awscli
-  src: https://github.com/gothick/ansible-awscli.git
+  - name: gothick.awscli
+    src: https://github.com/gothick/ansible-awscli.git
 
-- name: arillso.sudoers
-  version: 2.3.0
+  - name: arillso.sudoers
+    version: 2.3.0
 
-- name: Oefenweb.postfix
-  version: v3.6.4
+  - name: Oefenweb.postfix
+    version: v3.6.4
 
-- name: geerlingguy.apache
-  version: 4.0.0
+  - name: geerlingguy.apache
+    version: 4.0.0
 
-- name: geerlingguy.php
-  version: 6.0.0
+  - name: geerlingguy.php
+    version: 6.0.0
 
-- name: geerlingguy.certbot
-  version: 5.2.0
+  - name: geerlingguy.certbot
+    version: 5.2.0
+
+  - name: Oefenweb.nodejs
+    version: v8.0.0
+
+  - name: Oefenweb.yarn
+    version: v1.0.56
 
 collections:
   - name: basicbind.swap_file
