@@ -26,6 +26,10 @@
 	RewriteEngine On
 	RewriteCond %{HTTPS} !=on
 	RewriteRule ^/?(.*) https://{{ site.server_name }} [R,L,QSD]
+
+	LogLevel info
+	ErrorLog {{ apache_log_dir }}/{{ site.server_name }}-http-error.log
+	CustomLog {{ apache_log_dir }}/{{ site.server_name }}-http-access.log combined
 </VirtualHost>
 
 

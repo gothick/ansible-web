@@ -1,6 +1,4 @@
 ---
-apache_server_root: /etc/apache2
-apache_log_dir: /var/log/apache2
 safe_admin_hosts:
   - gothick.plus.com
   - klegg
@@ -10,20 +8,13 @@ safe_admin_ips:
   - "192.168.1.103" # home Mac :)
   - "10.0.2.2"
 
-default_apache_user: www-data
-default_apache_group: www-data
-
-acme_well_known_dir: /var/www/well-known
-acme_sites_dir: /etc/letsencrypt/live
-acme_email: gothick@gothick.org.uk
-
 default_site_docroot: "{{ apache_sites_dir }}/default.gothick.org.uk"
 
 websites:
   # One special site: the default site. We use 000-default.conf for the Apache config name
   # so it always gets loaded first, and we also set the docroot to a special directory so
   # we can put a "this is the default site, why the fuck you here, dude?" page there.
-  - server_name: "default.gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "default.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ default_site_docroot }}"
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks Multiviews"
@@ -33,19 +24,19 @@ websites:
     enable_server_status: true
     secure_private_directory: true
 
-  - server_name: "brianthedebugger.gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "brianthedebugger.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/brianthedebugger.gothick.org.uk"
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks Multiviews"
     canonical_rewrite: true
 
-  - server_name: "dev.gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "dev.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/dev.gothick.org.uk"
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks Multiviews"
     canonical_rewrite: true
 
-  - server_name: "bookpedia.gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "bookpedia.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/bookpedia.gothick.org.uk"
     allow_override: "all"
     docroot_owner: "gothick"
@@ -53,7 +44,7 @@ websites:
     directory_options: "FollowSymLinks Multiviews"
     canonical_rewrite: true
 
-  - server_name: "exhibition.gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "exhibition.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/exhibition.gothick.org.uk/current"
     allow_override: "all"
     docroot_owner: "gothick"
@@ -61,9 +52,9 @@ websites:
     directory_options: "FollowSymLinks Multiviews"
     canonical_rewrite: true
 
-  - server_name: "meditationchimer.com{{ hostname_suffix | default('') }}"
+  - server_name: "meditationchimer.com{{ test_hostname_suffix | default('') }}"
     aliases:
-      - "www.meditationchimer.com{{ hostname_suffix | default('') }}"
+      - "www.meditationchimer.com{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/meditationchimer.com/html"
     docroot_owner: "meditationchimer"
     docroot_group: "meditationchimer"
@@ -71,15 +62,15 @@ websites:
     directory_options: "Indexes FollowSymLinks Multiviews"
     canonical_rewrite: true
 
-  - server_name: "xslorenz.gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "xslorenz.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/xslorenz.gothick.org.uk/html"
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks Multiviews"
     canonical_rewrite: true
 
-  - server_name: "onthescales.com{{ hostname_suffix | default('') }}"
+  - server_name: "onthescales.com{{ test_hostname_suffix | default('') }}"
     aliases:
-      - "www.onthescales.com{{ hostname_suffix | default('') }}"
+      - "www.onthescales.com{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/onthescales.com/html"
     docroot_owner: "onthescales"
     docroot_group: "onthescales"
@@ -87,21 +78,21 @@ websites:
     directory_options: "Indexes FollowSymLinks Multiviews"
     canonical_rewrite: true
 
-  - server_name: "tweetnest.gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "tweetnest.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/tweetnest.gothick.org.uk/html"
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks"
     canonical_rewrite: true
     php_fpm_pool: "/run/php/ansible-managed-fpm-gothick.sock"
 
-  - server_name: "oldtweets.gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "oldtweets.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/oldtweets.gothick.org.uk/html"
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks"
     canonical_rewrite: true
     php_fpm_pool: "/run/php/ansible-managed-fpm-gothick.sock"
 
-  - server_name: "omm.gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "omm.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     siteroot: "{{ apache_sites_dir }}/gothick.org.uk/omm.gothick.org.uk"
     compresstypes:
       - "text/html"
@@ -127,7 +118,7 @@ websites:
     no_well_known: true
     php_fpm_pool: "/run/php/ansible-managed-fpm-omm.sock"
 
-  - server_name: "fresher.gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "fresher.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     siteroot: "{{ apache_sites_dir }}/fresher.gothick.org.uk"
     compresstypes:
       - "text/html"
@@ -153,17 +144,17 @@ websites:
     no_well_known: true
     php_fpm_pool: "/run/php/ansible-managed-fpm-fresher.sock"
 
-  - server_name: "gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "gothick.org.uk{{ test_hostname_suffix | default('') }}"
     aliases:
-      - "www.gothick.org.uk{{ hostname_suffix | default('') }}"
-      - "mattgibsoncreative.co.uk{{ hostname_suffix | default('') }}"
-      - "www.mattgibsoncreative.co.uk{{ hostname_suffix | default('') }}"
-      - "mattgibsoncreative.gothick.org.uk{{ hostname_suffix | default('') }}"
-      - "mattgibsoncreative.com{{ hostname_suffix | default('') }}"
-      - "www.mattgibsoncreative.com{{ hostname_suffix | default('') }}"
-      - "mattgetsrunning.com{{ hostname_suffix | default('') }}"
-      - "www.mattgetsrunning.com{{ hostname_suffix | default('') }}"
-      - "mattgetsrunning.gothick.org.uk{{ hostname_suffix | default('') }}"
+      - "www.gothick.org.uk{{ test_hostname_suffix | default('') }}"
+      - "mattgibsoncreative.co.uk{{ test_hostname_suffix | default('') }}"
+      - "www.mattgibsoncreative.co.uk{{ test_hostname_suffix | default('') }}"
+      - "mattgibsoncreative.gothick.org.uk{{ test_hostname_suffix | default('') }}"
+      - "mattgibsoncreative.com{{ test_hostname_suffix | default('') }}"
+      - "www.mattgibsoncreative.com{{ test_hostname_suffix | default('') }}"
+      - "mattgetsrunning.com{{ test_hostname_suffix | default('') }}"
+      - "www.mattgetsrunning.com{{ test_hostname_suffix | default('') }}"
+      - "mattgetsrunning.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/wordpress/html"
     docroot_owner: "wordpress"
     docroot_group: "users"
@@ -173,7 +164,7 @@ websites:
     php_fpm_pool: "/run/php/ansible-managed-fpm-wordpress.sock"
 
   # This one only has a .htaccess file that redirects things to WordPress
-  - server_name: "threesixfive.gothick.org.uk{{ hostname_suffix | default('') }}"
+  - server_name: "threesixfive.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/threesixfive.gothick.org.uk"
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks Multiviews"

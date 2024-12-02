@@ -1,3 +1,0 @@
-# Live environment
-use_letsencrypt: true
-acme_use_staging_server: false

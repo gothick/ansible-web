@@ -134,8 +134,8 @@
         certbot_create_method: webroot
         certbot_create_if_missing: true
         certbot_agree_tos: true
-        certbot_auto_renew_hour: "2"
-        certbot_auto_renew_minute: "18" # Random.org
+        certbot_auto_renew_hour: "{{ acme_auto_renew_hour }}"
+        certbot_auto_renew_minute: "{{ acme_auto_renew_minute }}"
         # NB: certbot_create_extra_args can't be empty with our current role version;
         # see https://github.com/geerlingguy/ansible-role-certbot/issues/225
         certbot_create_extra_args: ''
@@ -143,7 +143,7 @@
         certbot_testmode: "{{ acme_use_staging_server }}"
         certbot_email: "{{ acme_email }}"
         # TODO: Can/should we do this as some other user? Not sure. What permissions would it need?
-        certbot_auto_renew_user: root
+        certbot_auto_renew_user: "{{ acme_auto_renew_user }}"
       # Because there's no point in doing this for e.g. vagrant, where letsencrypt won't
       # be able to see our sites anyway, so we need a mechanism for not bothering.
       when: use_letsencrypt

@@ -1,0 +1,9 @@
+# Live environment
+use_letsencrypt: true
+acme_use_staging_server: false
+acme_email: gothick@gothick.org.uk
+acme_well_known_dir: /var/www/well-known
+acme_sites_dir: /etc/letsencrypt/live
+acme_auto_renew_hour: "2"
+acme_auto_renew_minute: "18"
+acme_auto_renew_user: root

@@ -1,0 +1,8 @@
+---
+webdav_config:
+  users:
+    # Passwords are from vault.yml, encrypted. In fact, as they're stored in digest
+    # format, they're doubly-encrypted.
+    - "gothick:webdav:{{ gothick_password }}"
+  folders:
+    - DEVONthink

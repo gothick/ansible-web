@@ -1,0 +1,52 @@
+#jinja2: lstrip_blocks:True
+{{ ansible_managed | comment }}
+<VirtualHost _default_:443>
+    ServerName {{ webdav_server_name }}
+
+    ServerAdmin {{ admin_email }}
+
+    # TODO Probably don't need this as well as the standard DocumentRoot as they
+    # point to the same place.
+    Alias "/.well-known" "{{ well_known_docroot }}/.well-known"
+
+    DocumentRoot {{ well_known_docroot }}
+
+    <Directory "{{ well_known_docroot }}">
+        Options -Indexes +FollowSymLinks +MultiViews
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    <IfModule mod_ssl.c>
+        <IfFile {{ acme_sites_dir }}/{{ webdav_server_name }}/fullchain.pem >
+			SSLCertificateFile	{{ acme_sites_dir }}/{{ webdav_server_name }}/fullchain.pem
+			SSLCertificateKeyFile {{ acme_sites_dir }}/{{ webdav_server_name }}/privkey.pem
+		</IfFile>
+
+		# Using a separate IfFile with ! here as IfFile doesn't seem to have an Else, weirdly.
+		<IfFile !{{ acme_sites_dir }}/{{ webdav_server_name }}/fullchain.pem >
+			SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+			SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+		</IfFile>
+    </IfModule>
+
+   	DavLockDB /var/lock/apache2/DAVLock
+
+    {% for folder in webdav_config.folders %}
+        Alias /{{ folder }} {{ webdav_dir }}/{{ folder }}
+
+        <Location /{{ folder }}>
+            DAV On
+            SSLRequireSSL
+            AuthType Digest
+            AuthName webdav
+            AuthUserFile {{ webdav_digest_file }}
+            Require valid-user
+        </Location>
+    {% endfor %}
+
+    LogLevel info
+    ErrorLog {{ apache_log_dir }}/{{ webdav_server_name }}-https-error.log
+    CustomLog {{ apache_log_dir }}/{{ webdav_server_name }}-https-access.log combined
+
+</VirtualHost>

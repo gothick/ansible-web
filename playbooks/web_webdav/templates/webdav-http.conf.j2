@@ -1,0 +1,15 @@
+#jinja2: lstrip_blocks:True
+{{ ansible_managed | comment }}
+<VirtualHost *:80>
+	ServerName {{ webdav_server_name }}
+	ServerAdmin {{ admin_email }}
+
+	RewriteEngine On
+	RewriteCond %{HTTPS} !=on
+	RewriteRule ^/?(.*) https://{{ webdav_server_name }}/$1 [R,L]
+
+	LogLevel info
+	ErrorLog {{ apache_log_dir }}/{{ webdav_server_name }}-http-error.log
+	CustomLog {{ apache_log_dir }}/{{ webdav_server_name }}-http-access.log combined
+
+</VirtualHost>

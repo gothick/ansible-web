@@ -46,6 +46,9 @@
 - name: Configure all websites
   import_playbook: playbooks/web_websites/main.yml
 
+- name: Set up webdav
+  import_playbook: playbooks/web_webdav/main.yml
+
 - name: Install and configure beanstalkd
   import_playbook: playbooks/beanstalkd/main.yml
 
