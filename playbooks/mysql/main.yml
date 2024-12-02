@@ -1,0 +1,14 @@
+---
+- name: Install MySQL server and client
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  roles:
+    - geerlingguy.mysql
+
+  # pre_tasks:
+
+  # tasks:

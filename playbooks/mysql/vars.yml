@@ -1,0 +1,5 @@
+---
+mysql_datadir: /var/lib/mysql
+
+mysql_config_include_files:
+  - src: cnf/charset.cnf

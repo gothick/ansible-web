@@ -60,3 +60,6 @@
 
 - name: Add admin cron jobs for web servers
   import_playbook: playbooks/web_cron_jobs/main.yml
+
+- name: Install and configure MySQL
+  import_playbook: playbooks/mysql/main.yml

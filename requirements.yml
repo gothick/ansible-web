@@ -31,6 +31,9 @@ roles:
   - name: geerlingguy.elasticsearch
     version: 5.1.2
 
+  - name: geerlingguy.mysql
+    version: 4.3.4
+
 collections:
   - name: basicbind.swap_file
     version: 2.0.3
