@@ -1,0 +1,26 @@
+---
+- name: Add admin cron jobs for web servers
+  hosts: all
+  become: true
+
+  # vars_files:
+  #   - vars.yml
+
+  # roles:
+
+  # pre_tasks:
+
+  tasks:
+
+    - name: Add EMAIL cron variable
+      community.general.cronvar:
+        name: EMAIL
+        value: "{{ admin_email }}"
+
+    - name: Ensure cron job 'web-writeable' is present
+      ansible.builtin.cron:
+        name: 'web-writeable'
+        minute: '35'
+        hour: '4'
+        job: 'find -L /var/www -perm -o+w'
+        user: 'root'

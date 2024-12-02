@@ -1,0 +1,6 @@
+---
+elasticsearch_version: '7.x'
+# We don't need anything like the Elasticsearch default heap size; let's keep things
+# very lean.
+elasticsearch_heap_size_min: 128m
+elasticsearch_heap_size_max: 256m

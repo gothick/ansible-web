@@ -51,3 +51,12 @@
 
 - name: Install and configure Node, etc.
   import_playbook: playbooks/web_node_etc/main.yml
+
+- name: Install and configure Elasticsearch
+  import_playbook: playbooks/elasticsearch/main.yml
+
+- name: Install and configure Supervisor
+  import_playbook: playbooks/supervisor/main.yml
+
+- name: Add admin cron jobs for web servers
+  import_playbook: playbooks/web_cron_jobs/main.yml

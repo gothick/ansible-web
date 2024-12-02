@@ -1,0 +1,11 @@
+---
+- name: Install and configure ElasticSearch
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  roles:
+    - role: geerlingguy.java
+    - role: geerlingguy.elasticsearch

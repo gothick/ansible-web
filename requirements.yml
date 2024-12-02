@@ -25,6 +25,12 @@ roles:
   - name: Oefenweb.yarn
     version: v1.0.56
 
+  - name: geerlingguy.java
+    version: 2.5.0
+
+  - name: geerlingguy.elasticsearch
+    version: 5.1.2
+
 collections:
   - name: basicbind.swap_file
     version: 2.0.3
