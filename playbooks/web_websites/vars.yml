@@ -160,7 +160,7 @@ websites:
     docroot_group: "users"
     allow_override: "all"
     directory_options: "FollowSymLinks"
-    canonical_rewrite: false
+    canonical_rewrite: false # WordPress does its own canonicalisation
     php_fpm_pool: "/run/php/ansible-managed-fpm-wordpress.sock"
 
   # This one only has a .htaccess file that redirects things to WordPress
