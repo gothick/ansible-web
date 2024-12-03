@@ -1,5 +1,8 @@
 ---
-mysql_datadir: /var/lib/mysql
+# NB: Due to a bug in the role, we can't use anything other than
+# the default or mysql will fail to initialise.
+# https://github.com/geerlingguy/ansible-role-mysql/issues/510
+# mysql_datadir: /var/lib/mysql/data
 
 mysql_config_include_files:
   - src: cnf/charset.cnf

@@ -6,9 +6,35 @@
   vars_files:
     - vars.yml
 
+  pre_tasks:
+    # If this is our first time setting up, the data directory needs to be
+    # *completely* empty, including of the lost+found directory. Annoyingly
+    # there's a bug in the role we're using: https://github.com/geerlingguy/ansible-role-mysql/issues/510
+    # that means that we can't just move the data dir below the default
+    # location. This fucking issue has been the bane of my fucking life
+    # for years. Why can't mysql just fucking cope with a lost+found
+    # directory? Surely a lot of people want their mysql on a mount point?
+
+    - name: How many files are in /var/lib/mysql?
+      ansible.builtin.find:
+        paths: /var/lib/mysql
+        file_type: any
+      register: mysql_files
+
+    - name: "Kludge: remove our lost+found directory if it exists and is the only thing in the directory"
+      ansible.builtin.file:
+        state: absent
+        path: /var/lib/mysql/lost+found
+      when: mysql_files.matched == 1 and (mysql_files.files | selectattr('path', 'equalto', '/var/lib/mysql/lost+found') | count) == 1
+
   roles:
     - geerlingguy.mysql
 
-  # pre_tasks:
-
-  # tasks:
+  post_tasks:
+    - name: Recreate lost+found directory if we deleted it above
+      ansible.builtin.file:
+        state: directory
+        path: /var/lib/mysql/lost+found
+        owner: root
+        group: root
+        mode: '0755'

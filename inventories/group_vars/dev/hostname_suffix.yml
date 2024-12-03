@@ -1,2 +1,7 @@
 ---
-test_hostname_suffix: '.localtest'
+# For non-Vagrant environments, we use a subdomain which we can wildcard to point
+# to our staging server. For example, gothick.org.uk will end up as
+# gothick.org.uk.staging.gothick.org.uk. Which is a bit of a mouthful but
+# should mean that Letsencrypt can actually resolve all of our domains, and
+# that we don't need to fool around editing our hosts file to test things.
+test_hostname_suffix: "{{ '.localtest' if (is_vagrant | default(false)) else '.staging.gothick.org.uk' }}"
