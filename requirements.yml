@@ -34,6 +34,9 @@ roles:
   - name: geerlingguy.mysql
     version: 4.3.4
 
+  - name: geerlingguy.docker
+    version: 7.4.3
+
 collections:
   - name: basicbind.swap_file
     version: 2.0.3
