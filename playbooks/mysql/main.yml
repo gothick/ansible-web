@@ -14,27 +14,37 @@
     # location. This fucking issue has been the bane of my fucking life
     # for years. Why can't mysql just fucking cope with a lost+found
     # directory? Surely a lot of people want their mysql on a mount point?
+    # I like having it on a separate volume so I can easily snapshot it in
+    # ec2, for example, let alone anything else.
 
-    - name: How many files are in /var/lib/mysql?
+    - name: What files are in /var/lib/mysql?
       ansible.builtin.find:
         paths: /var/lib/mysql
         file_type: any
       register: mysql_files
 
+    # This should *only* happen the first time we initialise the machine, as
+    # after that mysql is up and running and has all its files in place. But
+    # mysql won't initialise if there's a lost+found directory in there.
+    # This is pretty damn safe as our first criterion is that there's *only
+    # one thing in the directory*; mysql creates lots of stuff so we won't
+    # nuke anything important if it's already up and running.
     - name: "Kludge: remove our lost+found directory if it exists and is the only thing in the directory"
       ansible.builtin.file:
         state: absent
         path: /var/lib/mysql/lost+found
+      register: lost_found_removed
       when: mysql_files.matched == 1 and (mysql_files.files | selectattr('path', 'equalto', '/var/lib/mysql/lost+found') | count) == 1
 
   roles:
     - geerlingguy.mysql
 
   post_tasks:
-    - name: Recreate lost+found directory if we deleted it above
-      ansible.builtin.file:
-        state: directory
-        path: /var/lib/mysql/lost+found
-        owner: root
-        group: root
-        mode: '0755'
+    - name: "Kludge: recreate lost+found directory if we deleted it above"
+      # Note that we use mklost+found, not mkdir. This pre-allocates space
+      # to the lost+found directory so that fsck doesn't need to allocate
+      # space when recovering lost files.
+      ansible.builtin.command: mklost+found
+      args:
+        chdir: /var/lib/mysql
+        creates: /var/lib/mysql/lost+found
