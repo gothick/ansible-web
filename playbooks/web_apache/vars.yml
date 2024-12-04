@@ -20,6 +20,11 @@ apache_mods_enabled:
   - dav_fs
   - dav_lock
   - auth_digest
+  # For Docker forwarding
+  - proxy_balancer
+  - proxy_http
+  - slotmem_shm
+
   # You haven't bothered with pagespeed this time. More trouble than it's worth.
 
 # apache_mods_disabled: []
