@@ -9,7 +9,6 @@ hostnames:
   # that there are multiple copies of the same host floating around.
   - tag:Name
 
-
 # Only count our dev and prod environments; we may have other EC2
 # boxes lying around that we don't want to fiddle with.
 filters:
