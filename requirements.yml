@@ -34,6 +34,7 @@ roles:
   - name: geerlingguy.mysql
     version: 4.3.4
 
+  # TODO: Get rid of this if we don't end up using Docker
   - name: geerlingguy.docker
     version: 7.4.3
 
@@ -50,4 +51,3 @@ collections:
 
 # - name: geerlingguy.pip
 #   version: 3.0.3
-

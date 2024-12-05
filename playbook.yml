@@ -66,3 +66,6 @@
 
 - name: Install and configure MySQL
   import_playbook: playbooks/mysql/main.yml
+
+- name: Install and configure OpenVPN
+  import_playbook: playbooks/openvpn/main.yml

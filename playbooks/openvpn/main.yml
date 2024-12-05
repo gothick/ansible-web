@@ -1,0 +1,56 @@
+---
+# This Playbook is basically this article: https://ubuntu.com/server/docs/how-to-install-and-use-openvpn
+# but in Ansible format.
+- name: Install and configure OpenVPN
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  pre_tasks:
+    - name: Install OpenVPN and easy-rsa
+      ansible.builtin.apt:
+        name:
+          - openvpn
+          - easy-rsa
+        state: present
+        cache_valid_time: 3600
+
+  tasks:
+
+    # - name: Create easy-rsa directory
+    #   ansible.builtin.file:
+    #     path: /etc/openvpn/easy-rsa
+    #     state: directory
+    #     owner: root
+    #     group: root
+    #     mode: '0700'
+
+    # - name: Find all easy-rsa content
+    #   ansible.builtin.find:
+    #     paths: /usr/share/easy-rsa
+    #     file_type: any
+    #   register: easy_rsa_content
+
+    # - name: Symlink easy-rsa files to /etc/openvpn/easy-rsa
+    #   ansible.builtin.file:
+    #     src: "{{ item.path }}"
+    #     dest: "/etc/openvpn/easy-rsa/{{ item.path | basename }}"
+    #     state: link
+    #   with_items: "{{ easy_rsa_content.files }}"
+
+    # - name: Copy easy-rsa vars file
+    #   ansible.builtin.copy:
+    #     src: easy_rsa_vars
+    #     dest: /etc/openvpn/easy-rsa/vars
+    #     owner: root
+    #     group: root
+    #     mode: '0600'
+
+    - name: Create easy-rsa directory using make-cadir
+      ansible.builtin.command:
+        cmd: make-cadir /etc/openvpn/easy-rsa
+        creates: /etc/openvpn/easy-rsa
+
+  post_tasks:
