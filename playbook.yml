@@ -66,3 +66,12 @@
 
 - name: Install and configure MySQL
   import_playbook: playbooks/mysql/main.yml
+
+- name: Install and configure Docker
+  import_playbook: playbooks/web_docker/main.yml
+  tags: docker
+
+- name: Create test 'hello' Docker container (in dev environment only)
+  import_playbook: playbooks/web_docker_hello/main.yml
+  tags: docker
+  when: inventory_hostname in groups['dev']

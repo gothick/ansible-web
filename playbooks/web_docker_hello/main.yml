@@ -1,0 +1,25 @@
+---
+- name: Install and configure simple Docker "Hello" image for testing
+  hosts: all
+  become: true
+
+  # vars_files:
+  #  - vars.yml
+
+  # pre_tasks:
+
+  tasks:
+    - name: Pull Hello image
+      community.docker.docker_image:
+        name: nginxdemos/hello
+        tag: latest
+        source: pull
+
+    - name: Run Hello container
+      community.docker.docker_container:
+        name: hello
+        state: started
+        image: nginxdemos/hello
+        ports:
+          - "4242:80"
+        restart_policy: always
