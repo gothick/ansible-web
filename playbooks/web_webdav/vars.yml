@@ -11,6 +11,6 @@ webdav_digest_file: "{{ webdav_conf_dir }}/htdigest"
 webdav_server_name: "webdav.gothick.org.uk{{ test_hostname_suffix | default('') }}"
 
 certs:
-  - domains: "[ {{ webdav_server_name }} ]"
+  - domains: "{{ [ webdav_server_name ] }}"
     email: "{{ acme_email }}"
     webroot: "{{ well_known_docroot }}"
