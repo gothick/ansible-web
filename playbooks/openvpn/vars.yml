@@ -6,3 +6,6 @@ easy_rsa_req_cn: "gothick.org.uk"
 easy_rsa_path: /etc/openvpn/easy-rsa
 easy_rsa_vars_path: "{{ easy_rsa_path}}/vars"
 easy_rsa_pki_path: "{{ easy_rsa_path}}/pki"
+client_names:
+  - homemac
+  - anotherone
