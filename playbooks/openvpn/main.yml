@@ -53,4 +53,80 @@
         cmd: make-cadir /etc/openvpn/easy-rsa
         creates: /etc/openvpn/easy-rsa
 
+    - name: Template out vars directory
+      ansible.builtin.template:
+        src: easy_rsa_vars.j2
+        dest: "{{ easy_rsa_vars_path }}"
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Initialise public key infrastructure
+      ansible.builtin.command:
+        cmd: ./easyrsa init-pki
+        chdir: "{{ easy_rsa_path }}"
+        creates: "{{ easy_rsa_pki_path }}"
+      environment:
+        EASYRSA_VARS_FILE: "{{ easy_rsa_vars_path }}"
+        EASYRSA_BATCH: "1"
+        # EASYRSA_REQ_CN: "{{ easy_rsa_req_cn }}"
+        # EASYRSA_ALGO: "{{ easy_rsa_algo }}"
+        # EASYRSA_DIGEST: "{{ easy_rsa
+
+    - name: Build certificate authority
+      ansible.builtin.command:
+        cmd: ./easyrsa build-ca nopass
+        chdir: "{{ easy_rsa_path }}"
+        creates: "{{ easy_rsa_pki_path }}/ca.crt"
+      environment:
+        EASYRSA_VARS_FILE: "{{ easy_rsa_vars_path }}"
+        EASYRSA_BATCH: "1"
+
+    - name: Generate server keypair
+      ansible.builtin.command:
+        cmd: "./easyrsa gen-req {{ ansible_hostname }} nopass"
+        chdir: "{{ easy_rsa_path }}"
+        creates: "{{ easy_rsa_pki_path }}/private/{{ ansible_hostname }}.key"
+      environment:
+        EASYRSA_VARS_FILE: "{{ easy_rsa_vars_path }}"
+        EASYRSA_BATCH: "1"
+
+    - name: Generate Diffie Hellman parameters
+      ansible.builtin.command:
+        cmd: "./easyrsa gen-dh"
+        chdir: "{{ easy_rsa_path }}"
+        creates: "{{ easy_rsa_pki_path }}/dh.pem"
+      environment:
+        EASYRSA_VARS_FILE: "{{ easy_rsa_vars_path }}"
+        EASYRSA_BATCH: "1"
+
+    - name: Create server certificate
+      ansible.builtin.command:
+        cmd: "./easyrsa sign-req server {{ ansible_hostname }}"
+        chdir: "{{ easy_rsa_path }}"
+        creates: "{{ easy_rsa_pki_path }}/issued/{{ ansible_hostname }}.crt"
+      environment:
+        EASYRSA_VARS_FILE: "{{ easy_rsa_vars_path }}"
+        EASYRSA_BATCH: "1"
+
+    - name: Copy keys and certificates to /etc/openvpn
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        remote_src: true
+        dest: /etc/openvpn/
+        owner: root
+        group: root
+        mode: '0600'
+      with_items:
+        - "{{ easy_rsa_pki_path }}/dh.pem"
+        - "{{ easy_rsa_pki_path }}/ca.crt"
+        - "{{ easy_rsa_pki_path }}/issued/{{ ansible_hostname }}.crt"
+        - "{{ easy_rsa_pki_path }}/private/{{ ansible_hostname }}.key"
+
+    # Next step: generate client certificate. You'll need to grab
+    # pki/ca.crt and pki/issued/homemac.crt to your local machine
+    # and configure them in your OpenVPN client.
+
+
+
   post_tasks:
