@@ -313,3 +313,15 @@ verb 3
 
 # Notify the client that when the server restarts so it
 # can automatically reconnect.
+
+# Turn on ip forwarding, etc.
+up /etc/openvpn/server.up.sh
+
+# And back off again
+down /etc/openvpn/server.down.sh
+
+{% if push_routes %}
+{% for route in push_routes %}
+push "route {{ route }}"
+{% endfor %}
+{% endif %}

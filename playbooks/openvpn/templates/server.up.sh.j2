@@ -1,0 +1,16 @@
+{{ ansible_managed | comment }}
+#!/bin/sh
+#
+# This script will be run by OpenVPN on startup via the 'up' configuration
+# directive in /etc/openvpn/server.conf.
+#
+
+# Set up iptables NAT rules as needed.
+# Example:
+# /sbin/iptables -t nat -A POSTROUTING -s 10.8.0.0/255.255.0.0 -o eth0 -j MASQUERADE
+
+# Add additional scripts to /etc/openvpn/server.up.d
+FILES=$(/bin/ls /etc/openvpn/server.up.d/*.sh 2>/dev/null || echo)
+for f in $FILES; do
+    . $f
+done

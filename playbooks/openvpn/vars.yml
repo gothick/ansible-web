@@ -9,3 +9,7 @@ easy_rsa_pki_path: "{{ easy_rsa_path}}/pki"
 client_names:
   - homemac
   - anotherone
+
+push_routes:
+  # Our configured AWS subnet
+  - "172.31.16.0 255.255.240.0"
