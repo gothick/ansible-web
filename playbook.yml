@@ -25,6 +25,9 @@
 - name: Web Users
   import_playbook: playbooks/web_users/main.yml
 
+- name: Secure sshd to some degree
+  import_playbook: playbooks/secure_sshd/main.yml
+
 - name: Configure postfix
   import_playbook: playbooks/web_mail/main.yml
 

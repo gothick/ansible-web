@@ -1,0 +1,24 @@
+---
+- name: Secure sshd to some degree
+  hosts: all
+  become: true
+
+  # vars_files:
+  #   - vars.yml
+
+  tasks:
+    - name: Template out password auth configuration
+      ansible.builtin.template:
+        src: 10-kill-passwords.conf.j2
+        dest: /etc/ssh/sshd_config.d/10-kill-passwords.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart sshd
+
+  handlers:
+    - name: Restart sshd
+      ansible.builtin.systemd_service:
+        state: restarted
+        daemon_reload: true
+        name: sshd
