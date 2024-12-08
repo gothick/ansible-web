@@ -15,8 +15,9 @@
 nice tar -C / -cz var/www | \
   aws s3 cp - s3://gothick.org.uk-backup/{{ destination }}/{{ www_backup_file}}.tgz
 
-nice tar -C / -cz var/docker | \
-  aws s3 cp - s3://gothick.org.uk-backup/{{ destination }}/{{ docker_backup_file }}.tgz
+# We're not using Docker at the moment, but if we were, we'd back it up like this:
+# nice tar -C / -cz var/docker | \
+#   aws s3 cp - s3://gothick.org.uk-backup/{{ destination }}/{{ docker_backup_file }}.tgz
 
 nice tar -C / -cz home | \
   aws s3 cp - s3://gothick.org.uk-backup/{{ destination }}/{{ home_backup_file }}.tgz
