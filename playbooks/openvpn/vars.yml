@@ -4,11 +4,14 @@ easy_rsa_digest: "sha512"
 easy_rsa_dn: "cn_only"
 easy_rsa_req_cn: "gothick.org.uk"
 easy_rsa_path: /etc/openvpn/easy-rsa
-easy_rsa_vars_path: "{{ easy_rsa_path}}/vars"
-easy_rsa_pki_path: "{{ easy_rsa_path}}/pki"
+easy_rsa_vars_path: "{{ easy_rsa_path }}/vars"
+easy_rsa_pki_path: "{{ easy_rsa_path }}/pki"
+
 client_names:
   - homemac
   - anotherone
+
+client_config_dir: /etc/openvpn/client_certs
 
 push_routes:
   # Our configured AWS subnet

@@ -83,7 +83,7 @@ key {{ ansible_hostname }}.key  # This file should be kept secret
 # Diffie hellman parameters.
 # Generate your own with:
 #   openssl dhparam -out dh2048.pem 2048
-dh dh2048.pem
+dh dh.pem
 
 # Network topology
 # Should be subnet (addressing via IP)
@@ -294,7 +294,7 @@ status /var/log/openvpn/openvpn-status.log
 # "log" will truncate the log file on OpenVPN startup,
 # while "log-append" will append to it.  Use one
 # or the other (but not both).
-;log         /var/log/openvpn/openvpn.log
+log         /var/log/openvpn/openvpn.log
 ;log-append  /var/log/openvpn/openvpn.log
 
 # Set the appropriate level of log
@@ -304,7 +304,7 @@ status /var/log/openvpn/openvpn-status.log
 # 4 is reasonable for general usage
 # 5 and 6 can help to debug connection problems
 # 9 is extremely verbose
-verb 3
+verb 4
 
 # Silence repeating messages.  At most 20
 # sequential messages of the same message

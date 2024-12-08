@@ -124,36 +124,95 @@
         - "{{ easy_rsa_pki_path }}/private/{{ ansible_hostname }}.key"
       notify: Restart openvpn
 
+    - name: Create client config directory
+      ansible.builtin.file:
+        name: "{{ client_config_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0700'
+
+    - name: Copy keys and certificates also to client config dir, as we'll need them there too.
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        remote_src: true
+        dest: "{{ client_config_dir }}"
+        owner: root
+        group: root
+        mode: '0600'
+      with_items:
+        - "{{ easy_rsa_pki_path }}/dh.pem"
+        - "{{ easy_rsa_pki_path }}/ca.crt"
+        - "{{ easy_rsa_pki_path }}/issued/{{ ansible_hostname }}.crt"
+        - "{{ easy_rsa_pki_path }}/private/{{ ansible_hostname }}.key"
+
     # Generate client certificates.
     # TODO: You'll need to grab pki/ca.crt and pki/issued/homemac.crt
     # to your local machine and configure them in your OpenVPN client.
     # Maybe make this a bit easier by putting them in a tarball
     # somewhere handy?
-    - name: Generate client request
+    - name: Generate client requests
       ansible.builtin.command:
-        cmd: "./easyrsa gen-req {{ item }} nopass"
+        cmd: "./easyrsa gen-req {{ vpn_client_name }} nopass"
         chdir: "{{ easy_rsa_path }}"
-        creates: "{{ easy_rsa_pki_path }}/reqs/{{ item }}.req"
+        creates: "{{ easy_rsa_pki_path }}/reqs/{{ vpn_client_name }}.req"
       environment:
         EASYRSA_VARS_FILE: "{{ easy_rsa_vars_path }}"
         EASYRSA_BATCH: "1"
       loop: "{{ client_names }}"
+      loop_control:
+        loop_var: vpn_client_name
 
-    - name: Generate client certificate
+    - name: Generate client certificates
       ansible.builtin.command:
-        cmd: "./easyrsa sign-req client {{ item }}"
+        cmd: "./easyrsa sign-req client {{ vpn_client_name }}"
         chdir: "{{ easy_rsa_path }}"
-        creates: "{{ easy_rsa_pki_path }}/issued/{{ item }}.crt"
+        creates: "{{ easy_rsa_pki_path }}/issued/{{ vpn_client_name }}.crt"
       environment:
         EASYRSA_VARS_FILE: "{{ easy_rsa_vars_path }}"
         EASYRSA_BATCH: "1"
       loop: "{{ client_names }}"
+      loop_control:
+        loop_var: vpn_client_name
+
+    - name: Copy client certificates to client config directory
+      ansible.builtin.copy:
+        src: "{{ easy_rsa_pki_path }}/issued/{{ vpn_client_name }}.crt"
+        dest: "{{ client_config_dir }}/{{ vpn_client_name }}.crt"
+        remote_src: true
+        owner: root
+        group: root
+        mode: '0600'
+      loop: "{{ client_names }}"
+      loop_control:
+        loop_var: vpn_client_name
+
+    - name: Copy client keys to client config directory
+      ansible.builtin.copy:
+        src: "{{ easy_rsa_pki_path }}/private/{{ vpn_client_name }}.key"
+        dest: "{{ client_config_dir }}/{{ vpn_client_name }}.key"
+        remote_src: true
+        owner: root
+        group: root
+        mode: '0600'
+      loop: "{{ client_names }}"
+      loop_control:
+        loop_var: vpn_client_name
 
     - name: Generate tls key
       ansible.builtin.command:
         cmd: openvpn --genkey --secret /etc/openvpn/ta.key
         creates: /etc/openvpn/ta.key
       notify: Restart openvpn
+
+    - name: Copy tls key to client config directory
+      ansible.builtin.copy:
+        remote_src: true
+        src: /etc/openvpn/ta.key
+        dest: "{{ client_config_dir }}/ta.key"
+        owner: root
+        group: root
+        mode: '0600'
 
     - name: Create server.up.d directory
       ansible.builtin.file:
@@ -196,6 +255,33 @@
         state: started
         daemon_reload: true
         enabled: true
+
+    - name: Template out client configuration file
+      ansible.builtin.template:
+        src: client.conf.j2
+        dest: "{{ client_config_dir }}/{{ vpn_client_name }}.conf"
+        owner: root
+        group: root
+        mode: '0600'
+      loop: "{{ client_names }}"
+      loop_control:
+        loop_var: vpn_client_name
+
+    - name: Bundle client files
+      community.general.archive:
+        path:
+          - "{{ client_config_dir }}/{{ vpn_client_name }}.crt"
+          - "{{ client_config_dir }}/{{ vpn_client_name }}.key"
+          - "{{ client_config_dir }}/{{ vpn_client_name }}.conf"
+          - "{{ client_config_dir }}/ca.crt"
+          - "{{ client_config_dir }}/ta.key"
+        dest: "{{ client_config_dir }}/{{ vpn_client_name }}.tgz"
+        owner: root
+        group: root
+        mode: '0600'
+      loop: "{{ client_names }}"
+      loop_control:
+        loop_var: vpn_client_name
 
   handlers:
     - name: Restart openvpn
