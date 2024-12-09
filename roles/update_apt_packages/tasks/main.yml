@@ -3,6 +3,6 @@
   # TODO: Do we want to limit this so we don't kick off every run with it? I suppose
   # it depends how often we want to run the playbooks...
   ansible.builtin.apt:
-    upgrade: true
+    upgrade: "yes"
     update_cache: true
     cache_valid_time: 3600
