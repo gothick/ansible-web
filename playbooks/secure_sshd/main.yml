@@ -6,6 +6,10 @@
   # vars_files:
   #   - vars.yml
 
+  # pre-tasks:
+  #   - name: Gather service facts
+  #     ansible.builtin.service_facts:
+
   tasks:
     - name: Template out password auth configuration
       ansible.builtin.template:
@@ -19,6 +23,6 @@
   handlers:
     - name: Restart sshd
       ansible.builtin.systemd_service:
+        daemon-reload: true
         state: restarted
-        daemon_reload: true
-        name: sshd
+        name: ssh
