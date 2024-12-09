@@ -19,7 +19,7 @@ websites:
     allow_override: "all"
     directory_options: "Indexes FollowSymLinks Multiviews"
     canonical_rewrite: true
-    apache_config_name: 000-default # Because the first VirtulHost Apache sees becomes the default
+    apache_config_name: 000-gothick-default # Because the first VirtulHost Apache sees becomes the default
     php_fpm_pool: "/run/php/ansible-managed-fpm-default.sock"
     enable_server_status: true
     secure_private_directory: true
