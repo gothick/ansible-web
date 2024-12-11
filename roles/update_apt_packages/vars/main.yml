@@ -1,0 +1,2 @@
+---
+update_apt_packages_once_statefile: /var/lib/ansible/update_apt_packages_once
