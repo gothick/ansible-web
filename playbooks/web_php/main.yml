@@ -66,12 +66,6 @@
       tags:
         - phptest
 
-    - name: Debug a2ensite
-      ansible.builtin.debug:
-        var: site_result
-      tags:
-        - phptest
-
   handlers:
     - name: Reload apache
       ansible.builtin.service:
