@@ -20,10 +20,6 @@ keyed_groups:
   - key: tags.env
     separator: ''
 
-# groups:
-#   dev: "'dev' in tags.env"
-#   live: "'prod' in tags.env"
-
 # We use the public ipv4 IP address to connect via ssh; this is the
 # Elastic IP if the host has one.
 compose:

@@ -1,0 +1,10 @@
+---
+# This adds localhost manually so we don't get errors if we try to
+# exclude all but the localhost in a play. If we don't have it here
+# (as "localhost" isn't really around at inventory-querying time),
+# we'll get an error saying there are no hosts to run against.
+ungrouped:
+  hosts:
+    localhost:
+      vars:
+        ansible_connection: local
