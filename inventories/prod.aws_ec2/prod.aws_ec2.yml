@@ -14,6 +14,8 @@ hostnames:
 filters:
   tag:env:
     - prod
+  # All instances with their state as `running`
+  instance-state-name: running
 
 # Create a dynamic group for each of our environments
 keyed_groups:
