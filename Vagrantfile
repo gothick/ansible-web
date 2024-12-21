@@ -3,7 +3,7 @@
 
 Vagrant.configure("2") do |config|
     # Base VM OS configuration.
-    config.vm.box = "bento/ubuntu-22.04"
+    config.vm.box = "bento/ubuntu-24.04"
     config.ssh.insert_key = false
     config.vm.synced_folder '.', '/vagrant', disabled: true
 

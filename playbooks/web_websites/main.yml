@@ -125,6 +125,11 @@
       with_items: "{{ websites }}"
       tags: acme
 
+    - name: Debug
+      ansible.builtin.debug:
+        var: acme_use_staging_server
+      tags: test
+
     - name: Set up Certbot with the certificates set up as above for all websites
       ansible.builtin.import_role:
         name: geerlingguy.certbot
@@ -140,7 +145,7 @@
         # see https://github.com/geerlingguy/ansible-role-certbot/issues/225
         certbot_create_extra_args: ''
         # certbot_testmode enables --test-cert, which uses the staging server.
-        certbot_testmode: "{{ acme_use_staging_server }}"
+        certbot_testmode: "{{ acme_use_staging_server | bool }}"
         certbot_email: "{{ acme_email }}"
         # TODO: Can/should we do this as some other user? Not sure. What permissions would it need?
         certbot_auto_renew_user: "{{ acme_auto_renew_user }}"

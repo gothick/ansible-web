@@ -1,8 +1,36 @@
 ---
-- name: Update apt packages
-  # TODO: Do we want to limit this so we don't kick off every run with it? I suppose
-  # it depends how often we want to run the playbooks...
+
+- name: Ensure statefile directory exists
+  ansible.builtin.file:
+    state: directory
+    path: "{{ update_apt_packages_once_statefile | dirname }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Check for statefile presence
+  ansible.builtin.stat:
+    path: "{{ update_apt_packages_once_statefile }}"
+  register: statefile
+
+- name: Update apt packages *once*
   ansible.builtin.apt:
-    upgrade: "yes"
+    upgrade: "safe"
     update_cache: true
-    cache_valid_time: 3600
+    cache_valid_time: "{{ update_apt_packages_cache_valid_time }}"
+    # The ansible linter will whine about this (or it would if we
+    # didn't have a .ansible-lint configuration), but we want to
+    # do it so that our server is always running all the latest
+    # packages *at launch*, which is why we make sure to only run
+    # this task *once* when we first launch the server.
+    state: "latest"
+  when: not statefile.stat.exists
+
+- name: Create statefile
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ update_apt_packages_once_statefile }}"
+    force: false
+    owner: root
+    group: root
+    mode: "0644"

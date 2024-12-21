@@ -14,6 +14,7 @@
   connection: local
   gather_facts: false
   vars:
+    create_recovery_volume: false
     instances:
       - name: ansible-test-dev0
         group: web
@@ -34,7 +35,8 @@
           env: "{{ item.env }}"
         state: running
         instance_type: t2.medium
-        image_id: ami-09a1c459d70c72b96
+        # image_id: ami-04552bb4f4dd38925 # 22.04 20241120
+        image_id: ami-00f3c44a2de45a590 # 24.04 20241206
         key_name: ansible # We've uploaded this public key to Amazon already
         volumes:
           - device_name: /dev/sda1
@@ -71,17 +73,6 @@
       register: ec2_vol_www
       with_items: "{{ newinstances.results }}"
 
-# directory '/var/www' do
-#   action :create
-#   mode '0755'
-#   owner 'root'
-#   group 'root'
-# end
-
-# directory '/var/lib/mysql' do
-#   mode '0755'
-# end
-
     - name: Add volume for /var/lib/mysql
       amazon.aws.ec2_vol:
         instance: "{{ item.instances[0].instance_id }}"
@@ -91,6 +82,17 @@
         volume_type: gp2 # ssd
       register: ec2_vol_db
       with_items: "{{ newinstances.results }}"
+
+    - name: Add volume for /data/recovery
+      amazon.aws.ec2_vol:
+        instance: "{{ item.instances[0].instance_id }}"
+        name: "recovery-{{ item.item.name }}"
+        device_name: /dev/sdh
+        volume_size: 50
+        volume_type: gp2 # ssd
+      register: ec2_vol_recovery
+      with_items: "{{ newinstances.results }}"
+      when: create_recovery_volume
 
     - name: Add new hosts to inventory for use below
       # For now we'll just set the facts up to connect via the public
@@ -139,6 +141,7 @@
       with_items:
         - '/var/www'
         - '/var/lib/mysql'
+        - '/data/recovery'
 
     - name: Filesystem for www
       community.general.filesystem:
@@ -151,6 +154,13 @@
         fstype: ext4
         state: present
         dev: /dev/xvdg
+
+    - name: Filesystem for recovery
+      community.general.filesystem:
+        fstype: ext4
+        state: present
+        dev: /dev/xvdh
+      when: create_recovery_volume
 
     - name: Mount www
       ansible.posix.mount:
@@ -167,6 +177,15 @@
         fstype: ext4
         src: /dev/xvdg
         opts: noatime,auto,nofail
+
+    - name: Mount '/data/recovery'
+      ansible.posix.mount:
+        path: '/data/recovery'
+        state: mounted
+        fstype: ext4
+        src: '/dev/xvdh'
+        opts: noatime,auto,nofail
+      when: create_recovery_volume
 
 # Okay, now we're ready to get on with things via our dynamic inventory using
 # a more normal playbook. You can run provision.yml in the root of the project
