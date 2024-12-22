@@ -10,3 +10,4 @@
       - ncdu
       - iotop
       - git
+      - net-tools
