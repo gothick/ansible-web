@@ -24,7 +24,7 @@
 		Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 		# Protect against XSS
 		# MapBox needed this setting a little loose to work; see https://docs.mapbox.com/mapbox-gl-js/guides/browsers/#referrer-policies
-		Header set Referrer-Policy "origin"
+		Header set Referrer-Policy "strict-origin"
 		# We don't embed things, but let's have some nice defaults anyway. At least it shows
 		# we're thinking about it.
 		Header set Permissions-Policy "geolocation=(self), microphone=(), camera=(), fullscreen=(self), payment=()"
