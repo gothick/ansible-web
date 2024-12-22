@@ -16,13 +16,18 @@
 		# Newer, for modern browsers
 		Header set Content-Security-Policy "frame-ancestors 'self';"
 
-		# TODO:
-		# Strict-Transport-Security
-		# X-Content-Type-Options
-		# Referrer-Policy
-		# Permissions-Policy
-		# Steps to reproduce:
-		# Simply go to https://securityheaders.com/?q=https%3A%2F%2Fgothick.org.uk%2F
+		# Recommended by https://securityheaders.com/?q=https%3A%2F%2Fgothick.org.uk%2F
+
+		# Protect against MIME sniffing
+		Header set X-Content-Type-Options "nosniff"
+		# Enforce HTTPS
+		Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		# Protect against XSS
+		# MapBox needed this setting a little loose to work; see https://docs.mapbox.com/mapbox-gl-js/guides/browsers/#referrer-policies
+		Header set Referrer-Policy "origin"
+		# We don't embed things, but let's have some nice defaults anyway. At least it shows
+		# we're thinking about it.
+		Header set Permissions-Policy "geolocation=(self), microphone=(), camera=(), fullscreen=(self), payment=()"
 
 		# We manage our well_known directories somewhat globally. It's useful if
 		# they're stored outside the main document root. For example, if I want
