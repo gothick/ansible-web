@@ -1,0 +1,25 @@
+---
+- name: Configure unattended upgrades
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Install unattended-upgrades
+      ansible.builtin.apt:
+        name: unattended-upgrades
+        state: present
+        cache_valid_time: 600
+
+    - name: Template unattended-upgrades config files
+      ansible.builtin.template:
+        src: "{{ item }}.j2"
+        dest: "/etc/apt/apt.conf.d/{{ item }}"
+        owner: root
+        group: root
+        mode: "0644"
+      loop:
+        - 20auto-upgrades
+        - 50unattended-upgrades

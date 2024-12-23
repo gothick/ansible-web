@@ -73,6 +73,9 @@
 - name: Install and configure OpenVPN
   import_playbook: playbooks/openvpn/main.yml
 
+- name: Configure unattended upgrades
+  import_playbook: playbooks/unattended_upgrades/main.yml
+
 #
 # This should be the last import in the playbook
 #
