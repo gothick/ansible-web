@@ -72,3 +72,9 @@
 
 - name: Install and configure OpenVPN
   import_playbook: playbooks/openvpn/main.yml
+
+#
+# This should be the last import in the playbook
+#
+- name: Notify done
+  import_playbook: playbooks/notify_done/main.yml

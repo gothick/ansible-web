@@ -1,0 +1,13 @@
+---
+- name: Notify when finished
+  hosts: all
+
+  tasks:
+    - name: Discord notification
+      delegate_to: localhost
+      community.general.discord:
+        webhook_id: "{{ discord_notify_webhook_id }}"
+        webhook_token: "{{ discord_notify_webhook_token }}"
+        content: "Server {{ inventory_hostname }} has been provisioned."
+      when: discord_notify_webhook_id is defined
+      changed_when: false
