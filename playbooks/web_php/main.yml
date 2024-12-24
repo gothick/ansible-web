@@ -33,8 +33,6 @@
       tags:
         - phptest
 
-    # TODO: Move these somewhere else.
-
     - name: Install PHP test script
       ansible.builtin.template:
         src: phpinfo.php.j2
@@ -48,8 +46,6 @@
     - name: Install PHP test site configuration
       ansible.builtin.template:
         src: testsite.conf.j2
-        # TODO: Can we use this? Or do we have to include (but not run)
-        # the Apache role to get hold of apache_server_root?
         dest: "{{ php_apache_server_root }}/sites-available/{{ php_phptest_conf_name }}"
         owner: root
         group: root
