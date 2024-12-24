@@ -147,10 +147,6 @@
         - "{{ easy_rsa_pki_path }}/private/{{ ansible_hostname }}.key"
 
     # Generate client certificates.
-    # TODO: You'll need to grab pki/ca.crt and pki/issued/homemac.crt
-    # to your local machine and configure them in your OpenVPN client.
-    # Maybe make this a bit easier by putting them in a tarball
-    # somewhere handy?
     - name: Generate client requests
       ansible.builtin.command:
         cmd: "./easyrsa gen-req {{ vpn_client_name }} nopass"
