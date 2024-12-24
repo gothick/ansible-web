@@ -8,7 +8,6 @@ while true; do
         [Yy]* )
             # I *think* this should just work, passwordless, these days, as I think
             # I now have passwordless MySQL root login set up from the get-go.
-	          # TODO: We may need to restore a standard Debian maintenance user, too.
             gunzip -c {{ recovery_dir }}/all-databases.sql.gz | mysql
             break
             ;;
