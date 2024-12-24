@@ -34,20 +34,6 @@ roles:
   - name: geerlingguy.mysql
     version: 4.3.4
 
-  # TODO: Get rid of this if we don't end up using Docker
-  - name: geerlingguy.docker
-    version: 7.4.3
-
 collections:
   - name: basicbind.swap_file
     version: 2.0.3
-
-
-#  - name: boutetnico.awscli
-#    version: 5.0.0
-
-#  - name: Oefenweb.postfix
-#    version: v3.6.4
-
-# - name: geerlingguy.pip
-#   version: 3.0.3
