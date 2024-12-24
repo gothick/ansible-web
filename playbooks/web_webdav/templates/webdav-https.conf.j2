@@ -5,8 +5,6 @@
 
     ServerAdmin {{ admin_email }}
 
-    # TODO Probably don't need this as well as the standard DocumentRoot as they
-    # point to the same place.
     Alias "/.well-known" "{{ well_known_docroot }}/.well-known"
 
     DocumentRoot {{ well_known_docroot }}
