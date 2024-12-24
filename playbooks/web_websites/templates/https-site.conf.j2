@@ -113,7 +113,6 @@
 
 		{% if site.php_fpm_pool is defined %}
 		<IfModule proxy_module>
-			{# TODO: Test this. May need setting up in pool https://www.php.net/manual/en/install.fpm.configuration.php#pm.status-path #}
 			<LocationMatch "/fpm-status">
 				Require local
 				{% if safe_admin_hosts is defined and safe_admin_hosts %}
@@ -261,9 +260,6 @@
 		#		downgrade-1.0 force-response-1.0
 
 		# Redirect e.g. http://www.meditationchimer.com (an alias) to https://meditationchimer.com
-		{# TODO: We might want to protect this from open redirect by using the
-		   same approach of checking the host header as we do in the HTTP version
-		   of the site. #}
 		{% if site.canonical_rewrite %}
 		RewriteEngine On
 		# Canonical host, {{ site.server_name }}
@@ -278,36 +274,5 @@
 		RewriteCond %{SCRIPT_FILENAME} !maintenance.html
 		RewriteRule ^.*$ /system/maintenance.html [L,R=503]
 
-		{# Turns out mod_pagespeed wasn't even enabled on the server with
-		   our chef setup. I think I probably just gave up on it as not
-		   worthwhile at some point. #}
-		{#
-			{% if site.enable_pagespeed | default(false) %}
-			<IfModule pagespeed_module>
-				ModPagespeedEnableFilters prioritize_critical_css
-				# TODO If we enable this, our basic gothick.org.uk page dies with a JavaScript error
-				# ModPagespeedEnableFilters defer_javascript
-				ModPagespeedEnableFilters sprite_images
-				ModPagespeedEnableFilters rewrite_images
-				ModPagespeedEnableFilters recompress_png
-				ModPagespeedEnableFilters convert_png_to_jpeg,convert_jpeg_to_webp
-				ModPagespeedEnableFilters collapse_whitespace,remove_comments
-
-				<Location /mod_pagespeed_statistics>
-					<IfModule mod_rewrite.c>
-						RewriteEngine Off
-					</IfModule>
-					{% if safe_admin_hosts is defined and safe_admin_hosts %}
-					Require host {{ safe_admin_hosts | join(' ') }}
-					{% endif %}
-					SetHandler mod_pagespeed_statistics
-				</Location>
-			</IfModule>
-			{% else %}
-			<IfModule pagespeed_module>
-				ModPagespeed off
-			</IfModule>
-			{% endif %}
-		#}
 	</VirtualHost>
 </IfModule>
