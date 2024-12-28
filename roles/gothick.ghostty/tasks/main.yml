@@ -1,0 +1,8 @@
+---
+- name: Install ghostery terminfo
+  ansible.builtin.command:
+    cmd: tic -o /usr/share/terminfo -x -
+    creates: /usr/share/terminfo/g/ghostery
+    stdin: "{{ lookup('ansible.builtin.file', 'terminfo') }}"
+  become: true
+  become_user: root

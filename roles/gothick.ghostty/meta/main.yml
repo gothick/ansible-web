@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  role_name: ghostty
+  namespace: gothick
+  author: Matt Gibson
+  description: Copy ghostty terminfo to system terminfo database
+  license: MIT
+  min_ansible_version: "2.10"
+  platforms:
+    - name: Ubuntu
+  galaxy_tags:
+    - ghostty
+    - cli
+dependencies: []

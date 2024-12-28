@@ -14,6 +14,7 @@
     - ansible_tools
     - useful_tools
     - gothick.awscli
+    - gothick.ghostty
     - basicbind.swap_file.swap_file
 
   tasks:

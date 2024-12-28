@@ -4,6 +4,9 @@ roles:
   - name: gothick.awscli
     src: https://github.com/gothick/ansible-awscli.git
 
+  - name: gothick.ghostty
+    src: https://github.com/gothick/ansible-ghostty.git
+
   - name: arillso.sudoers
     version: 2.3.0
 
