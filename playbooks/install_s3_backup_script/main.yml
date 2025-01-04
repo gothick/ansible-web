@@ -7,7 +7,7 @@
 
   vars_files:
     # - vault.yml
-    # - vars.yml
+    - vars.yml
 
   tasks:
     - name: Install percona-toolkit, used to dump mysql users and privileges separately
