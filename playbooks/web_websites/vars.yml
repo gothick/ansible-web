@@ -47,6 +47,7 @@ websites:
   - server_name: "exhibition.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/exhibition.gothick.org.uk/current"
     allow_override: "all"
+    # create_docroot: false # Because this will be a symlink created by Capistrano
     docroot_owner: "gothick"
     docroot_group: "gothick"
     directory_options: "FollowSymLinks Multiviews"
