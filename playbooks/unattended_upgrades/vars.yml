@@ -2,3 +2,4 @@
 unattended_upgrades_mail: "{{ admin_email }}"
 unattended_upgrades_mail_report: "on-change" # Your other choice is "only-on-error"
 unattended_upgrades_automatic_reboot: "true"
+unattended_upgrades_frequency_days: 7
