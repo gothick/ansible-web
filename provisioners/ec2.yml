@@ -69,7 +69,7 @@
         name: "www-{{ item.item.name }}"
         device_name: /dev/sdf
         volume_size: 64
-        volume_type: gp2 # ssd
+        volume_type: gp3 # ssd, cheaper than gp2 and the differences are inconsequential for us
       register: ec2_vol_www
       with_items: "{{ newinstances.results }}"
 
@@ -79,7 +79,7 @@
         name: "db-{{ item.item.name }}"
         device_name: /dev/sdg
         volume_size: 8
-        volume_type: gp2 # ssd
+        volume_type: gp3
       register: ec2_vol_db
       with_items: "{{ newinstances.results }}"
 
@@ -89,7 +89,7 @@
         name: "recovery-{{ item.item.name }}"
         device_name: /dev/sdh
         volume_size: 50
-        volume_type: gp2 # ssd
+        volume_type: gp3
       register: ec2_vol_recovery
       with_items: "{{ newinstances.results }}"
       when: create_recovery_volume
