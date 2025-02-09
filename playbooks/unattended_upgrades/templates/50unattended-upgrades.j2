@@ -13,7 +13,11 @@ Unattended-Upgrade::Allowed-Origins {
 	// should also install from here by default.
 	"${distro_id}ESMApps:${distro_codename}-apps-security";
 	"${distro_id}ESM:${distro_codename}-infra-security";
-//	"${distro_id}:${distro_codename}-updates";
+{% if unattended_upgrades_security_only | default(true) | bool %}
+//    "${distro_id}:${distro_codename}-updates";
+{% else %}
+	"${distro_id}:${distro_codename}-updates";
+{% endif %}
 //	"${distro_id}:${distro_codename}-proposed";
 //	"${distro_id}:${distro_codename}-backports";
 };
