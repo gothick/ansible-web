@@ -7,4 +7,4 @@ postfix_relayhost_port: 587
 postfix_relaytls: true
 postfix_sasl_auth_enable: true
 postfix_sasl_user: "{{ vault_postfix_sasl_user }}"
-postfix_sasl_password:  "{{ vault_postfix_sasl_password }}"
+postfix_sasl_password: "{{ vault_postfix_sasl_password }}"

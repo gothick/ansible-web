@@ -12,4 +12,3 @@
 
 - name: Dump facts
   import_playbook: playbooks/dump_facts/main.yml
-
