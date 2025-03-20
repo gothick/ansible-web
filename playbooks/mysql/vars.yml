@@ -6,3 +6,5 @@
 
 mysql_config_include_files:
   - src: cnf/charset.cnf
+
+mysql_disable_log_bin: true
