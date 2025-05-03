@@ -38,6 +38,15 @@
         group: root
         mode: "0744"
 
+    - name: Add job for volume snapshots
+      ansible.builtin.cron:
+        name: s3 backups
+        minute: "0"
+        hour: "5"
+        user: root
+        job: "/usr/local/bin/snapshot_ebs_volumes.sh > /dev/null"
+        cron_file: daily_snapshot
+
     - name: Send cron snapshot emails to the right place
       community.general.cronvar:
         name: MAILTO
