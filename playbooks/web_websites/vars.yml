@@ -119,31 +119,31 @@ websites:
     no_well_known: true
     php_fpm_pool: "/run/php/ansible-managed-fpm-omm.sock"
 
-  - server_name: "fresher.gothick.org.uk{{ test_hostname_suffix | default('') }}"
-    siteroot: "{{ apache_sites_dir }}/fresher.gothick.org.uk"
-    compresstypes:
-      - "text/html"
-      - "text/plain"
-      - "text/xml"
-      - "text/css"
-      - "application/x-javascript"
-      - "application/javascript"
-      - "application/ecmascript"
-      - "application/rss+xml"
-      - "application/xml"
-      - "application/json"
-      - "application/ld+json"
-    siteroot_owner: "fresher"
-    siteroot_group: "users"
-    docroot: "{{ apache_sites_dir }}/fresher.gothick.org.uk/current/public"
-    docroot_owner: "fresher"
-    docroot_group: "users"
-    create_docroot: false # Because this will be a symlink created by Deployer
-    allow_override: "all"
-    directory_options: "Indexes FollowSymLinks"
-    canonical_rewrite: true
-    no_well_known: true
-    php_fpm_pool: "/run/php/ansible-managed-fpm-fresher.sock"
+  # - server_name: "fresher.gothick.org.uk{{ test_hostname_suffix | default('') }}"
+  #   siteroot: "{{ apache_sites_dir }}/fresher.gothick.org.uk"
+  #   compresstypes:
+  #     - "text/html"
+  #     - "text/plain"
+  #     - "text/xml"
+  #     - "text/css"
+  #     - "application/x-javascript"
+  #     - "application/javascript"
+  #     - "application/ecmascript"
+  #     - "application/rss+xml"
+  #     - "application/xml"
+  #     - "application/json"
+  #     - "application/ld+json"
+  #   siteroot_owner: "fresher"
+  #   siteroot_group: "users"
+  #   docroot: "{{ apache_sites_dir }}/fresher.gothick.org.uk/current/public"
+  #   docroot_owner: "fresher"
+  #   docroot_group: "users"
+  #   create_docroot: false # Because this will be a symlink created by Deployer
+  #   allow_override: "all"
+  #   directory_options: "Indexes FollowSymLinks"
+  #   canonical_rewrite: true
+  #   no_well_known: true
+  #   php_fpm_pool: "/run/php/ansible-managed-fpm-fresher.sock"
 
   - server_name: "gothick.org.uk{{ test_hostname_suffix | default('') }}"
     aliases:

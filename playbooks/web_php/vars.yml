@@ -75,21 +75,21 @@ php_fpm_pools:
     pool_pm_max_requests: 500
     pool_pm_status_path: /fpm-status
 
-  - pool_name: fresher
-    pool_user: fresher
-    pool_group: users
-    pool_template: custom.conf.j2
-    pool_listen: '/run/php/ansible-managed-fpm-fresher.sock'
-    # So that Apache can talk to it
-    pool_listen_owner: 'www-data'
-    # So that the omm user can reset the opcache using cachetool
-    pool_listen_group: 'fresher'
-    php_admin_values:
-      open_basedir: "{{ apache_sites_dir }}/fresher.gothick.org.uk:/tmp"
-      opcache.memory_consumption: 256
-      opcache.max_accelerated_files: 20000
-    pool_pm: dynamic
-    pool_pm_status_path: /fpm-status
+  # - pool_name: fresher
+  #   pool_user: fresher
+  #   pool_group: users
+  #   pool_template: custom.conf.j2
+  #   pool_listen: '/run/php/ansible-managed-fpm-fresher.sock'
+  #   # So that Apache can talk to it
+  #   pool_listen_owner: 'www-data'
+  #   # So that the omm user can reset the opcache using cachetool
+  #   pool_listen_group: 'fresher'
+  #   php_admin_values:
+  #     open_basedir: "{{ apache_sites_dir }}/fresher.gothick.org.uk:/tmp"
+  #     opcache.memory_consumption: 256
+  #     opcache.max_accelerated_files: 20000
+  #   pool_pm: dynamic
+  #   pool_pm_status_path: /fpm-status
 
   - pool_name: wordpress
     pool_user: wordpress
