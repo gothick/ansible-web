@@ -17,7 +17,7 @@ websites:
   - server_name: "default.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ default_site_docroot }}"
     allow_override: "all"
-    directory_options: "Indexes FollowSymLinks Multiviews"
+    directory_options: "-Indexes +FollowSymLinks +Multiviews"
     canonical_rewrite: true
     apache_config_name: 000-gothick-default # Because the first VirtulHost Apache sees becomes the default
     php_fpm_pool: "/run/php/ansible-managed-fpm-default.sock"
@@ -27,13 +27,13 @@ websites:
   - server_name: "brianthedebugger.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/brianthedebugger.gothick.org.uk"
     allow_override: "all"
-    directory_options: "Indexes FollowSymLinks Multiviews"
+    directory_options: "-Indexes +FollowSymLinks +Multiviews"
     canonical_rewrite: true
 
   - server_name: "dev.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/dev.gothick.org.uk"
     allow_override: "all"
-    directory_options: "Indexes FollowSymLinks Multiviews"
+    directory_options: "-Indexes +FollowSymLinks +Multiviews"
     canonical_rewrite: true
 
   - server_name: "bookpedia.gothick.org.uk{{ test_hostname_suffix | default('') }}"
@@ -60,13 +60,13 @@ websites:
     docroot_owner: "meditationchimer"
     docroot_group: "meditationchimer"
     allow_override: "all"
-    directory_options: "Indexes FollowSymLinks Multiviews"
+    directory_options: "-Indexes +FollowSymLinks +Multiviews"
     canonical_rewrite: true
 
   - server_name: "xslorenz.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/xslorenz.gothick.org.uk/html"
     allow_override: "all"
-    directory_options: "Indexes FollowSymLinks Multiviews"
+    directory_options: "-Indexes +FollowSymLinks +Multiviews"
     canonical_rewrite: true
 
   - server_name: "onthescales.com{{ test_hostname_suffix | default('') }}"
@@ -76,20 +76,20 @@ websites:
     docroot_owner: "onthescales"
     docroot_group: "onthescales"
     allow_override: "all"
-    directory_options: "Indexes FollowSymLinks Multiviews"
+    directory_options: "-Indexes +FollowSymLinks +Multiviews"
     canonical_rewrite: true
 
   - server_name: "tweetnest.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/tweetnest.gothick.org.uk/html"
     allow_override: "all"
-    directory_options: "Indexes FollowSymLinks"
+    directory_options: "-Indexes +FollowSymLinks"
     canonical_rewrite: true
     php_fpm_pool: "/run/php/ansible-managed-fpm-gothick.sock"
 
   - server_name: "oldtweets.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/oldtweets.gothick.org.uk/html"
     allow_override: "all"
-    directory_options: "Indexes FollowSymLinks"
+    directory_options: "-Indexes +FollowSymLinks"
     canonical_rewrite: true
     php_fpm_pool: "/run/php/ansible-managed-fpm-gothick.sock"
 
@@ -114,7 +114,7 @@ websites:
     docroot_group: "users"
     create_docroot: false # Because this will be a symlink created by Deployer
     allow_override: "all"
-    directory_options: "Indexes FollowSymLinks"
+    directory_options: "-Indexes +FollowSymLinks"
     canonical_rewrite: true
     no_well_known: true
     php_fpm_pool: "/run/php/ansible-managed-fpm-omm.sock"
@@ -168,5 +168,5 @@ websites:
   - server_name: "threesixfive.gothick.org.uk{{ test_hostname_suffix | default('') }}"
     docroot: "{{ apache_sites_dir }}/gothick.org.uk/threesixfive.gothick.org.uk"
     allow_override: "all"
-    directory_options: "Indexes FollowSymLinks Multiviews"
+    directory_options: "-Indexes +FollowSymLinks +Multiviews"
     canonical_rewrite: true
