@@ -40,7 +40,7 @@
 
     - name: Add job for volume snapshots
       ansible.builtin.cron:
-        name: s3 backups
+        name: Volume snapshots
         minute: "0"
         hour: "5"
         user: root
