@@ -10,6 +10,10 @@ safe_admin_ips:
 
 default_site_docroot: "{{ apache_sites_dir }}/default.gothick.org.uk"
 
+# Values for global variables in security.conf
+web_serversignature: "Off"
+web_servertokens: "Prod"
+
 websites:
   # One special site: the default site. We use 000-default.conf for the Apache config name
   # so it always gets loaded first, and we also set the docroot to a special directory so
