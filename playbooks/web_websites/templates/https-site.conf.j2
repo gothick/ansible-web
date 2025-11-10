@@ -2,7 +2,6 @@
 {{ ansible_managed | comment }}
 <IfModule mod_ssl.c>
 	<VirtualHost _default_:443>
-
 		ServerName {{ site.server_name }}
 		{% if site.aliases is defined %}
 		ServerAlias {{ site.aliases | join(' ') }}

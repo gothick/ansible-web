@@ -25,7 +25,6 @@ web_users_sudoers:
       - name: gothick
         entry: 'ALL=(ALL) NOPASSWD:ALL'
 
-
 _web_users_key_main_mac: "{{ lookup('ansible.builtin.file', 'authorised_key_main_mac') }}"
 _web_users_key_chromebook: "{{ lookup('ansible.builtin.file', 'authorised_key_chromebook') }}"
 

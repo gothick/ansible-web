@@ -9,6 +9,15 @@
   pre_tasks:
 
   tasks:
+    - name: Security.conf overrides
+      ansible.builtin.template:
+        src: security.conf.j2
+        dest: "{{ apache_server_root }}/conf-available/security.conf"
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Reload apache
+
     - name: Create siteroot folders
       ansible.builtin.file:
         path: "{{ item.siteroot }}"
