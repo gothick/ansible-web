@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
     config.vm.define "vagrant-web" do |machine|
       machine.vm.hostname = "vagrant-web.test"
       machine.vm.network :private_network, ip: "192.168.56.2"
-      machine.vm.network "forwarded_port", guest: 80, host: 8080
+      machine.vm.network "forwarded_port", guest: 80, host: 8181 # Because Jenkins is on 8080
       machine.vm.network "forwarded_port", guest: 443, host: 4443
       machine.vm.provision "ansible" do |ansible|
         ansible.playbook = "playbook.yml"
