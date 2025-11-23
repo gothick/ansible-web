@@ -38,6 +38,9 @@
 - name: Install S3 backup script
   import_playbook: playbooks/install_s3_backup_script/main.yml
 
+- name: Set up duplicity/backupninja backups
+  import_playbook: playbooks/web_backups/main.yml
+
 - name: Install S3 restore script
   import_playbook: playbooks/install_s3_restore_script/main.yml
 

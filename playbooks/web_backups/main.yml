@@ -1,0 +1,52 @@
+---
+- name: Install and configure backupninja and duplicity
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: "Install backpunninja and duplicity"
+      ansible.builtin.apt:
+        package:
+          - backupninja
+          - duplicity
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: "Install backupninja main configuration"
+      ansible.builtin.template:
+        src: backupninja.conf.j2
+        dest: "/etc/backupninja.conf"
+        mode: "0600"
+
+    - name: "Create backupninja cache directory"
+      ansible.builtin.file:
+        path: "/var/cache/backupninja"
+        state: directory
+        mode: "0700"
+
+    - name: "Configure database backups through backupninja to /var/backups"
+      ansible.builtin.template:
+        src: mysql-backup.mysql.j2
+        dest: "/etc/backup.d/10.mysql-backup.mysql"
+        mode: "0600"
+
+    - name: "Configure database file backups from /var/backups via duplicty to s3"
+      ansible.builtin.template:
+        src: mysql-backup.dup.j2
+        dest: "/etc/backup.d/15.mysql-backup.dup"
+        mode: "0600"
+
+    - name: "Configure www file backups through backupninja via duplicity to s3"
+      ansible.builtin.template:
+        src: www-backup.dup.j2
+        dest: "/etc/backup.d/20.www-backup.dup"
+        mode: "0600"
+
+    - name: "Configure home file backups through backupninja via duplicity to s3"
+      ansible.builtin.template:
+        src: home-backup.dup.j2
+        dest: "/etc/backup.d/30.home-backup.dup"
+        mode: "0600"
