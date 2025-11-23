@@ -16,6 +16,9 @@ sqldump = yes
 # arguments to pass to mysqldump
 # sqldumpoptions = --add-drop-table --quick --quote-names
 
+# https://stackoverflow.com/a/58967178/300836 tells you why I'm ignoring a couple of system tables
+sqldumpoptions = --lock-tables --complete-insert --add-drop-table --quick --quote-names --ignore-table=mysql.innodb_table_stats --ignore-table=mysql.innodb_index_stats
+
 # compress = < yes | no > (default = yes)
 # if yes, compress the sqldump output.
 compress = yes
