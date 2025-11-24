@@ -7,11 +7,12 @@
     - vars.yml
 
   tasks:
-    - name: "Install backpunninja and duplicity"
+    - name: "Install backpunninja, duplicity and percona-toolkit"
       ansible.builtin.apt:
         package:
           - backupninja
           - duplicity
+          - percona-toolkit
         update_cache: true
         cache_valid_time: 3600
 
@@ -32,6 +33,13 @@
         src: mysql-backup.mysql.j2
         dest: "/etc/backup.d/10.mysql-backup.mysql"
         mode: "0600"
+
+    # Shell script to backup users and grants using pt-show-grants from Percona Toolkit
+    - name: "Configure database users and grants through backupninja to /var/backups"
+      ansible.builtin.template:
+        src: mysql-users-grants.sh.j2
+        dest: "/etc/backup.d/11.mysql-users-grants.sh"
+        mode: "0700"
 
     - name: "Configure database file backups from /var/backups via duplicty to s3"
       ansible.builtin.template:
