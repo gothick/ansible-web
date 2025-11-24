@@ -58,3 +58,11 @@
         src: home-backup.dup.j2
         dest: "/etc/backup.d/30.home-backup.dup"
         mode: "0600"
+
+    - name: "Install grab backups script"
+      ansible.builtin.template:
+        src: grab_duplicity_backups_from_s3.sh.j2
+        dest: /usr/local/bin/grab_duplicity_backups_from_s3.sh
+        owner: root
+        group: root
+        mode: "0744"
