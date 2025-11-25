@@ -1,10 +1,7 @@
 #! /bin/sh
 {{ ansible_managed | comment }}
 
-{% set bucket_prefix        = 'backups-from-' %}
-{% set home_backup_prefix   = 'home-dup-' %}
-{% set www_backup_prefix    = 'www-dup-' %}
-{% set mysql_backup_prefix  = 'mysql-dup-' %}
+{% set bucket_prefix = 'backups-from-' %}
 
 if [ $# -ne 1 ] ; then
     echo "Usage: ${0}: <source_server_name>"
@@ -15,13 +12,10 @@ server=$1
 
 bucket="s3://gothick.org.uk-backup/{{ bucket_prefix }}$server"
 
-echo "Copying mysql backups"
-aws s3 cp "$bucket/{{ mysql_backup_prefix }}$1" "{{ web_backups_recovery_dir }}/{{ mysql_backup_prefix }}$1" --recursive
-
-echo "Copying www backup"
-aws s3 cp "$bucket/{{ www_backup_prefix }}$1" "{{ web_backups_recovery_dir }}/{{ www_backup_prefix }}$1" --recursive
-
-echo "Copying home backup"
-aws s3 cp "$bucket/{{ home_backup_prefix }}$1" "{{ web_backups_recovery_dir }}/{{ home_backup_prefix }}$1" --recursive
+{% for backup in backups %}
+echo "Copying {{ backup.name }} backups"
+rm -fr "{{ web_backups_recovery_dir }}/{{ backup.dest }}"
+aws s3 cp "$bucket/{{ backup.source }}" "{{ web_backups_recovery_dir }}/{{ backup.dest }}" --recursive
+{% endfor %}
 
 exit 0

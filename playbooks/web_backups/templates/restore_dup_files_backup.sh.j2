@@ -1,0 +1,10 @@
+#! /bin/sh
+{{ ansible_managed | comment }}
+while true; do
+    read -p "Are you sure you want to extract recovery backups to {{ item.target_dir }} (y/n)? " yn
+    case $yn in
+        [Yy]* ) duplicity restore --force file://{{ web_backups_recovery_dir }}/{{ item.source_dir }} {{ item.target_dir }}; break;;
+        [Nn]* ) exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done

@@ -41,23 +41,17 @@
         dest: "/etc/backup.d/11.mysql-users-grants.sh"
         mode: "0700"
 
-    - name: "Configure database file backups from /var/backups via duplicty to s3"
+    - name: Configure backups from various filesystem locations to s3, including mysql dumps from above
       ansible.builtin.template:
-        src: mysql-backup.dup.j2
-        dest: "/etc/backup.d/15.mysql-backup.dup"
+        src: duplicity-backup.dup.j2
+        dest: "/etc/backup.d/{{ item.dest }}"
+        owner: root
+        group: root
         mode: "0600"
-
-    - name: "Configure www file backups through backupninja via duplicity to s3"
-      ansible.builtin.template:
-        src: www-backup.dup.j2
-        dest: "/etc/backup.d/20.www-backup.dup"
-        mode: "0600"
-
-    - name: "Configure home file backups through backupninja via duplicity to s3"
-      ansible.builtin.template:
-        src: home-backup.dup.j2
-        dest: "/etc/backup.d/30.home-backup.dup"
-        mode: "0600"
+      loop:
+        - { dest: '15.mysql-backup.dup', include: ['/var/backups/mysql'], backup_path: 'mysql-dup-backup' }
+        - { dest: '20.www-backup.dup', include: ['/var/www'], backup_path: 'www-dup-backup' }
+        - { dest: '30.home-backup.dup', include: ['/home'], backup_path: 'home-dup-backup' }
 
     - name: "Install grab backups script"
       ansible.builtin.template:
@@ -66,3 +60,23 @@
         owner: root
         group: root
         mode: "0744"
+      vars:
+        backups:
+          - { name: 'mysql', source: 'mysql-dup-backup', dest: 'mysql-dup-backup' }
+          - { name: 'www', source: 'www-dup-backup', dest: 'www-dup-backup' }
+          - { name: 'home', source: 'home-dup-backup', dest: 'home-dup-backup' }
+
+    - name: Install files restore scripts
+      ansible.builtin.template:
+        src: restore_dup_files_backup.sh.j2
+        dest: "{{ item.destination }}"
+        owner: root
+        group: root
+        mode: '0744'
+      loop:
+        - destination: "/usr/local/bin/restore_dup_www_backup.sh"
+          source_dir: "www-dup-backup"
+          target_dir: "/"
+        - destination: /usr/local/bin/restore_dup_home_backup.sh
+          source_dir: "home-dup-backup"
+          target_dir: "/"

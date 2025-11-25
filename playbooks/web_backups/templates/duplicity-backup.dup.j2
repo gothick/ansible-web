@@ -1,12 +1,6 @@
 {{ ansible_managed | comment }}
 
-{% set destination          = 'backups-from-' ~ inventory_hostname %}
-{% set home_backup          = 'home-dup-' ~ inventory_hostname %}
-{% set www_backup           = 'www-dup-' ~ inventory_hostname %}
-{% set mysql_backup         = 'mysql-dup-' ~ inventory_hostname %}
-{% set docker_backup_file   = 'docker-dup-' ~ inventory_hostname %}
-{% set mysql_backup_file    = 'all-databases-dup-' ~ inventory_hostname %}
-{% set mysql_users_file     = 'db_users-dup-' ~ inventory_hostname %}
+{% set destination   = 'backups-from-' ~ inventory_hostname %}
 
 ## This is an example duplicity configuration file.
 ##
@@ -137,7 +131,9 @@ password = {{ web_backups_password }}
 ##    taken into account.
 
 ## files to include in the backup
-include = /var/backups/mysql
+{% for path in item.include %}
+include = {{ path }}
+{% endfor %}
 
 # files to exclude from the backup
 # exclude = /home/*/.gnupg
@@ -190,7 +186,7 @@ keepincroffulls = all
 ## the default value of this configuration option is not set:
 ##
 ## Default:
-desturl = s3://gothick.org.uk-backup/{{ destination }}/{{ mysql_backup}}
+desturl = s3://gothick.org.uk-backup/{{ destination }}/{{ item.backup_path }}
 
 ## Amazon Web Services Access Key ID and Secret Access Key, needed for backups
 ## to S3 buckets.
