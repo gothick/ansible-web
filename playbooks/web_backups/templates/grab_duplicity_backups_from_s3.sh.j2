@@ -1,4 +1,5 @@
 #! /bin/sh
+set -e
 {{ ansible_managed | comment }}
 
 {% set bucket_prefix = 'backups-from-' %}
@@ -17,5 +18,3 @@ echo "Copying {{ backup.name }} backups"
 rm -fr "{{ web_backups_recovery_dir }}/{{ backup.dest }}"
 aws s3 cp "$bucket/{{ backup.source }}" "{{ web_backups_recovery_dir }}/{{ backup.dest }}" --recursive
 {% endfor %}
-
-exit 0
