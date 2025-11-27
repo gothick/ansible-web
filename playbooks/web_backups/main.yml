@@ -1,0 +1,92 @@
+---
+- name: Install and configure backupninja and duplicity
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: "Install backupninja, duplicity and percona-toolkit"
+      ansible.builtin.apt:
+        name:
+          - backupninja
+          - duplicity
+          - percona-toolkit
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: "Install backupninja main configuration"
+      ansible.builtin.template:
+        src: backupninja.conf.j2
+        dest: "/etc/backupninja.conf"
+        mode: "0600"
+
+    - name: "Create backupninja cache directory"
+      ansible.builtin.file:
+        path: "/var/cache/backupninja"
+        state: directory
+        mode: "0700"
+
+    - name: "Configure database backups through backupninja to /var/backups"
+      ansible.builtin.template:
+        src: mysql-backup.mysql.j2
+        dest: "/etc/backup.d/10.mysql-backup.mysql"
+        mode: "0600"
+        owner: root
+        group: root
+
+    # Shell script to backup users and grants using pt-show-grants from Percona Toolkit
+    - name: "Configure database users and grants through backupninja to /var/backups"
+      ansible.builtin.template:
+        src: mysql-users-grants.sh.j2
+        dest: "/etc/backup.d/11.mysql-users-grants.sh"
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Configure backups from various filesystem locations to s3, including mysql dumps from above
+      ansible.builtin.template:
+        src: duplicity-backup.dup.j2
+        dest: "/etc/backup.d/{{ item.dest }}"
+        owner: root
+        group: root
+        mode: "0600"
+      loop:
+        - { dest: '15.mysql-backup.dup', include: ['/var/backups/mysql'], backup_path: 'mysql-dup-backup' }
+        - { dest: '20.www-backup.dup', include: ['/var/www'], backup_path: 'www-dup-backup' }
+        - { dest: '30.home-backup.dup', include: ['/home'], backup_path: 'home-dup-backup' }
+
+    - name: "Install grab backups script"
+      ansible.builtin.template:
+        src: grab_duplicity_backups_from_s3.sh.j2
+        dest: /usr/local/bin/grab_duplicity_backups_from_s3.sh
+        owner: root
+        group: root
+        mode: "0744"
+      vars:
+        backups:
+          - { name: 'mysql', source: 'mysql-dup-backup', dest: 'mysql-dup-backup' }
+          - { name: 'www', source: 'www-dup-backup', dest: 'www-dup-backup' }
+          - { name: 'home', source: 'home-dup-backup', dest: 'home-dup-backup' }
+
+    - name: Install files restore scripts
+      ansible.builtin.template:
+        src: restore_dup_files_backup.sh.j2
+        dest: "{{ item.destination }}"
+        owner: root
+        group: root
+        mode: '0744'
+      loop:
+        - destination: "/usr/local/bin/restore_dup_www_backup.sh"
+          source_dir: "www-dup-backup"
+          target_dir: "/"
+          action: "restore www files"
+        - destination: /usr/local/bin/restore_dup_home_backup.sh
+          source_dir: "home-dup-backup"
+          target_dir: "/"
+          action: "restore home files"
+        - destination: /usr/local/bin/restore_dup_mysql_backup.sh
+          source_dir: "mysql-dup-backup"
+          target_dir: "{{ web_backups_recovery_dir }}/mysql"
+          action: "restore mysql backup files"

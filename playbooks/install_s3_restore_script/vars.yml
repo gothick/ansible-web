@@ -7,10 +7,10 @@ files_scripts:
     tarball: www.tgz
     target_dir: var/www
 
-  - destination: /usr/local/bin/restore_docker_backup.sh
-    recovery_dir: "{{ recovery_dir }}"
-    tarball: docker.tgz
-    target_dir: var/docker
+# - destination: /usr/local/bin/restore_docker_backup.sh
+#   recovery_dir: "{{ recovery_dir }}"
+#   tarball: docker.tgz
+#   target_dir: var/docker
 
   - destination: /usr/local/bin/restore_mysql_files_backup.sh
     recovery_dir: "{{ recovery_dir }}"

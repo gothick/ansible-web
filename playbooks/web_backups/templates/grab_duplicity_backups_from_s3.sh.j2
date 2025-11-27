@@ -1,0 +1,20 @@
+#! /bin/sh
+set -e
+{{ ansible_managed | comment }}
+
+{% set bucket_prefix = 'backups-from-' %}
+
+if [ $# -ne 1 ] ; then
+    echo "Usage: ${0}: <source_server_name>"
+    exit 1
+fi
+
+server=$1
+
+bucket="s3://gothick.org.uk-backup/{{ bucket_prefix }}$server"
+
+{% for backup in backups %}
+echo "Copying {{ backup.name }} backups"
+rm -fr "{{ web_backups_recovery_dir }}/{{ backup.dest }}"
+aws s3 cp "$bucket/{{ backup.source }}" "{{ web_backups_recovery_dir }}/{{ backup.dest }}" --recursive
+{% endfor %}
