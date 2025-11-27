@@ -77,6 +77,12 @@
         - destination: "/usr/local/bin/restore_dup_www_backup.sh"
           source_dir: "www-dup-backup"
           target_dir: "/"
+          action: "restore www files"
         - destination: /usr/local/bin/restore_dup_home_backup.sh
           source_dir: "home-dup-backup"
           target_dir: "/"
+          action: "restore home files"
+        - destination: /usr/local/bin/restore_dup_mysql_backup.sh
+          source_dir: "mysql-dup-backup"
+          target_dir: "{{ web_backups_recovery_dir }}/mysql"
+          action: "restore mysql backup files"
