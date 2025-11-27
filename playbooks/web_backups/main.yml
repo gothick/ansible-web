@@ -7,7 +7,7 @@
     - vars.yml
 
   tasks:
-    - name: "Install backpunninja, duplicity and percona-toolkit"
+    - name: "Install backupninja, duplicity and percona-toolkit"
       ansible.builtin.apt:
         package:
           - backupninja
