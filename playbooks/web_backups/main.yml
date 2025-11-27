@@ -33,6 +33,8 @@
         src: mysql-backup.mysql.j2
         dest: "/etc/backup.d/10.mysql-backup.mysql"
         mode: "0600"
+        owner: root
+        group: root
 
     # Shell script to backup users and grants using pt-show-grants from Percona Toolkit
     - name: "Configure database users and grants through backupninja to /var/backups"
