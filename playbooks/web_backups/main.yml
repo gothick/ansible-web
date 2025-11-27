@@ -9,7 +9,7 @@
   tasks:
     - name: "Install backupninja, duplicity and percona-toolkit"
       ansible.builtin.apt:
-        package:
+        name:
           - backupninja
           - duplicity
           - percona-toolkit
