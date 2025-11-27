@@ -41,6 +41,8 @@
       ansible.builtin.template:
         src: mysql-users-grants.sh.j2
         dest: "/etc/backup.d/11.mysql-users-grants.sh"
+        owner: root
+        group: root
         mode: "0700"
 
     - name: Configure backups from various filesystem locations to s3, including mysql dumps from above
