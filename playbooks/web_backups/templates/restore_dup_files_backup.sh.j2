@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 {{ ansible_managed | comment }}
 while true; do
     read -p "Are you sure you want to {{ item.action }} to {{ item.target_dir }} (y/n)? " yn
