@@ -1,3 +1,0 @@
----
-# Infrequent Access; it's cheaper than standard.
-s3_storage_class: STANDARD_IA
