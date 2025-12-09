@@ -24,6 +24,9 @@ php_www_pool_listen: "127.0.0.1:9000"
 
 php_apache_server_root: "/etc/apache2"
 
+php_max_execution_time: 120
+php_max_input_vars: 3000
+
 # Create just the dev pool for now. Individual websites
 # might create others for themselves in different
 # playbooks
