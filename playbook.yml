@@ -16,7 +16,7 @@
     - gothick.awscli
     - gothick.ghostty
     - basicbind.swap_file.swap_file
-
+    - geerlingguy.redis
   tasks:
 
 - name: Create Ansible user
