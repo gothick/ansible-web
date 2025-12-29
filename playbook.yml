@@ -2,7 +2,7 @@
 - name: Main Web Playbook
   hosts: all
   become: true
-
+  gather_facts: true
   vars:
     vagrant_version: "2.4.1"
 
@@ -16,7 +16,14 @@
     - gothick.awscli
     - gothick.ghostty
     - basicbind.swap_file.swap_file
+    # Our provisioner should already have assigned StandardServerRole to EC2 instances; this
+    # role should allow the CloudWatch Agent to send data to CloudWatch.
+    - role: christiangda.amazon_cloudwatch_agent
+      when: ansible_facts.ohai_cloud.provider | default(omit) == "ec2"
+      vars:
+        cwa_agent_mode: "ec2"
     - geerlingguy.redis
+
   tasks:
 
 - name: Create Ansible user
