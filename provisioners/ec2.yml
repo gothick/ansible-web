@@ -34,6 +34,7 @@
           group: "{{ item.group }}"
           env: "{{ item.env }}"
         state: running
+        iam_instance_profile: StandardServerRole
         instance_type: t2.medium
         # image_id: ami-04552bb4f4dd38925 # 22.04 20241120
         image_id: ami-00f3c44a2de45a590 # 24.04 20241206
