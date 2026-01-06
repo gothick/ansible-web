@@ -18,10 +18,6 @@
     - basicbind.swap_file.swap_file
     # Our provisioner should already have assigned StandardServerRole to EC2 instances; this
     # role should allow the CloudWatch Agent to send data to CloudWatch.
-    - role: christiangda.amazon_cloudwatch_agent
-      when: ansible_facts.ohai_cloud.provider | default(omit) == "ec2"
-      vars:
-        cwa_agent_mode: "ec2"
     - geerlingguy.redis
 
   tasks:
@@ -78,6 +74,9 @@
 
 - name: Install and configure OpenVPN
   import_playbook: playbooks/openvpn/main.yml
+
+- name: Install CloudWatch Agent
+  import_playbook: playbooks/cloudwatch/main.yml
 
 - name: Configure unattended upgrades
   import_playbook: playbooks/unattended_upgrades/main.yml
