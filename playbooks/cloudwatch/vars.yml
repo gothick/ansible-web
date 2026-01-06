@@ -1,0 +1,3 @@
+---
+cwa_agent_mode: "ec2"
+cwa_conf_json_file_content: "{{ lookup('ansible.builtin.template', 'templates/amazon-cloudwatch-agent.yaml.j2') | from_yaml }}"

@@ -1,0 +1,16 @@
+---
+- name: Install and configure Amazon CloudWatch Agent
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  # pre_tasks:
+  #   - name: Debug json content
+  #     ansible.builtin.debug:
+  #       msg: "{{ cwa_conf_json_file_content }}"
+
+  roles:
+    - role: christiangda.amazon_cloudwatch_agent
+      when: ansible_facts.ohai_cloud.provider | default(omit) == "ec2"
