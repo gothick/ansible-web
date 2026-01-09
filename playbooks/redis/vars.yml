@@ -1,0 +1,3 @@
+---
+redis_maxmemory: 268435456 # 256MB
+redis_maxmemory_policy: allkeys-lru

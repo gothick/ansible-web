@@ -16,9 +16,6 @@
     - gothick.awscli
     - gothick.ghostty
     - basicbind.swap_file.swap_file
-    # Our provisioner should already have assigned StandardServerRole to EC2 instances; this
-    # role should allow the CloudWatch Agent to send data to CloudWatch.
-    - geerlingguy.redis
 
   tasks:
 
@@ -71,6 +68,9 @@
 
 - name: Install and configure MySQL
   import_playbook: playbooks/mysql/main.yml
+
+- name: Install and configure Redis
+  import_playbook: playbooks/redis/main.yml
 
 - name: Install and configure OpenVPN
   import_playbook: playbooks/openvpn/main.yml
