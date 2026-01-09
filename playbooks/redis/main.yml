@@ -1,0 +1,10 @@
+---
+- name: Install and configure Redis
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  roles:
+    - role: geerlingguy.redis
