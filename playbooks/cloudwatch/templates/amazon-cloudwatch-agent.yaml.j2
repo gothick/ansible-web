@@ -21,23 +21,27 @@ metrics:
         InstanceId: '${aws:InstanceId}'
         InstanceType: '${aws:InstanceType}'
     metrics_collected:
-        cpu:
-            measurement:
-                - cpu_usage_idle
-                # - cpu_usage_iowait
-                - cpu_usage_user
-                - cpu_usage_system
-            metrics_collection_interval: 60
-            resources:
-                - '*'
-            totalcpu: false
+        # Standard CloudWatch gives us basic CPU by default, so let's not bother with these
+        # until we actually need them.
+        # cpu:
+        #     measurement:
+        #         - cpu_usage_idle
+        #         # - cpu_usage_iowait
+        #         - cpu_usage_user
+        #         - cpu_usage_system
+        #     metrics_collection_interval: 60
+        #     resources:
+        #         - '*'
+        #     totalcpu: false
         disk:
             measurement:
                 - used_percent
                 # - inodes_free
             metrics_collection_interval: 60
             resources:
-                - '*'
+                - '/'
+                - '/var/lib/mysql'
+                - '/var/www'
         diskio:
             measurement:
                 # - io_time
@@ -47,7 +51,9 @@ metrics:
                 # - reads
             metrics_collection_interval: 60
             resources:
-                - '*'
+                - '/'
+                - '/var/lib/mysql'
+                - '/var/www'
         mem:
             measurement:
                 - mem_used_percent
