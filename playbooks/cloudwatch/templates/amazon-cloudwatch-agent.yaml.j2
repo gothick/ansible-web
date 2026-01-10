@@ -51,9 +51,12 @@ metrics:
                 # - reads
             metrics_collection_interval: 60
             resources:
-                - '/'
-                - '/var/lib/mysql'
-                - '/var/www'
+                # root
+                - 'xvda1'
+                # www
+                - 'xvdf'
+                # mysql
+                - 'xvdg'
         mem:
             measurement:
                 - mem_used_percent
