@@ -69,6 +69,9 @@
 - name: Install and configure MySQL
   import_playbook: playbooks/mysql/main.yml
 
+- name: Install tools that only OMM uses
+  import_playbook: playbooks/omm_tools/main.yml
+
 - name: Install and configure Redis
   import_playbook: playbooks/redis/main.yml
 

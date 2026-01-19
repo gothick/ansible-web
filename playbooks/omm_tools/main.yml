@@ -1,0 +1,16 @@
+---
+- name: Install various tools used by OMM specifically
+  hosts: all
+  become: true
+
+  # vars_files:
+  #   - vars.yml
+
+  tasks:
+    - name: Install OMM dependency tools
+      ansible.builtin.apt:
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+        name:
+          - exiftool
