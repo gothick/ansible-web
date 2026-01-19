@@ -3,4 +3,4 @@
 #   - name: jslint
 #   - name: node-sass
 
-nodejs_version: nodejs-v23x
+nodejs_version: nodejs-v22x
