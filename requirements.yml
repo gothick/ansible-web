@@ -26,7 +26,7 @@ roles:
     version: v8.0.0
 
   - name: Oefenweb.yarn
-    version: v1.0.56
+    version: v1.0.57
 
   - name: geerlingguy.java
     version: 2.5.0
@@ -36,6 +36,9 @@ roles:
 
   - name: geerlingguy.mysql
     version: 4.3.4
+
+  - name: Oefenweb.fail2ban
+    version: v4.0.11
 
 collections:
   - name: basicbind.swap_file

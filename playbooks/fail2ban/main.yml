@@ -1,0 +1,10 @@
+---
+- name: Install and configure fail2ban
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  roles:
+    - Oefenweb.fail2ban
