@@ -84,6 +84,9 @@
 - name: Configure unattended upgrades
   import_playbook: playbooks/unattended_upgrades/main.yml
 
+- name: Configure fail2ban
+  import_playbook: playbooks/fail2ban/main.yml
+
 #
 # This should be the last import in the playbook
 #
