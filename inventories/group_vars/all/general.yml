@@ -1,4 +1,4 @@
 ---
-admin_email: gothick@gothick.org.uk
-security_email: security@gothick.org.uk
-admin_ip_address: 81.174.144.111
+admin_email: "{{ vault_admin_email }}"
+security_email: "{{ vault_security_email }}"
+admin_ip_address: "{{ vault_admin_ip_address }}"
