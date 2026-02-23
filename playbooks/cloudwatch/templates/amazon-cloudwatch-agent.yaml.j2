@@ -37,7 +37,7 @@ metrics:
             measurement:
                 - used_percent
                 # - inodes_free
-            metrics_collection_interval: 60
+            metrics_collection_interval: 300
             resources:
                 - '/'
                 - '/var/lib/mysql'
@@ -60,7 +60,7 @@ metrics:
         mem:
             measurement:
                 - mem_used_percent
-            metrics_collection_interval: 60
+            metrics_collection_interval: 300
         # netstat:
         #     measurement:
         #         - tcp_established
@@ -69,4 +69,4 @@ metrics:
         swap:
             measurement:
                 - swap_used_percent
-            metrics_collection_interval: 60
+            metrics_collection_interval: 300
