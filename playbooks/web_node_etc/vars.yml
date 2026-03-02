@@ -3,4 +3,5 @@
 #   - name: jslint
 #   - name: node-sass
 
-nodejs_version: nodejs-v22x
+# Matches version on my Mac :)
+nodejs_version: nodejs-v25x
