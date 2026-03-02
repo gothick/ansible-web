@@ -23,7 +23,7 @@ roles:
     version: 5.2.0
 
   - name: Oefenweb.nodejs
-    version: v8.0.0
+    version: v8.1.1
 
   - name: Oefenweb.yarn
     version: v1.0.57
