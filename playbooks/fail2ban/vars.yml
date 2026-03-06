@@ -6,7 +6,7 @@ fail2ban_ignoreip:
   - 172.31.16.0/20 # AWS VPC range
   - "{{ admin_ip_address }}"
 
-fail2ban_filterd_path: ./files/filter.d/
+fail2ban_filterd_path: "{{ playbook_dir }}/files/filter.d/"
 
 fail2ban_services:
   - name: sshd
