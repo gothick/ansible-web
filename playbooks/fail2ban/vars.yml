@@ -6,6 +6,8 @@ fail2ban_ignoreip:
   - 172.31.16.0/20 # AWS VPC range
   - "{{ admin_ip_address }}"
 
+fail2ban_filterd_path: "{{ playbook_dir }}/files/filter.d/"
+
 fail2ban_services:
   - name: sshd
   - name: apache-auth
@@ -26,3 +28,10 @@ fail2ban_services:
     logpath: /var/log/apache2/*error.log
   - name: php-url-fopen
     logpath: /var/log/apache2/*access.log
+  - name: apache-wordpress-logins
+    port: https
+    filter: apache-wordpress-logins
+    logpath: /var/log/apache2/gothick.org.uk-https-access.log
+    maxretry: 2
+    findtime: 600
+    bantime: 3600
