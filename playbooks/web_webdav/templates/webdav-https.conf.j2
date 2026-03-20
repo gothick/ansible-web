@@ -1,5 +1,6 @@
 #jinja2: lstrip_blocks:True
 {{ ansible_managed | comment }}
+
 <VirtualHost _default_:443>
     ServerName {{ webdav_server_name }}
 
@@ -9,11 +10,22 @@
 
     DocumentRoot {{ well_known_docroot }}
 
+    KeepAlive On
+    KeepAliveTimeout 5
+    MaxKeepAliveRequests 100
+    EnableMMAP On
+    EnableSendfile On
+
     <Directory "{{ well_known_docroot }}">
         Options -Indexes +FollowSymLinks +MultiViews
         AllowOverride All
         Require all granted
     </Directory>
+
+    <IfModule mod_deflate.c>
+        AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+        DeflateCompressionLevel 6
+    </IfModule>
 
     <IfModule mod_ssl.c>
         <IfFile {{ acme_sites_dir }}/{{ webdav_server_name }}/fullchain.pem >
@@ -42,6 +54,11 @@
             Require valid-user
         </Location>
     {% endfor %}
+
+    <IfModule mod_deflate.c>
+        AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+        DeflateCompressionLevel 6
+    </IfModule>
 
     LogLevel info
     ErrorLog {{ apache_log_dir }}/{{ webdav_server_name }}-https-error.log

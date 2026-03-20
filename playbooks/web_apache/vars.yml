@@ -24,6 +24,11 @@ apache_mods_enabled:
   - proxy_balancer
   - proxy_http
   - slotmem_shm
+  # For compression
+  - deflate
+  - filter
+  - socache_shmcb
+  - http2
 
   # You haven't bothered with pagespeed this time. More trouble than it's worth.
 

@@ -8,3 +8,27 @@
 
   roles:
     - geerlingguy.apache
+
+  pre_tasks:
+
+  tasks:
+    - name: Copy ansible.conf file to apache available confs
+      ansible.builtin.copy:
+        src: ansible-ssl.conf
+        dest: "{{ apache_server_root }}/conf-available/ansible-ssl.conf"
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Reload apache
+
+    - name: Enable ansible.conf
+      ansible.builtin.command: a2enconf ansible-ssl
+      register: conf_result
+      changed_when: "'Enabling conf ansible-ssl' in conf_result.stdout"
+      notify: Reload apache
+
+  handlers:
+    - name: Reload apache
+      ansible.builtin.service:
+        name: apache2
+        state: reloaded

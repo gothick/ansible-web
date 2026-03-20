@@ -7,6 +7,7 @@
 		ServerAlias {{ site.aliases | join(' ') }}
 		{% endif %}
 
+		Protocols {{ site.protocols | default('h2 http/1.1') }}
 		ServerAdmin {{ admin_email }}
 
 		# Protect against iframe clickjacking
