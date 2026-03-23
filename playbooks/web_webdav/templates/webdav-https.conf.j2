@@ -24,11 +24,6 @@
         Require all granted
     </Directory>
 
-    <IfModule mod_deflate.c>
-        AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
-        DeflateCompressionLevel 6
-    </IfModule>
-
     <IfModule mod_ssl.c>
         <IfFile {{ acme_sites_dir }}/{{ webdav_server_name }}/fullchain.pem >
 			SSLCertificateFile	{{ acme_sites_dir }}/{{ webdav_server_name }}/fullchain.pem
@@ -58,8 +53,10 @@
     {% endfor %}
 
     <IfModule mod_deflate.c>
-        AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
-        DeflateCompressionLevel 6
+        <IfModule mod_filter.c>
+            AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+            DeflateCompressionLevel 6
+        </IfModule>
     </IfModule>
 
     LogLevel info
