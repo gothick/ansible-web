@@ -3,13 +3,6 @@
   hosts: all
   become: true
 
-  # vars_files:
-  #   - vars.yml
-
-  # pre-tasks:
-  #   - name: Gather service facts
-  #     ansible.builtin.service_facts:
-
   tasks:
     - name: Template out password auth configuration
       ansible.builtin.template:

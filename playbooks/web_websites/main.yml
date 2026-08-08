@@ -6,8 +6,6 @@
   vars_files:
     - vars.yml
 
-  pre_tasks:
-
   tasks:
     - name: Security.conf overrides
       ansible.builtin.template:
@@ -134,11 +132,6 @@
       with_items: "{{ websites }}"
       tags: acme
 
-    - name: Debug
-      ansible.builtin.debug:
-        var: acme_use_staging_server
-      tags: test
-
     - name: Set up Certbot with the certificates set up as above for all websites
       ansible.builtin.import_role:
         name: geerlingguy.certbot
@@ -167,7 +160,6 @@
       tags: acme
 
   handlers:
-
     - name: Reload apache
       ansible.builtin.service:
         name: apache2

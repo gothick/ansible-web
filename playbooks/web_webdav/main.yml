@@ -8,10 +8,7 @@
     - vars.yml
     - webdav_config.yml
 
-  pre_tasks:
-
   tasks:
-
     - name: Create config directory
       ansible.builtin.file:
         path: "{{ webdav_conf_dir }}"
@@ -108,7 +105,6 @@
       tags: acme
 
   handlers:
-
     - name: Reload apache
       ansible.builtin.service:
         name: apache2

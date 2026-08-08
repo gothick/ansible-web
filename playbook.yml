@@ -3,11 +3,6 @@
   hosts: all
   become: true
   gather_facts: true
-  vars:
-    vagrant_version: "2.4.1"
-
-  pre_tasks:
-
   roles:
     - update_apt_packages
     - ansible_node
@@ -16,8 +11,6 @@
     - gothick.awscli
     - gothick.ghostty
     - basicbind.swap_file.swap_file
-
-  tasks:
 
 - name: Create Ansible user
   import_playbook: playbooks/create_ansible_user/main.yml

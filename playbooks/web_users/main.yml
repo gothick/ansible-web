@@ -28,11 +28,9 @@
       loop: "{{ web_users_users }}"
 
     - name: Install oh-my-zsh for zsh users
-      # ansible.builtin.shell: |
-      #   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
       loop: "{{ user_info.results }}"
-        # Note the unattended flag being passed in here. This stops it asking
-        # dopey questions or trying to run zsh once it's done the install.
+      # Note the unattended flag being passed in here. This stops it asking
+      # dopey questions or trying to run zsh once it's done the install.
       ansible.builtin.shell: |
         sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
       become: true

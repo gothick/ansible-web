@@ -3,10 +3,6 @@
   hosts: all
   become: true
 
-  pre_tasks:
-
-  tasks:
-
 - name: Configure php
   import_playbook: playbooks/web_php/main.yml
 

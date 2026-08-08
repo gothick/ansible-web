@@ -9,8 +9,6 @@
   roles:
     - geerlingguy.apache
 
-  pre_tasks:
-
   tasks:
     - name: Copy ansible-ssl.conf file to apache available confs
       ansible.builtin.copy:
