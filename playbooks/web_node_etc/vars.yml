@@ -4,4 +4,4 @@
 #   - name: node-sass
 
 # Matches version on my Mac :)
-nodejs_version: nodejs-v25x
+nodejs_version: nodejs-v26x
