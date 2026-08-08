@@ -123,3 +123,9 @@ test/units/.coverage.*
 /SYMLINK_CACHE.json
 changelogs/.plugin-cache.yaml
 .ansible-test-timeout.json
+
+# Local tooling state (not part of the deployable project)
+# ansible-lint's own dependency cache (see `ansible-lint --offline`)
+.ansible/
+# Claude Code session state
+.claude/
