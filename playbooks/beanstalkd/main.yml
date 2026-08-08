@@ -4,13 +4,7 @@
   hosts: all
   become: true
 
-  # vars_files:
-  #   - vars.yml
-
-  pre_tasks:
-
   tasks:
-
     - name: Install beanstalkd
       ansible.builtin.apt:
         name: beanstalkd

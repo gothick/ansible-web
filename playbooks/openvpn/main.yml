@@ -18,36 +18,6 @@
         cache_valid_time: 3600
 
   tasks:
-
-    # - name: Create easy-rsa directory
-    #   ansible.builtin.file:
-    #     path: /etc/openvpn/easy-rsa
-    #     state: directory
-    #     owner: root
-    #     group: root
-    #     mode: '0700'
-
-    # - name: Find all easy-rsa content
-    #   ansible.builtin.find:
-    #     paths: /usr/share/easy-rsa
-    #     file_type: any
-    #   register: easy_rsa_content
-
-    # - name: Symlink easy-rsa files to /etc/openvpn/easy-rsa
-    #   ansible.builtin.file:
-    #     src: "{{ item.path }}"
-    #     dest: "/etc/openvpn/easy-rsa/{{ item.path | basename }}"
-    #     state: link
-    #   with_items: "{{ easy_rsa_content.files }}"
-
-    # - name: Copy easy-rsa vars file
-    #   ansible.builtin.copy:
-    #     src: easy_rsa_vars
-    #     dest: /etc/openvpn/easy-rsa/vars
-    #     owner: root
-    #     group: root
-    #     mode: '0600'
-
     - name: Create easy-rsa directory using make-cadir
       ansible.builtin.command:
         cmd: make-cadir /etc/openvpn/easy-rsa
@@ -69,9 +39,6 @@
       environment:
         EASYRSA_VARS_FILE: "{{ easy_rsa_vars_path }}"
         EASYRSA_BATCH: "1"
-        # EASYRSA_REQ_CN: "{{ easy_rsa_req_cn }}"
-        # EASYRSA_ALGO: "{{ easy_rsa_algo }}"
-        # EASYRSA_DIGEST: "{{ easy_rsa
 
     - name: Build certificate authority
       ansible.builtin.command:
@@ -241,7 +208,6 @@
         - src: forwarding.up.sh.j2
           dest: /etc/openvpn/server.up.d/forwarding.up.sh
           mode: '0700'
-
       notify: Restart openvpn
 
     - name: Enable and start openvpn systemd service
@@ -285,5 +251,3 @@
         state: restarted
         daemon_reload: true
         name: openvpn@server
-
-  post_tasks:

@@ -21,8 +21,6 @@
         env: dev
         eip: 34.198.66.246
 
-  pre_tasks:
-
   tasks:
     # This will find an existing instance by name, or create it if it
     # doesn't exist.
