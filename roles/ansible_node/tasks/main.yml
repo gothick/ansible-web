@@ -9,7 +9,7 @@
       # Ansible, as it requires python3 to install python3...
       # - python3 # The basic Ansible-controlled node requirement
       - aptitude # Ansible apparently prefers this to raw apt
-      - facter # Improve fact gathering
+      # - facter # Improve fact gathering
       - ohai # Improve fact gathering
       - python3-boto3 # Required for aws/ec2 ansible plugins
       - python3-botocore # Required for aws/ec2 ansible plugins

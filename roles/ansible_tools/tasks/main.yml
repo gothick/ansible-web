@@ -7,7 +7,7 @@
     name:
       - python3 # The basic Ansible-controlled node requirement
       - aptitude # Ansible apparently prefers this to raw apt
-      - facter # Improve fact gathering
+      # - facter # Improve fact gathering
       - ohai # Improve fact gathering
 
       # TODO: Consider this if you can be arsed remounting / with
