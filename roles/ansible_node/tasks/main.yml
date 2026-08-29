@@ -9,8 +9,12 @@
       # Ansible, as it requires python3 to install python3...
       # - python3 # The basic Ansible-controlled node requirement
       - aptitude # Ansible apparently prefers this to raw apt
+      # I never used this:
       # - facter # Improve fact gathering
-      - ohai # Improve fact gathering
+      # And this I only used for checking if we're in EC2 or not,
+      # but I've changed to a much more lightweight method using
+      # Ansible's own amazon.aws.ec2_metadata_facts.
+      # - ohai # Improve fact gathering
       - python3-boto3 # Required for aws/ec2 ansible plugins
       - python3-botocore # Required for aws/ec2 ansible plugins
       - python3-packaging # Used by amazon.aws.ec2_vol_info
