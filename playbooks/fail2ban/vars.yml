@@ -1,4 +1,6 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/vars.json
+
 # Configure fail2ban defaults
 
 fail2ban_ignoreip:
@@ -31,6 +33,13 @@ fail2ban_services:
   - name: apache-wordpress-logins
     port: https
     filter: apache-wordpress-logins
+    logpath: /var/log/apache2/gothick.org.uk-https-access.log
+    maxretry: 2
+    findtime: 600
+    bantime: 3600
+  - name: apache-wordpress-author-exclude
+    port: https
+    filter: apache-wordpress-author-exclude
     logpath: /var/log/apache2/gothick.org.uk-https-access.log
     maxretry: 2
     findtime: 600
