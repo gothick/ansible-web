@@ -6,6 +6,15 @@
   vars_files:
     - vars.yml
 
+  pre_tasks:
+    - name: See if we're actually running on EC2
+      amazon.aws.ec2_metadata_facts:
+      ignore_errors: true # noqa: ignore-errors
+
+    - name: Record whether we're on EC2
+      ansible.builtin.set_fact:
+        is_ec2: "{{ ansible_ec2_instance_id is defined }}"
+
   roles:
     - role: christiangda.amazon_cloudwatch_agent
-      when: ansible_facts.ohai_cloud.provider | default(omit) == "ec2"
+      when: is_ec2
