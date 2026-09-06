@@ -1,0 +1,22 @@
+{{ ansible_managed | comment }}
+# mpm_event configuration.
+#
+# StartServers: initial number of server processes to start
+# MinSpareThreads: minimum number of worker threads which are kept spare
+# MaxSpareThreads: maximum number of worker threads which are kept spare
+# ThreadLimit: ThreadsPerChild can be changed to this maximum value during a
+#              graceful restart. ThreadLimit can only be changed by stopping
+#              and starting Apache.
+# ThreadsPerChild: constant number of worker threads in each server process
+# MaxRequestWorkers: maximum number of worker threads
+# MaxConnectionsPerChild: maximum number of requests a server process serves
+
+<IfModule mpm_event_module>
+    StartServers             {{ apache_mpm_start_servers | default(2, true) }}
+    MinSpareThreads          {{ apache_mpm_min_spare_threads | default(50, true) }}
+    MaxSpareThreads          {{ apache_mpm_max_spare_threads | default(150, true) }}
+    ThreadLimit              {{ apache_mpm_thread_limit | default(64, true) }}
+    ThreadsPerChild          {{ apache_mpm_threads_per_child | default(50, true) }}
+    MaxRequestWorkers        {{ apache_mpm_max_request_workers | default(300, true) }}
+    MaxConnectionsPerChild   {{ apache_mpm_max_connections_per_child | default(0, true) }}
+</IfModule>
