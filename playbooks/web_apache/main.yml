@@ -25,8 +25,24 @@
       changed_when: "'Enabling conf ansible-ssl' in conf_result.stdout"
       notify: Reload apache
 
+    - name: Configure mpm_event
+      ansible.builtin.template:
+        src: mpm_event.conf.j2
+        dest: "{{ apache_server_root }}/mods-available/mpm_event.conf"
+        owner: root
+        group: root
+        mode: '0644'
+      # ThreadLimit can only change on a full stop/start, not a graceful
+      # reload, so this needs its own, more disruptive, handler.
+      notify: Restart apache
+
   handlers:
     - name: Reload apache
       ansible.builtin.service:
         name: apache2
         state: reloaded
+
+    - name: Restart apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted

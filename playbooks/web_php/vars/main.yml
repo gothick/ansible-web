@@ -31,7 +31,11 @@ php_max_input_vars: "3000"
 # might create others for themselves in different
 # playbooks
 php_fpm_pools:
-  # Not a default pool, but a pool for our default.gothick.org.uk site
+  # Not a default pool, but a pool for our default.gothick.org.uk site.
+  # This site never legitimately needs concurrency - its only visitors are
+  # people who got our IP wrong and bots scanning for exposed backups/.env
+  # files - so it's kept deliberately smaller than our real sites' pools
+  # rather than inheriting the role's much larger default of 50.
   - pool_name: default
     pool_user: www-data
     pool_group: www-data
@@ -40,6 +44,11 @@ php_fpm_pools:
     php_admin_values:
       open_basedir: "{{ apache_sites_dir }}/default.gothick.org.uk/:/tmp"
     pool_pm: dynamic
+    pool_pm_max_children: 4
+    pool_pm_start_servers: 1
+    pool_pm_min_spare_servers: 1
+    pool_pm_max_spare_servers: 2
+    pool_pm_max_requests: 200
     pool_pm_status_path: /fpm-status
 
   - pool_name: gothick
@@ -99,7 +108,12 @@ php_fpm_pools:
     pool_group: users
     pool_template: custom.conf.j2
     pool_listen: '/run/php/ansible-managed-fpm-wordpress.sock'
-    pool_pm_max_children: 10
+    # Bumped from 10 -> 14 on 2026-09-06: /fpm-status showed
+    # "max children reached" hit 8 times in a single 14-hour period
+    # (with max active processes == 10), so it was genuinely running out
+    # of headroom under normal traffic, not just during the Sept 6
+    # attack. See project notes for the fuller resource-sizing rationale.
+    pool_pm_max_children: 14
     php_admin_values:
       open_basedir: "{{ apache_sites_dir }}/wordpress:/tmp"
       post_max_size: '12M'
