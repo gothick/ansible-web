@@ -3,7 +3,7 @@
 
 # Configure fail2ban defaults
 
-fail2ban_ignoreip:
+fail2ban_ignoreips:
   - 127.0.0.1/8
   - 172.31.16.0/20 # AWS VPC range
   - "{{ admin_ip_address }}"
