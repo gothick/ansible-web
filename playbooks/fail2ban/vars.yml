@@ -44,3 +44,10 @@ fail2ban_services:
     maxretry: 2
     findtime: 600
     bantime: 3600
+  - name: apache-404flood
+    filter: apache-404flood
+    port: http,https
+    logpath: /var/log/apache2/*access.log
+    maxretry: 20
+    findtime: 30
+    bantime: 3600
