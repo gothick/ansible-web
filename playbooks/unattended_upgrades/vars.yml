@@ -6,6 +6,27 @@ unattended_origins_patterns:
   - 'o=Ubuntu,a=${distro_codename}'
   - 'o=Ubuntu,a=${distro_codename}-updates'
 
-unattended_automatic_reboot: true
-unattended_automatic_reboot_time: '02:00'
 unattended_mail_report: on-change
+unattended_remove_unused_kernel_packages: true
+
+# Nightly schedule, chosen to stay clear of everything else:
+#   01:00        backupninja (typically ~3 min; ~35 min on monthly duplicity full)
+#   02:00/14:00  apt-daily: refresh package lists
+#   02:18        certbot renew
+#   02:30/14:30  apt-daily-upgrade: install upgrades (finished well before 03:30)
+#   03:30        reboot, only if /var/run/reboot-required exists
+#   04:35        web-writeable check
+#   05:00        EBS snapshots
+# The overnight upgrade run means a reboot-requiring fix waits ~1h, not ~19h.
+# The afternoon run catches fixes published during the day; any reboot it
+# needs waits for the next 03:30.
+# NB: the reboot time must fall after the upgrade window, or shutdown(8)
+# will schedule it for the following day.
+unattended_automatic_reboot: true
+unattended_automatic_reboot_time: '03:30'
+
+unattended_systemd_timer_override: true
+unattended_apt_daily_oncalendar: '*-*-* 2,14:00'
+unattended_apt_daily_randomizeddelaysec: '10m'
+unattended_apt_daily_upgrade_oncalendar: '*-*-* 2,14:30'
+unattended_apt_daily_upgrade_randomizeddelaysec: '15m'
