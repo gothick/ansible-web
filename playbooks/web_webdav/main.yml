@@ -12,8 +12,8 @@
     - name: Create config directory
       ansible.builtin.file:
         path: "{{ webdav_conf_dir }}"
-        owner: "{{ default_apache_user }}"
-        group: "{{ default_apache_group }}"
+        owner: root
+        group: root
         state: directory
         mode: '0755'
 
@@ -21,9 +21,9 @@
       ansible.builtin.template:
         src: webdav_digest.j2
         dest: "{{ webdav_digest_file }}"
-        owner: "{{ default_apache_user }}"
+        owner: root
         group: "{{ default_apache_group }}"
-        mode: '0600' # They're encrypted, but they're still passwords
+        mode: '0640' # Apache needs to read it; nothing else may write it
 
     - name: Create webdav folders
       ansible.builtin.file:
@@ -38,16 +38,16 @@
       ansible.builtin.file:
         path: "{{ well_known_docroot }}/.well-known/acme-challenge"
         state: directory
-        owner: "{{ default_apache_user }}"
-        group: "{{ default_apache_group }}"
+        owner: root
+        group: root
         mode: '0755'
 
     - name: Template http version of the config file
       ansible.builtin.template:
         src: webdav-http.conf.j2
         dest: "{{ apache_server_root }}/sites-available/{{ webdav_server_name }}.conf"
-        owner: "{{ default_apache_user }}"
-        group: "{{ default_apache_group }}"
+        owner: root
+        group: root
         mode: '0644'
       notify: Reload apache
 
@@ -55,8 +55,8 @@
       ansible.builtin.template:
         src: webdav-https.conf.j2
         dest: "{{ apache_server_root }}/sites-available/{{ webdav_server_name }}-ssl.conf"
-        owner: "{{ default_apache_user }}"
-        group: "{{ default_apache_group }}"
+        owner: root
+        group: root
         mode: '0644'
       notify: Reload apache
 
