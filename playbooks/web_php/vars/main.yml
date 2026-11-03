@@ -51,21 +51,6 @@ php_fpm_pools:
     pool_pm_max_requests: 200
     pool_pm_status_path: /fpm-status
 
-  - pool_name: gothick
-    pool_user: www-data
-    pool_group: www-data
-    pool_template: custom.conf.j2
-    pool_listen: '/run/php/ansible-managed-fpm-gothick.sock'
-    php_admin_values:
-      open_basedir: "{{ apache_sites_dir }}/gothick.org.uk/:/tmp"
-    pool_pm: dynamic
-    pool_pm_max_children: 5
-    pool_pm_start_servers: 2
-    pool_pm_min_spare_servers: 1
-    pool_pm_max_spare_servers: 3
-    pool_pm_max_requests: 500
-    pool_pm_status_path: /fpm-status
-
   - pool_name: omm
     pool_user: omm
     pool_group: users
