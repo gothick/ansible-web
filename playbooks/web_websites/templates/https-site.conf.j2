@@ -268,6 +268,21 @@
 		RewriteRule ^/(.*)$        https://{{ site.server_name }}/$1 [L,R=301]
 		{% endif %}
 
+		{% if site.cheap_json_404 | default(false) %}
+		# Scanners probe for credential/config files like /credentials.json. Left to
+		# WordPress, each miss is a full (expensive) PHP-rendered 404 page, and a burst
+		# of them can exhaust the PHP-FPM pool. If a .json request doesn't match a real
+		# file on disk, answer with a bare 404 from Apache without involving PHP. We
+		# leave /wp-json/ (REST API) and /.well-known/ alone as they can be served
+		# virtually. Only enable this for sites with no virtual .json routes.
+		RewriteEngine On
+		RewriteCond %{REQUEST_URI} \.json$ [NC]
+		RewriteCond %{REQUEST_URI} !^/wp-json/ [NC]
+		RewriteCond %{REQUEST_URI} !^/\.well-known/
+		RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} !-f
+		RewriteRule ^ - [R=404,L]
+		{% endif %}
+
 		# Generally useful
 		RewriteEngine On
 		RewriteCond {{ site.docroot }}/system/maintenance.html -f
