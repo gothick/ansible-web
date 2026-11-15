@@ -10,7 +10,7 @@
 
     - name: Record whether we're on EC2
       ansible.builtin.set_fact:
-        is_ec2: "{{ ansible_ec2_instance_id is defined }}"
+        is_ec2: "{{ ansible_facts['ec2_instance_id'] is defined }}"
 
   tasks:
     # Because snapshotting EC2 volumes makes no sense if we're not in EC2

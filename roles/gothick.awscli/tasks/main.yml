@@ -6,14 +6,14 @@
     cache_valid_time: 3600
     name:
       - awscli
-  when: ansible_distribution_release in ['jammy']
+  when: ansible_facts['distribution_release'] in ['jammy']
 
 - name: Install awscli via snap
   community.general.snap:
     classic: true
     name:
       - aws-cli
-  when: ansible_distribution_release in ['noble']
+  when: ansible_facts['distribution_release'] in ['noble']
 
 - name: Get specified user's home directory
   ansible.builtin.user:
