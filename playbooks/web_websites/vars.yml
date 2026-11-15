@@ -152,6 +152,7 @@ websites:
     allow_override: "all"
     directory_options: "FollowSymLinks"
     canonical_rewrite: false # WordPress does its own canonicalisation
+    cheap_json_404: true # Don't let scanners probing for *.json files cost us a PHP render each
     php_fpm_pool: "/run/php/ansible-managed-fpm-wordpress.sock"
 
   # This one only has a .htaccess file that redirects things to WordPress

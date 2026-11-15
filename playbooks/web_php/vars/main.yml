@@ -98,7 +98,12 @@ php_fpm_pools:
     # (with max active processes == 10), so it was genuinely running out
     # of headroom under normal traffic, not just during the Sept 6
     # attack. See project notes for the fuller resource-sizing rationale.
-    pool_pm_max_children: 14
+    # Bumped from 14 -> 20 on 2026-11-15 after a scanner burst (~50 requests in
+    # a second, all expensive WordPress 404s) hit the limit and caused 504s.
+    # Workers average ~58MB RSS and ~2GB was available, so this costs at most
+    # ~350MB. It's only margin; see the cheap_json_404 site option for the
+    # real mitigation.
+    pool_pm_max_children: 20
     php_admin_values:
       open_basedir: "{{ apache_sites_dir }}/wordpress:/tmp"
       post_max_size: '12M'
