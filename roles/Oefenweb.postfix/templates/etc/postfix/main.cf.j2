@@ -1,4 +1,4 @@
-# {{ ansible_managed }}
+{{ ansible_managed | comment }}
 
 # See /usr/share/postfix/main.cf.dist for a commented, more complete version
 
@@ -25,17 +25,39 @@ compatibility_level = {{ postfix_compatibility_level }}
 # TLS parameters
 smtpd_tls_cert_file = {{ postfix_smtpd_tls_cert_file }}
 smtpd_tls_key_file = {{ postfix_smtpd_tls_key_file }}
-smtpd_use_tls=yes
+smtpd_use_tls = yes
+{% if postfix_smtpd_tls_security_level is defined %}
+smtpd_tls_security_level = {{ postfix_smtpd_tls_security_level }}
+{% endif %}
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+
+{% if postfix_smtp_tls_mandatory_ciphers is defined %}
+smtp_tls_mandatory_ciphers = {{ postfix_smtp_tls_mandatory_ciphers }}
+{% endif %}
+{% if postfix_smtpd_tls_mandatory_ciphers is defined %}
+smtpd_tls_mandatory_ciphers = {{ postfix_smtpd_tls_mandatory_ciphers }}
+{% endif %}
+{% if postfix_smtpd_tls_mandatory_protocols is defined %}
+smtpd_tls_mandatory_protocols = {{ postfix_smtpd_tls_mandatory_protocols }}
+{% endif %}
+{% if postfix_smtpd_tls_protocols is defined %}
+smtpd_tls_protocols = {{ postfix_smtpd_tls_protocols  }}
+{% endif %}
+{% if postfix_smtp_tls_mandatory_protocols is defined %}
+smtp_tls_mandatory_protocols = {{ postfix_smtp_tls_mandatory_protocols }}
+{% endif %}
+{% if postfix_smtp_tls_protocols is defined %}
+smtp_tls_protocols = {{ postfix_smtp_tls_protocols }}
+{% endif %}
 
 # See /usr/share/doc/postfix/TLS_README.gz in the postfix-doc package for
 # information on enabling SSL in the smtp client.
 
 myhostname = {{ postfix_hostname }}
 default_database_type = {{ postfix_default_database_type }}
-alias_maps = {{ postfix_default_database_type }}:{{ postfix_aliases_file }}
-alias_database = {{ postfix_default_database_type }}:{{ postfix_aliases_file }}
+alias_maps = {{ postfix_aliases_database_type }}:{{ postfix_aliases_file }}
+alias_database = {{ postfix_aliases_database_type }}:{{ postfix_aliases_file }}
 {% if postfix_virtual_aliases %}
 virtual_alias_maps = {{ postfix_default_database_type }}:{{ postfix_virtual_aliases_file }}
 {% endif %}
@@ -66,18 +88,25 @@ inet_interfaces = {{ postfix_inet_interfaces }}
 {% else %}
 inet_interfaces = {{ postfix_inet_interfaces | join(', ') }}
 {% endif %}
+{% if postfix_smtp_ipv4_bind is defined %}
+smtp_bind_address = {{ postfix_smtp_ipv4_bind }}
+{% endif %}
+{% if postfix_smtp_ipv6_bind is defined %}
+smtp_bind_address6 = {{ postfix_smtp_ipv6_bind }}
+{% endif %}
 {% if postfix_inet_protocols is string %}
 inet_protocols = {{ postfix_inet_protocols }}
 {% else %}
 inet_protocols = {{ postfix_inet_protocols | join(', ') }}
 {% endif %}
 
-{% if postfix_relayhost %}
+{% if postfix_relayhosts %}
 {% if postfix_relayhost_mxlookup %}
-relayhost = {{ postfix_relayhost }}:{{ postfix_relayhost_port }}
+relayhost = {% for host in postfix_relayhosts %}{{ host }}:{{ postfix_relayhost_port }}{{ ', ' if not loop.last else '' }}{% endfor %}
 {% else %}
-relayhost = [{{ postfix_relayhost }}]:{{ postfix_relayhost_port }}
+relayhost = {% for host in postfix_relayhosts %}[{{ host }}]:{{ postfix_relayhost_port }}{{ ', ' if not loop.last else '' }}{% endfor %}
 {% endif %}
+
 {% if postfix_sasl_auth_enable %}
 smtp_sasl_auth_enable = {{ postfix_sasl_auth_enable | bool | ternary('yes', 'no') }}
 smtp_sasl_password_maps = {{ postfix_default_database_type }}:{{ postfix_sasl_passwd_file }}

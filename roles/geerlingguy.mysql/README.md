@@ -1,18 +1,18 @@
 # Ansible Role: MySQL
 
-[![CI](https://github.com/geerlingguy/ansible-role-mysql/workflows/CI/badge.svg?event=push)](https://github.com/geerlingguy/ansible-role-mysql/actions?query=workflow%3ACI)
+[![CI](https://github.com/geerlingguy/ansible-role-mysql/actions/workflows/ci.yml/badge.svg)](https://github.com/geerlingguy/ansible-role-mysql/actions/workflows/ci.yml)
 
 Installs and configures MySQL or MariaDB server on RHEL/CentOS or Debian/Ubuntu servers.
 
 ## Requirements
 
-No special requirements; note that this role requires root access, so either run it in a playbook with a global `become: yes`, or invoke the role in your playbook like:
+No special requirements; note that this role requires root access, so either run it in a playbook with a global `become: true`, or invoke the role in your playbook like:
 
 ```yaml
 - hosts: database
   roles:
     - role: geerlingguy.mysql
-      become: yes
+      become: true
 ```
 
 ## Role Variables
@@ -39,7 +39,7 @@ The MySQL root user account details.
 mysql_root_password_update: false
 ```
 
-Whether to force update the MySQL root user's password. By default, this role will only change the root user's password when MySQL is first configured. You can force an update by setting this to `yes`.
+Whether to force update the MySQL root user's password. By default, this role will only change the root user's password when MySQL is first configured. You can force an update by setting this to `true`.
 
 > Note: If you get an error like `ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)` after a failed or interrupted playbook run, this usually means the root password wasn't originally updated to begin with. Try either removing  the `.my.cnf` file inside the configured `mysql_user_home` or updating it and setting `password=''` (the insecure default password). Run the playbook again, with `mysql_root_password_update` set to `yes`, and the setup should complete.
 
@@ -62,7 +62,7 @@ The main my.cnf configuration file and include directory.
 overwrite_global_mycnf: true
 ```
 
-Whether the global my.cnf should be overwritten each time this role is run. Setting this to `no` tells Ansible to only create the `my.cnf` file if it doesn't exist. This should be left at its default value (`yes`) if you'd like to use this role's variables to configure MySQL.
+Whether the global my.cnf should be overwritten each time this role is run. Setting this to `false` tells Ansible to only create the `my.cnf` file if it doesn't exist. This should be left at its default value (`true`) if you'd like to use this role's variables to configure MySQL.
 
 ```yaml
 mysql_config_include_files: []
@@ -84,13 +84,19 @@ mysql_users: []
 
 The MySQL users and their privileges. A user has the values:
 
-  - `name`
-  - `host` (defaults to `localhost`)
-  - `password` (can be plaintext or encrypted—if encrypted, set `encrypted: yes`)
-  - `encrypted` (defaults to `no`)
-  - `priv` (defaults to `*.*:USAGE`)
-  - `append_privs` (defaults to `no`)
-  - `state`  (defaults to `present`)
+- `name`
+- `host` (defaults to `localhost`)
+- `password` (can be plaintext or encrypted—if encrypted, set `encrypted: true`; defaults to `omit`)
+- `encrypted` (defaults to `false`)
+- `priv` (defaults to `*.*:USAGE`)
+- `append_privs` (defaults to `false`)
+- `state` (defaults to `present`)
+- `case_sensitive` (defaults to `false`)
+- `update_password` (defaults to `always`)
+- `tls_requires` (defaults to `{}`)
+- `plugin` (defaults to `omit`)
+- `plugin_auth_string` (defaults to `omit`)
+- `plugin_hash_string` (defaults to `omit`)
 
 The formats of these are the same as in the `mysql_user` module.
 
@@ -129,7 +135,7 @@ mysql_log_file_group: mysql *adm on Debian*
 mysql_log: ""
 mysql_log_error: *default value depends on OS*
 mysql_syslog_tag: *default value depends on OS*
-```yaml
+```
 
 MySQL logging configuration. Setting `mysql_log` (the general query log) or `mysql_log_error` to `syslog` will make MySQL log to syslog using the `mysql_syslog_tag`.
 
@@ -149,6 +155,12 @@ mysql_table_open_cache: "256"
 ```
 
 The rest of the settings in `defaults/main.yml` control MySQL's memory usage and some other common settings. The default values are tuned for a server where MySQL can consume 512 MB RAM, so you should consider adjusting them to suit your particular server better.
+
+```yaml
+mysql_disable_log_bin: false
+```
+
+This variable should be set to `true` if you don't need replication, or otherwise don't need a log of all MySQL's activity. If you leave it at the default value, disk space may be consumed at an alarming rate on highly-utlilized database servers!
 
 ```yaml
 mysql_server_id: "1"
@@ -172,41 +184,18 @@ mysql_hide_passwords: false
 
 Do you need to hide tasks' output which contain passwords during the execution ?
 
-### Later versions of MySQL on CentOS 7
-
-If you want to install MySQL from the official repository instead of installing the system default MariaDB equivalents, you can add the following `pre_tasks` task in your playbook:
-
-```yaml
-  pre_tasks:
-    - name: Install the MySQL repo.
-      yum:
-        name: http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
-        state: present
-      when: ansible_os_family == "RedHat"
-  
-    - name: Override variables for MySQL (RedHat).
-      set_fact:
-        mysql_daemon: mysqld
-        mysql_packages: ['mysql-server']
-        mysql_log_error: /var/log/mysqld.err
-        mysql_syslog_tag: mysqld
-        mysql_pid_file: /var/run/mysqld/mysqld.pid
-        mysql_socket: /var/lib/mysql/mysql.sock
-      when: ansible_os_family == "RedHat"
-```
-
 ### MariaDB usage
 
 This role works with either MySQL or a compatible version of MariaDB. On RHEL/CentOS 7+, the mariadb database engine was substituted as the default MySQL replacement package. No modifications are necessary though all of the variables still reference 'mysql' instead of mariadb.
 
-#### Ubuntu 14.04 and 16.04 MariaDB configuration
+#### Ubuntu 14.04+ MariaDB configuration
 
 On Ubuntu, the package names are named differently, so the `mysql_package` variable needs to be altered. Set the following variables (at a minimum):
 
     mysql_packages:
       - mariadb-client
       - mariadb-server
-      - python-mysqldb
+    mysql_daemon: mariadb
 
 ## Dependencies
 
@@ -217,7 +206,7 @@ If you have only installed `ansible-core`, be sure to require `community.mysql` 
 ## Example Playbook
 
     - hosts: db-servers
-      become: yes
+      become: true
       vars_files:
         - vars/main.yml
       roles:

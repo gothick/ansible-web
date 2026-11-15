@@ -11,7 +11,7 @@ roles:
     version: 2.3.0
 
   - name: Oefenweb.postfix
-    version: v3.6.4
+    version: v3.8.4
 
   - name: geerlingguy.apache
     version: 4.0.0
@@ -35,7 +35,7 @@ roles:
     version: 5.1.2
 
   - name: geerlingguy.mysql
-    version: 4.3.4
+    version: 6.5.0
 
   - name: Oefenweb.fail2ban
     version: v4.0.11

@@ -4,8 +4,8 @@
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
-        - "vars/{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
-        - "vars/{{ ansible_os_family }}.yml"
+        - "vars/{{ ansible_facts.os_family }}-{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
 
 - name: Define mysql_packages.
@@ -17,6 +17,13 @@
   ansible.builtin.set_fact:
     mysql_daemon: "{{ __mysql_daemon }}"
   when: mysql_daemon is not defined
+
+- name: Include distribution and database engine-specific variable overrides.
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution }}-{{ ansible_facts.distribution_major_version }}-{{ mysql_daemon }}.yml"
+      skip: true
 
 - name: Define mysql_slow_query_log_file.
   ansible.builtin.set_fact:

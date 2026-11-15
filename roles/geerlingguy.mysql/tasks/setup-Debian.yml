@@ -6,8 +6,8 @@
 
 - name: Update apt cache if MySQL is not yet installed.
   ansible.builtin.apt:
-    update_cache: yes
-  changed_when: False
+    update_cache: true
+  changed_when: false
   when: not mysql_installed.stat.exists
 
 - name: Ensure MySQL Python libraries are installed.
@@ -39,4 +39,4 @@
     - ib_logfile1
   when: >
     not mysql_installed.stat.exists
-    and ansible_distribution_major_version | int < 12
+    and ansible_facts.distribution_major_version | int < 12
