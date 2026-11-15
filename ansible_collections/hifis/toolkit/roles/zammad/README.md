@@ -18,9 +18,9 @@ See [Dependencies](#dependencies).
 
 Currently [supported platforms](meta/main.yml) are:
 
-- Ubuntu 20.04 LTS
 - Ubuntu 22.04 LTS
 - Ubuntu 24.04 LTS
+- Ubuntu 26.04 LTS
 
 ## Requirements
 
@@ -31,7 +31,7 @@ The below requirements are needed on the target host:
 ## Role Variables
 
 ```yaml
-zammad_version: "6.4.1"
+zammad_version: "7.2.1"
 ```
 
 Zammad version to be installed.
@@ -44,7 +44,7 @@ Choose another release channel for the Zammad packages.
 Please refer to <https://packager.io/gh/zammad/zammad> for a complete list.
 
 ```yaml
-zammad_domain_name: "{{ ansible_fqdn }}"
+zammad_domain_name: "{{ ansible_facts.fqdn }}"
 ```
 
 Zammad's fully qualified domain name.
@@ -86,6 +86,12 @@ validate, if the SSL key pair is given under the paths `zammad_ssl_key_path` and
 `zammad_ssl_cert_path` are valid.
 
 ```yaml
+zammad_hide_sensitive_changes: true
+```
+
+Do not display sensitive changes, such as the SSL/TLS private key, in diffs by default.
+
+```yaml
 zammad_nginx_server_tokens: "off"
 ```
 
@@ -117,6 +123,17 @@ Configure additional server directives in the Nginx configuration.
 This allows to implement more use case specific adjustments, e.g.
 configuring multiple domains or the redirection of outdated domains to the
 most recent one.
+
+```yaml
+zammad_nginx_additional_locations:
+  - |
+    location ~* \.html$ {
+      root /opt/zammad/public;
+    }
+```
+
+Configure additional location directives in the Nginx server configuration.
+This allows to serve additional files from the public directory, e.g. custom HTML files.
 
 ```yaml
 zammad_elasticsearch_url: "http://localhost:9200"

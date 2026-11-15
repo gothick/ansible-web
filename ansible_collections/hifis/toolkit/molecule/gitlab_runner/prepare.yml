@@ -6,9 +6,10 @@
 ---
 - name: "Prepare"
   hosts: "all"
+  become: true
   tasks:
     - name: "Install necessary packages"
-      when: "ansible_os_family == 'Debian'"
+      when: "ansible_facts.os_family == 'Debian'"
       block:
         - name: "Install missing dependencies"
           ansible.builtin.apt:
@@ -20,20 +21,14 @@
               - "python3-debian"
             state: "present"
             update_cache: true
-    - name: "Set up iptables"
-      when: "ansible_distribution == 'Debian'"
-      block:
-        - name: "Install missing dependencies"
-          ansible.builtin.apt:
-            name:
-              - "iptables"
-            state: "present"
-            update_cache: true
-        - name: "Use legacy iptables"
-          community.general.alternatives:
-            name: "iptables"
-            path: "/usr/sbin/iptables-legacy"
-        - name: "Use legacy ip6tables"
-          community.general.alternatives:
-            name: "ip6tables"
-            path: "/usr/sbin/ip6tables-legacy"
+
+- name: "Install Docker for instances that need it"
+  hosts: "all"
+  become: true
+  tasks:
+    - name: "Include geerlingguy.docker role"
+      when: "gitlab_runner_install_docker | default(false)"
+      ansible.builtin.include_role:
+        name: "geerlingguy.docker"
+      vars:
+        docker_install_compose: false

@@ -15,11 +15,12 @@ Currently [supported platforms](meta/main.yml) are:
 
 - AlmaLinux 8
 - AlmaLinux 9
-- Ubuntu 20.04 LTS
+- AlmaLinux 10
 - Ubuntu 22.04 LTS
 - Ubuntu 24.04 LTS
-- Debian 11 Bullseye
+- Ubuntu 26.04 LTS
 - Debian 12 Bookworm
+- Debian 13 Trixie
 
 ## Requirements
 

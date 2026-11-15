@@ -17,12 +17,20 @@
 - name: "Stop role for unsupported HAProxy / Debian combinations"
   ansible.builtin.meta: "end_host"
   when: >-
-    ansible_facts.distribution_release | lower == 'bookworm' and haproxy_version | regex_search('\\d+\\.\\d+') is version('2.4', '==') or
-    ansible_facts.distribution_release | lower == 'buster' and haproxy_version | regex_search('\\d+\\.\\d+') is version('2.8', '>=')
+    ansible_facts.distribution == 'Debian' and
+    (ansible_facts.distribution_release | lower == 'bookworm' and haproxy_version | regex_search('\\d+\\.\\d+') is version('2.4', '==') or
+    ansible_facts.distribution_release | lower == 'bookworm' and haproxy_version | regex_search('\\d+\\.\\d+') is version('3.4', '>=') or
+    ansible_facts.distribution_release | lower == 'bullseye' and haproxy_version | regex_search('\\d+\\.\\d+') is version('3.2', '>=') or
+    ansible_facts.distribution_release | lower == 'buster' and haproxy_version | regex_search('\\d+\\.\\d+') is version('2.8', '>='))
 
 - name: "Stop role for unsupported HAProxy / Ubuntu combinations"
   ansible.builtin.meta: "end_host"
-  when: "ansible_facts.distribution_release | lower == 'noble' and haproxy_version | regex_search('\\d+\\.\\d+') is version('2.9', '<')"
+  when: >-
+    ansible_facts.distribution == 'Ubuntu' and
+    (ansible_facts.distribution_release | lower == 'noble' and haproxy_version | regex_search('\\d+\\.\\d+') is version('2.9', '<') or
+    ansible_facts.distribution_release | lower == 'noble' and haproxy_version | regex_search('\\d+\\.\\d+') is version('3.4', '>=') or
+    ansible_facts.distribution_release | lower == 'resolute' and haproxy_version | regex_search('\\d+\\.\\d+') is version('3.2', '<') or
+    ansible_facts.distribution_release | lower not in ['noble', 'resolute'] and haproxy_version | regex_search('\\d+\\.\\d+') is version('3.2', '>='))
 
 - name: "Enable ip_forward."
   become: true
@@ -42,6 +50,15 @@
     sysctl_set: true
     reload: true
 
+- name: "Remove legacy PPA source created by apt_repository"
+  when:
+    - "ansible_facts.distribution == 'Ubuntu'"
+    - "haproxy_ppa_version | length > 0"
+  become: true
+  ansible.builtin.file:
+    path: "/etc/apt/sources.list.d/{{ (haproxy_ppa_version ~ '_' ~ ansible_facts.distribution_release | lower) | regex_replace('[^a-zA-Z0-9]+', '_') }}.list"
+    state: "absent"
+
 - name: "Install dependencies of HAProxy."
   become: true
   ansible.builtin.package:
@@ -58,59 +75,65 @@
     uris: "http://haproxy.debian.net"
     suites: "{{ ansible_facts.distribution_release | lower }}-backports-{{ haproxy_version | regex_search('\\d+\\.\\d+') }}"
     components: "main"
-    signed_by: "https://haproxy.debian.net/bernat.debian.org.gpg"
+    signed_by: "{{ haproxy_debian_signing_key }}"
     state: "present"
     enabled: true
-  register: "deb_repo"
+  register: "__deb_repo"
 
 - name: "Add PPA for HAProxy"
   when:
     - "ansible_facts.distribution == 'Ubuntu'"
     - "haproxy_ppa_version | length > 0"
   become: true
-  ansible.builtin.apt_repository:
-    repo: "{{ haproxy_ppa_version }}"
+  ansible.builtin.deb822_repository:
+    name: "haproxy-ppa"
+    types: "deb"
+    uris: "https://ppa.launchpadcontent.net/{{ haproxy_ppa_version | regex_replace('^ppa:', '') }}/ubuntu"
+    suites: "{{ ansible_facts.distribution_release | lower }}"
+    components: "main"
+    signed_by: "{{ haproxy_ppa_signing_key }}"
     state: "present"
-    validate_certs: true
-    mode: "0644"
-  register: "ppa"
+    enabled: true
+  register: "__ppa"
 
 - name: "Check whether wildcard character is contained in version string."
   ansible.builtin.set_fact:
-    version_contains_wildcard: "{{ '*' in haproxy_version }}"
+    __version_contains_wildcard: "{{ '*' in haproxy_version }}"
 
 - name: "Check whether HAProxy binary is installed."
   ansible.builtin.stat:
     path: "{{ haproxy_executable_path }}"
-  register: "haproxy_installed"
+  register: "__haproxy_binary"
 
 - name: "Check currently installed HAProxy version"
-  when: "not version_contains_wildcard and haproxy_installed.stat.exists"
+  when:
+    - "not __version_contains_wildcard"
+    - "__haproxy_binary.stat.exists"
   block:
     - name: "Get HAProxy version."
       ansible.builtin.command:
         cmd: "{{ haproxy_executable_path }} -v"
-      register: "haproxy_version_installed"
+      register: "__haproxy_version_installed"
       changed_when: false
       check_mode: false
 
     - name: "Extract installed and target HAProxy versions."
       ansible.builtin.set_fact:
-        installed_version: "{{ haproxy_version_installed |
+        __installed_version: "{{ __haproxy_version_installed |
                                regex_search('HA-?Proxy version (\\d+\\.\\d+\\.\\d+)', '\\1') |
                                default([None], True) |
                                first }}"
-        target_version: "{{ haproxy_version |
+        __target_version: "{{ haproxy_version |
                             regex_search('^(\\d+\\.\\d+\\.\\d+)', '\\1') |
                             default([None], True) |
                             first }}"
 
 - name: "Determine if errors in check mode can be ignored"
   ansible.builtin.set_fact:
-    ignore_errors_in_check_mode: "{{ ansible_check_mode and (ppa.changed or deb_repo.changed) }}"
+    __ignore_errors_in_check_mode: "{{ ansible_check_mode and (__ppa.changed or __deb_repo.changed) }}"
 
-- name: "Install and configure HAProxy"
-  ignore_errors: "{{ ignore_errors_in_check_mode }}"  # noqa ignore-errors
+- name: "Install HAProxy"
+  ignore_errors: "{{ __ignore_errors_in_check_mode }}"  # noqa ignore-errors
   block:
 
     - name: "Install or upgrade haproxy package."
@@ -118,9 +141,10 @@
       ansible.builtin.package:
         name: "{{ haproxy_name }}={{ haproxy_version }}"
         update_cache: true
-      when: "version_contains_wildcard or
-            not haproxy_installed.stat.exists or
-            installed_version is version(target_version, operator='lt', strict=True)"
+      when: >-
+        __version_contains_wildcard or
+        not __haproxy_binary.stat.exists or
+        __installed_version is version(__target_version, operator='lt', strict=True)
 
     - name: "Create HAProxy Configuration Directory."
       become: true
@@ -130,18 +154,6 @@
         owner: "{{ haproxy_user }}"
         group: "{{ haproxy_group }}"
         mode: "0750"
-
-    - name: "Create HAProxy Configuration File."
-      become: true
-      ansible.builtin.template:
-        src: "{{ haproxy_config_template }}"
-        dest: "{{ haproxy_conf_file_path }}"
-        owner: "{{ haproxy_user }}"
-        group: "{{ haproxy_group }}"
-        mode: "0640"
-      notify:
-        - "Check HAProxy configuration file"
-        - "Reload HAProxy"
 
     - name: "Create HAProxy SSL Directory."
       become: true
@@ -154,7 +166,7 @@
 
 - name: "Generate self-signed TLS certificate"
   when: "haproxy_create_self_signed_cert | bool"
-  ignore_errors: "{{ ignore_errors_in_check_mode }}"  # noqa ignore-errors
+  ignore_errors: "{{ __ignore_errors_in_check_mode }}"  # noqa ignore-errors
   block:
     - name: "Generate an OpenSSL Private Key (4096 bits)"
       become: true
@@ -224,7 +236,7 @@
     - "Reload HAProxy"
 
 - name: "Generate DH Parameter file"
-  ignore_errors: "{{ ignore_errors_in_check_mode }}"  # noqa ignore-errors
+  ignore_errors: "{{ __ignore_errors_in_check_mode }}"  # noqa ignore-errors
   become: true
   community.crypto.openssl_dhparam:
     path: "{{ haproxy_ssl_dhparam_file }}"
@@ -235,5 +247,18 @@
   notify:
     - "Check HAProxy configuration file"
     - "Reload HAProxy"
+
+- name: "Create HAProxy Configuration File."
+  ignore_errors: "{{ __ignore_errors_in_check_mode }}"  # noqa ignore-errors
+  become: true
+  ansible.builtin.template:
+    src: "{{ haproxy_config_template }}"
+    dest: "{{ haproxy_conf_file_path }}"
+    owner: "{{ haproxy_user }}"
+    group: "{{ haproxy_group }}"
+    mode: "0640"
+    validate: "{{ haproxy_executable_path }} -c -q -f %s"
+  no_log: "{{ haproxy_hide_sensitive_changes }}"
+  notify: "Reload HAProxy"
 
 ...

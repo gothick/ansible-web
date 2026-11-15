@@ -29,7 +29,7 @@ roles:
     version: v1.0.57
 
   - name: geerlingguy.java
-    version: 2.5.0
+    version: 2.6.1
 
   - name: geerlingguy.elasticsearch
     version: 5.1.2
@@ -45,4 +45,4 @@ collections:
     version: 2.0.3
 
   - name: hifis.toolkit
-    version: "5.3.0"
+    version: "7.0.1"

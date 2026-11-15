@@ -14,9 +14,9 @@ availability and scalability context.
 
 Currently [supported platforms](meta/main.yml) are:
 
-- Ubuntu 20.04 LTS
 - Ubuntu 22.04 LTS
 - Ubuntu 24.04 LTS
+- Ubuntu 26.04 LTS
 
 ## Requirements
 
@@ -27,7 +27,7 @@ None.
 The Redis version to install:
 
 ```yaml
-redis_version: '7.2.1'
+redis_version: '8.0.1'
 ```
 
 Specifies whether the current node is `master`, or a `replica` instance:
@@ -58,6 +58,12 @@ Password used to authenticate in the Redis cluster:
 
 ```yaml
 redis_password: 'changeme'
+```
+
+Do not display sensitive changes in diffs by default:
+
+```yaml
+redis_hide_sensitive_changes: true
 ```
 
 List of dependent packages required by Redis Server:
@@ -103,7 +109,9 @@ Redis Sentinel service file path:
 redis_sentinel_service_file: '{{ redis_systemd_dir }}/redis-sentinel.service'
 ```
 
-Password for Redis Sentinel. This is unset by default.
+Password for Redis Sentinel. This is unset by default, in which case Sentinel
+does not require authentication. Set it to enable password authentication for
+Sentinel connections, for example:
 
 ```yaml
 redis_sentinel_password: 'changeme'

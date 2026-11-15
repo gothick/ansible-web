@@ -6,5 +6,8 @@
 exclude_paths:
   - ".cache/"
   - ".ansible/"
+  - ".nox/"
 skip_list:
   - 'var-naming[no-role-prefix]'
+enable_list:
+  - 'role-argument-spec'

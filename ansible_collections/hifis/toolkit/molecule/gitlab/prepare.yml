@@ -13,6 +13,7 @@
         - "ansible_facts.distribution_major_version | int >= 7"
       block:
         - name: "Install missing dependencies"
+          become: true
           ansible.builtin.dnf:
             name:
               - "sudo"
@@ -25,10 +26,13 @@
       when: "ansible_facts.os_family == 'Debian'"
       block:
         - name: "Install missing dependencies"
+          become: true
           ansible.builtin.apt:
             name:
               - "sudo"      # for `become` privilege escalation
               - "iproute2"  # for gathering network facts
+              - "python3-debian"
+              - "ca-certificates"
             state: "present"
             update_cache: true
 

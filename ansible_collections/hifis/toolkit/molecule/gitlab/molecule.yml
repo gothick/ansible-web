@@ -13,7 +13,7 @@ platforms:
     image: "${MOLECULE_IMAGE:-ghcr.io/hifis-net/ubuntu-systemd:24.04}"
     pre_build_image: true
     privileged: true
-    systemd: "always"
+    systemd: "true"
     tty: true
     override_command: false
 provisioner:
@@ -29,6 +29,7 @@ provisioner:
   inventory:
     host_vars:
       instancegitlab:
+        ansible_user: "ansible"
         gitlab_edition: "gitlab-ce"
         gitlab_ip_range: "0.0.0.0/0"
         gitlab_additional_configurations:
@@ -40,6 +41,19 @@ provisioner:
               - key: "env"
                 type: "plain"
                 value: "{ 'OWN_PRIVATE_API_URL' => 'grpc://127.0.0.1:8155' }"
+          - registry:
+              - key: "database"
+                type: "plain"
+                value: |-
+                  {
+                    'enabled' => false,
+                    'host' => '{{ gitlab_postgresql_db_host }}',
+                    'port' => {{ gitlab_postgresql_db_port }},
+                    'user' => 'gitlab',
+                    'password' => '{{ gitlab_postgresql_db_password }}',
+                    'dbname' => 'registry',
+                    'sslmode' => 'disable'
+                  }
         gitlab_feature_flags:
           # See https://docs.gitlab.com/ee/user/feature_flags.html
           - name: "vscode_web_ide"

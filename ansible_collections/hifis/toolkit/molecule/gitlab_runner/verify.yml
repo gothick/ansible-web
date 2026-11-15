@@ -6,6 +6,7 @@
 ---
 - name: "Verify"
   hosts: "all"
+  become: true
   tasks:
     - name: "Gather package facts"
       ansible.builtin.package_facts:
@@ -61,7 +62,7 @@
         that:
           - "ansible_facts.packages['gitlab-runner'][0].version == gitlab_runner_version + '-1'"
       when:
-        - "gitlab_runner_version is defined"
+        - "gitlab_runner_version | default('') | length > 0"
 
     - name: "Assert that ignition.json file was created"
       ansible.builtin.stat:
@@ -103,6 +104,19 @@
       ansible.builtin.assert:
         that:
           - "flatcar_linux_config.stdout.find(gitlab_runner_ssh_key) != -1"
+
+    - name: "Read butane config"
+      ansible.builtin.command: "cat /etc/gitlab-runner/butane-config.bu"
+      register: "butane_config"
+      changed_when: false
+
+    - name: "Assert that nameservers exist in butane config"
+      ansible.builtin.assert:
+        that:
+          - "('nameserver ' ~ item) in (butane_config.stdout_lines | map('trim') | list)"
+        fail_msg: "Nameserver {{ item }} is missing in /etc/gitlab-runner/butane-config.bu."
+        quiet: true
+      loop: "{{ gitlab_runner_nameservers }}"
 
     - name: "Store authentication token environment variable as Ansible fact."
       ansible.builtin.set_fact:
