@@ -13,10 +13,9 @@ This Ansible role provides a setup for GitLab CI in Openstack.
 
 Currently [supported platforms](meta/main.yml) are:
 
-- Ubuntu 20.04 LTS
 - Ubuntu 22.04 LTS
 - Ubuntu 24.04 LTS
-- Debian Bullseye
+- Ubuntu 26.04 LTS
 - Debian Bookworm
 
 ## Requirements
@@ -28,12 +27,12 @@ None.
 ### GitLab-Runner variables
 
 ```yaml
-gitlab_runner_version: "17.8.1"
+gitlab_runner_version: "18.0.2"
 ```
 The version of GitLab-Runner to install.
 
 ```yaml
-gitlab_runner_pkg_version: "17.8.1-1"
+gitlab_runner_pkg_version: "18.0.2-1"
 ```
 The version to be used to determine the GitLab-Runner
 [package](https://packages.gitlab.com/runner/gitlab-runner) (optional).
@@ -85,10 +84,15 @@ Decide wether to install Docker via
 Docker is required for the `docker` executor but not for the
 `docker+machine` executor.
 
+```yaml
+gitlab_runner_hide_sensitive_changes: true
+```
+Do not display sensitive changes in diffs by default.
+
 ### Docker-machine variables
 
 ```yaml
-gitlab_runner_docker_machine_binary_url: "https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/releases/v0.16.2-gitlab.25/downloads/docker-machine-Linux-{{ ansible_architecture }}"
+gitlab_runner_docker_machine_binary_url: "https://gitlab.com/gitlab-org/ci-cd/docker-machine/-/releases/v0.16.2-gitlab.25/downloads/docker-machine-Linux-{{ ansible_facts.architecture }}"
 ```
 
 The URL where to download the docker-machine binary file from.
@@ -103,7 +107,7 @@ The checksum of the downloaded docker-machine binary. This must correspond to th
 ### Flatcar Linux configuration
 
 ```yaml
-gitlab_runner_transpiler_binary_url: "https://github.com/coreos/butane/releases/download/v0.23.0/butane-{{ ansible_architecture }}-unknown-linux-gnu"
+gitlab_runner_transpiler_binary_url: "https://github.com/coreos/butane/releases/download/v0.23.0/butane-{{ ansible_facts.architecture }}-unknown-linux-gnu"
 ```
 
 The URL to the configuration transpiler binary that shall be used.
@@ -116,12 +120,15 @@ The checksum of the download transpiler binary. This must correspond to the file
 downloaded via the `gitlab_runner_transpiler_binary_url` variable.
 
 ```yaml
-gitlab_runner_namerservers:
+gitlab_runner_nameservers:
     - 9.9.9.9
     - 149.112.112.112
 ```
 
 The DNS nameservers to be used by the Openstack Flatcar virtual machine.
+
+Note: This variable was previously named `gitlab_runner_namerservers` (sic)
+and is no longer supported.
 
 ```yaml
 gitlab_runner_registry_mirrors:
@@ -418,9 +425,6 @@ gitlab_runner_list:
     docker_shm_size: 2147483648
     docker_privileged: true
     docker_network_mtu: "{{ gitlab_runner_mtu }}"
-    locked: false
-    tags: "{{ gitlab_runner_tags | default([]) }}"
-    run_untagged: "{{ gitlab_runner_run_untagged | default(false) }}"
     cache_insecure: "false"
     autoscaler_max_builds: 1
     autoscaler_idle_count: 4

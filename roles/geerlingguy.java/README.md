@@ -1,6 +1,6 @@
 # Ansible Role: Java
 
-[![CI](https://github.com/geerlingguy/ansible-role-java/workflows/CI/badge.svg?event=push)](https://github.com/geerlingguy/ansible-role-java/actions?query=workflow%3ACI)
+[![CI](https://github.com/geerlingguy/ansible-role-java/actions/workflows/ci.yml/badge.svg)](https://github.com/geerlingguy/ansible-role-java/actions/workflows/ci.yml)
 
 Installs Java for RedHat/CentOS, Amazon, and Debian/Ubuntu linux servers.
 
@@ -40,7 +40,7 @@ For RHEL / CentOS:
     - hosts: server
       roles:
         - role: geerlingguy.java
-          when: "ansible_os_family == 'RedHat'"
+          when: "ansible_facts.os_family == 'RedHat'"
           java_packages:
             - java-1.8.0-openjdk
 
@@ -54,7 +54,7 @@ For Ubuntu < 16.04:
     - hosts: server
       roles:
         - role: geerlingguy.java
-          when: "ansible_os_family == 'Debian'"
+          when: "ansible_facts.os_family == 'Debian'"
           java_packages:
             - openjdk-8-jdk
 

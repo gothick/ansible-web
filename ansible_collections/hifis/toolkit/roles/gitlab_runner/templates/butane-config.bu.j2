@@ -10,7 +10,7 @@ passwd:
   users:
     - name: core
       ssh_authorized_keys:
-        - {{ gitlab_runner_ssh_keypair.public_key }}
+        - {{ __gitlab_runner_ssh_keypair.public_key }}
 storage:
   files:
     - path: /etc/resolv.conf
@@ -18,7 +18,7 @@ storage:
       mode: 0644
       contents:
         inline: |
-{% for nameserver in gitlab_runner_namerservers %}
+{% for nameserver in gitlab_runner_nameservers %}
           nameserver {{ nameserver }}
 {% endfor %}
     - path: /opt/docker/daemon.json

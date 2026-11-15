@@ -6,10 +6,11 @@
 ---
 - name: "Prepare"
   hosts: "all"
+  become: true
   vars:
     # Apply suggested Elasticsearch configuration
     elasticsearch_version: "8.x"
-    elasticsearch_package: "elasticsearch=8.8.1"
+    elasticsearch_package: "elasticsearch=8.19.15"
     elasticsearch_heap_size_min: "256m"
     elasticsearch_heap_size_max: "256m"
     elasticsearch_extra_options: |
@@ -28,6 +29,7 @@
           - "gpg"
           - "ca-certificates"
           - "python3-cryptography"
+          - "python3-debian"
           - "ssl-cert"
         state: "present"
         update_cache: true

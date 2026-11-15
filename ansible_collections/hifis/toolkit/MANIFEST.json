@@ -2,7 +2,7 @@
  "collection_info": {
   "namespace": "hifis",
   "name": "toolkit",
-  "version": "5.3.0",
+  "version": "7.0.1",
   "authors": [
    "HIFIS Software Services <support@hifis.net>"
   ],
@@ -21,7 +21,11 @@
    "MIT"
   ],
   "license_file": null,
-  "dependencies": {},
+  "dependencies": {
+   "ansible.posix": ">=2.1.0",
+   "community.crypto": ">=3.0.0",
+   "community.general": ">=11.0.0"
+  },
   "repository": "https://github.com/hifis-net/ansible-collection-toolkit",
   "documentation": null,
   "homepage": "https://hifis.net/services/software-overview.html",
@@ -31,7 +35,7 @@
   "name": "FILES.json",
   "ftype": "file",
   "chksum_type": "sha256",
-  "chksum_sha256": "3f463094e348bbe29c80279a71b107e3996ba41b1f1ba3ac9787a24c5e1054d4",
+  "chksum_sha256": "7c75160ba76d7765fd051d2f96c7f7eea8bbcfff37f5df2b807d63f83af56906",
   "format": 1
  },
  "format": 1

@@ -18,13 +18,22 @@ skip-name-resolve
 sql_mode = {{ mysql_sql_mode }}
 {% endif %}
 
+{% if (mysql_cli_version is version('8.0.34', '>=') and mysql_daemon == 'mysql') %}
+plugin-load-add = auth_socket.so
+{% endif %}
+
 # Logging configuration.
 {% if mysql_log_error == 'syslog' or mysql_log == 'syslog' %}
 syslog
 syslog-tag = {{ mysql_syslog_tag }}
 {% else %}
 {% if mysql_log %}
+{% if mysql_cli_version is version('5.6', '>=') %}
+general_log = ON
+general_log_file = {{ mysql_log }}
+{% else %}
 log = {{ mysql_log }}
+{% endif %}
 {% endif %}
 log-error = {{ mysql_log_error }}
 {% endif %}
@@ -87,7 +96,8 @@ read_buffer_size = {{ mysql_read_buffer_size }}
 read_rnd_buffer_size = {{ mysql_read_rnd_buffer_size }}
 myisam_sort_buffer_size = {{ mysql_myisam_sort_buffer_size }}
 thread_cache_size = {{ mysql_thread_cache_size }}
-{% if '8.0.' not in mysql_cli_version.stdout %}
+{% if (mysql_daemon == 'mysql' and mysql_cli_version is version('8.0', '<')) or
+      mysql_daemon == 'mariadb' %}
 query_cache_type = {{ mysql_query_cache_type }}
 query_cache_size = {{ mysql_query_cache_size }}
 query_cache_limit = {{ mysql_query_cache_limit }}
@@ -104,7 +114,9 @@ lower_case_table_names = {{ mysql_lower_case_table_names }}
 event_scheduler = {{ mysql_event_scheduler_state }}
 
 # InnoDB settings.
-{% if mysql_supports_innodb_large_prefix and '8.0.' not in mysql_cli_version.stdout %}
+{% if mysql_supports_innodb_large_prefix and (
+      (mysql_daemon == 'mysql' and mysql_cli_version is version('8.0', '<')) or
+      (mysql_daemon == 'mariadb' and mysql_cli_version is version('10.6', '<'))) %}
 innodb_large_prefix = {{ mysql_innodb_large_prefix }}
 innodb_file_format = {{ mysql_innodb_file_format }}
 {% endif %}

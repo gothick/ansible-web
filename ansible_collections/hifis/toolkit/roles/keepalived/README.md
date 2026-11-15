@@ -13,9 +13,9 @@ Ansible role to set up Keepalived in a high availability and scalability context
 
 Currently [supported platforms](meta/main.yml) are:
 
-- Ubuntu 20.04 LTS
 - Ubuntu 22.04 LTS
 - Ubuntu 24.04 LTS
+- Ubuntu 26.04 LTS
 
 ## Requirements
 
@@ -61,7 +61,7 @@ keepalived_virtual_ipaddress_configs:
 Variable to pin the Keepalived version to a certain value:
 
 ```yaml
-keepalived_version: '2.3.2'
+keepalived_version: '2.4.3'
 ```
 
 #### List of dependencies of Keepalived
@@ -222,7 +222,7 @@ keepalived_weight: '0'
 Set the unicast source IP address of the Keepalived instance:
 
 ```yaml
-keepalived_unicast_src_ip: '{{ ansible_default_ipv4.address }}'
+keepalived_unicast_src_ip: '{{ ansible_facts.default_ipv4.address }}'
 ```
 
 #### Keepalived instance network interface
@@ -230,7 +230,7 @@ keepalived_unicast_src_ip: '{{ ansible_default_ipv4.address }}'
 Set network interface to which the floating IP address is associated:
 
 ```yaml
-keepalived_interface: "{{ ansible_default_ipv4.interface }}"
+keepalived_interface: "{{ ansible_facts.default_ipv4.interface }}"
 ```
 
 #### Keepalived instance virtual IP address and network interface
@@ -247,6 +247,12 @@ Set the authentication password of the Keepalived instance:
 
 ```yaml
 keepalived_auth_pass: 'changeme'
+```
+
+#### Do not display sensitive changes in diffs by default
+
+```yaml
+keepalived_hide_sensitive_changes: true
 ```
 
 #### Enable script security

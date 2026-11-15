@@ -14,19 +14,21 @@ and scalability context.
 
 Currently [supported platforms](meta/main.yml) are:
 
+- Ubuntu 26.04 LTS
 - Ubuntu 24.04 LTS
 - Ubuntu 22.04 LTS
-- Ubuntu 20.04 LTS
-- Debian 11 (Bullseye)
 - Debian 12 (Bookworm)
 
-This role is tested against the four latest LTS versions of HAProxy.
+This role is tested against the maintained LTS versions of HAProxy.
 Currently, this results in official support for the HAProxy release series:
 
-- `3.0`
-- `2.8` (not supported on Ubuntu 24.04)
-- `2.6` (not supported on Ubuntu 24.04)
-- `2.4` (not supported on Debian 12 and Ubuntu 24.04)
+| HAProxy | Ubuntu 22.04 | Ubuntu 24.04 | Ubuntu 26.04 | Debian 12 |
+|---------|:------------:|:------------:|:------------:|:---------:|
+| `3.4` | ❌ | ❌ | ✅ | ❌ |
+| `3.2` | ❌ | ✅ | ✅ | ✅ |
+| `3.0` | ✅ | ✅ | ❌ | ✅ |
+| `2.8` | ✅ | ❌ | ❌ | ✅ |
+| `2.6` | ✅ | ❌ | ❌ | ✅ |
 
 Other versions are known to work as well but are not automatically tested.
 
@@ -64,7 +66,7 @@ haproxy_frontend_ip: '192.168.33.100'
 Sets number of processors used by HAProxy:
 
 ```yaml
-haproxy_nbproc: '1'
+haproxy_nbproc: 1
 ```
 
 #### Number of threads used by HAProxy
@@ -72,7 +74,7 @@ haproxy_nbproc: '1'
 Sets number of threads used by HAProxy:
 
 ```yaml
-haproxy_nbthread: '2'
+haproxy_nbthread: 2
 ```
 
 #### HAProxy CPU Map for Multithreading
@@ -107,6 +109,12 @@ Variable to hold the stats admin user password:
 haproxy_stats_admin_user_password: 'changeme'
 ```
 
+Do not display sensitive changes in diffs by default:
+
+```yaml
+haproxy_hide_sensitive_changes: true
+```
+
 ### All other default variables
 
 #### Path to the executable of HAProxy
@@ -122,7 +130,29 @@ haproxy_executable_path: '/usr/sbin/haproxy'
 Variable to pin the PPA version to a certain value:
 
 ```yaml
-haproxy_ppa_version: 'ppa:vbernat/haproxy-3.0'
+haproxy_ppa_version: 'ppa:vbernat/haproxy-3.2'
+```
+
+#### HAProxy PPA signing key
+
+The OpenPGP public key used to verify the HAProxy PPA on Ubuntu. It defaults to
+the key of the PPAs referenced by `haproxy_ppa_version`:
+
+```yaml
+haproxy_ppa_signing_key: |-
+  -----BEGIN PGP PUBLIC KEY BLOCK-----
+  ...
+  -----END PGP PUBLIC KEY BLOCK-----
+```
+
+#### HAProxy Debian signing key
+
+The OpenPGP public key used to verify the HAProxy repository on Debian. In
+contrast to the Ubuntu key this defaults to a URL, since the key is served over
+HTTPS by the repository itself:
+
+```yaml
+haproxy_debian_signing_key: 'https://haproxy.debian.net/bernat.debian.org.gpg'
 ```
 
 #### HAProxy version
@@ -130,7 +160,7 @@ haproxy_ppa_version: 'ppa:vbernat/haproxy-3.0'
 Variable to pin the HAProxy version to a certain value:
 
 ```yaml
-haproxy_version: '3.0.*'
+haproxy_version: '3.2.*'
 ```
 
 #### HAProxy user

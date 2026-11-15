@@ -12,14 +12,14 @@ galaxy_info:
   company: "Helmholtz Association of German Research Centres"
   license: "MIT"
   issue_tracker_url: "https://github.com/hifis-net/ansible-collection-toolkit/issues"
-  min_ansible_version: "2.16"
+  min_ansible_version: "2.19"
 
   platforms:
     - name: "Ubuntu"
       versions:
-        - "focal"
         - "jammy"
         - "noble"
+        - "resolute"
 
   galaxy_tags:
     - "zammad"

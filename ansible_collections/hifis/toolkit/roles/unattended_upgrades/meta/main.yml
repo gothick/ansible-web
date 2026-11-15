@@ -10,16 +10,15 @@ galaxy_info:
   author: "hifis"
   description: "Setup unattended-upgrades on Debian-based systems"
   license: "GPLv2"
-  min_ansible_version: "2.16"
+  min_ansible_version: "2.19"
   platforms:
     - name: "Ubuntu"
       versions:
         - "jammy"
-        - "focal"
         - "noble"
+        - "resolute"
     - name: "Debian"
       versions:
-        - "bullseye"
         - "bookworm"
 
   galaxy_tags:

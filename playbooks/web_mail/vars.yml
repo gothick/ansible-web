@@ -2,6 +2,11 @@ postfix_hostname: "{{ ansible_hostname }}.gothick.org.uk"
 postfix_mailname: "gothick.org.uk"
 # postfix_aliases: []
 # postfix_virtual_aliases: []
+# NB: Oefenweb.postfix documents postfix_relayhost as deprecated in favour of
+# the postfix_relayhosts list, but as of v3.8.4 its sasl_passwd.j2 template
+# still reads the old variable (and the role copies it into postfix_relayhosts
+# if that's empty). Setting only postfix_relayhosts therefore fails with
+# "'postfix_relayhost' is undefined", so keep using the old name for now.
 postfix_relayhost: 'smtp.fastmail.com'
 postfix_relayhost_port: 587
 postfix_relaytls: true
