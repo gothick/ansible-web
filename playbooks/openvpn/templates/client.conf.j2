@@ -40,7 +40,7 @@ proto udp
 # The hostname/IP and port of the server.
 # You can have multiple remote entries
 # to load balance between the servers.
-remote {{ ansible_hostname }}.gothick.org.uk{{ test_hostname_suffix | default('') }} 1194
+remote {{ ansible_facts['hostname'] }}.gothick.org.uk{{ test_hostname_suffix | default('') }} 1194
 ;remote my-server-2 1194
 
 # Choose a random host from the remote
